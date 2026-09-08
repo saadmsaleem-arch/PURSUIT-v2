@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<title>PURSUIT | Syntax Arcade</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#020810;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    touch-action:none;
+}
+
+canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    touch-action:none;
+}
+
+#hud{
+    position:fixed;
+    inset:0;
+    color:white;
+    pointer-events:none;
+    padding-top:env(safe-area-inset-top);
+}
+
+.topHUD{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    padding:14px;
+}
+
+.hudBox{
+    background:rgba(3,10,19,.72);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:14px;
+    padding:9px 13px;
+    box-shadow:0 6px 18px rgba(0,0,0,.35);
+    backdrop-filter:blur(8px);
+}
+
+.label{
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    opacity:.75;
+}
+
+.value{
+    font-size:24px;
+    font-weight:1000;
+    line-height:1.05;
+}
+
+#speedValue{
+    color:#41cfff;
+}
+
+#robberValue{
+    color:#ff4b55;
+}
+
+#message{
+    position:absolute;
+    top:88px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.58);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:9px;
+    padding:7px 13px;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:1px;
+    opacity:0;
+}
+
+#nitroArea{
+    position:absolute;
+    left:18px;
+    right:18px;
+    bottom:calc(20px + env(safe-area-inset-bottom));
+    pointer-events:auto;
+}
+
+#nitroTitle{
+    font-weight:900;
+    font-size:12px;
+    margin-bottom:5px;
+    text-shadow:0 2px 6px black;
+}
+
+#nitroTrack{
+    height:20px;
+    border-radius:20px;
+    background:rgba(1,6,12,.78);
+    border:2px solid rgba(255,255,255,.26);
+    overflow:hidden;
+}
+
+#nitroFill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(
+        90deg,
+        #1cc8ff,
+        #3478ff,
+        #a94eff
+    );
+}
+
+#nitroText{
+    margin-top:6px;
+    font-size:10px;
+    text-align:center;
+    letter-spacing:1px;
+    opacity:.8;
+    text-shadow:0 2px 5px black;
+}
+
+#overlay{
+    position:fixed;
+    inset:0;
+    z-index:10;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:25px;
+
+    background:
+    radial-gradient(circle at 50% 22%,
+        rgba(11,73,121,.60),
+        rgba(3,10,18,.95) 60%),
+    linear-gradient(#071421,#010409);
+
+    color:white;
+    text-align:center;
+}
+
+.menu{
+    width:min(440px,100%);
+}
+
+.logo{
+    margin:0;
+
+    font-size:clamp(52px,14vw,82px);
+    font-weight:1000;
+    font-style:italic;
+
+    letter-spacing:-4px;
+
+    text-shadow:
+        -10px 0 30px rgba(255,25,45,.45),
+        10px 0 30px rgba(30,100,255,.55);
+}
+
+.subtitle{
+    margin-top:-3px;
+    margin-bottom:26px;
+
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:6px;
+
+    opacity:.75;
+}
+
+.menuPolice{
+    width:150px;
+    height:210px;
+    margin:0 auto 20px;
+    position:relative;
+    filter:drop-shadow(0 25px 25px rgba(0,0,0,.7));
+}
+
+.menuPolice .body{
+    position:absolute;
+    left:27px;
+    right:27px;
+    top:5px;
+    bottom:5px;
+
+    border-radius:35px 35px 23px 23px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #122a3e 0 37%,
+        #f5f5f5 37% 63%,
+        #122a3e 63%
+    );
+
+    border:3px solid #081522;
+}
+
+.lightbar{
+    position:absolute;
+
+    width:66px;
+    height:10px;
+
+    top:49px;
+    left:42px;
+
+    display:flex;
+    gap:4px;
+
+    z-index:3;
+}
+
+.lightbar span{
+    flex:1;
+    border-radius:3px;
+}
+
+.lightbar .red{
+    background:#ff2444;
+    box-shadow:0 0 30px #ff2444;
+}
+
+.lightbar .blue{
+    background:#2482ff;
+    box-shadow:0 0 30px #2482ff;
+}
+
+.policeText{
+    position:absolute;
+
+    top:96px;
+    left:39px;
+    right:39px;
+
+    padding:6px;
+
+    border-radius:5px;
+
+    background:white;
+    color:#10283b;
+
+    font-size:13px;
+    font-weight:1000;
+
+    z-index:4;
+}
+
+#description{
+    max-width:365px;
+
+    margin:0 auto 23px;
+
+    line-height:1.5;
+    font-size:14px;
+
+    opacity:.82;
+}
+
+button{
+    width:100%;
+
+    padding:17px;
+
+    border:none;
+    border-radius:18px;
+
+    font-size:20px;
+    font-weight:1000;
+
+    color:white;
+
+    background:
+    linear-gradient(#2add62,#0aaf3d);
+
+    box-shadow:
+        0 12px 35px rgba(17,218,84,.23);
+
+    cursor:pointer;
+}
+
+.brand{
+    margin-top:22px;
+
+    font-size:10px;
+    letter-spacing:4px;
+
+    opacity:.5;
+}
+
+.good{
+    color:#42ff82;
+}
+
+.bad{
+    color:#ff4c55;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+
+    <div class="topHUD">
+
+        <div class="hudBox">
+            <div class="label">DISTANCE</div>
+            <div class="value" id="robberValue">240 m</div>
+        </div>
+
+        <div class="hudBox">
+            <div class="label">SPEED</div>
+            <div class="value" id="speedValue">0</div>
+            <div class="label">km/h</div>
+        </div>
+
+    </div>
+
+    <div id="message">
+        NEAR MISS
+    </div>
+
+    <div id="nitroArea">
+
+        <div id="nitroTitle">
+            NITRO
+        </div>
+
+        <div id="nitroTrack">
+            <div id="nitroFill"></div>
+        </div>
+
+        <div id="nitroText">
+            DRAG TO STEER • TAP NITRO WHEN FULL
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="overlay">
+
+    <div class="menu">
+
+        <h1 id="menuTitle" class="logo">
+            PURSUIT
+        </h1>
+
+        <div id="menuSubtitle" class="subtitle">
+            CATCH THE CRIMINAL
+        </div>
+
+        <div id="menuCar" class="menuPolice">
+
+            <div class="body"></div>
+
+            <div class="lightbar">
+                <span class="red"></span>
+                <span class="blue"></span>
+            </div>
+
+            <div class="policeText">
+                POLICE
+            </div>
+
+        </div>
+
+        <div id="description">
+            Chase the suspect through traffic.
+            Your cruiser is slightly faster —
+            but every crash gives the robber more time to escape.
+        </div>
+
+        <button id="startButton">
+            START CHASE
+        </button>
+
+        <div class="brand">
+            SYNTAX ARCADE
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const overlay =
+document.getElementById("overlay");
+
+const startButton =
+document.getElementById("startButton");
+
+const menuTitle =
+document.getElementById("menuTitle");
+
+const menuSubtitle =
+document.getElementById("menuSubtitle");
+
+const menuCar =
+document.getElementById("menuCar");
+
+const description =
+document.getElementById("description");
+
+const speedValue =
+document.getElementById("speedValue");
+
+const robberValue =
+document.getElementById("robberValue");
+
+const nitroFill =
+document.getElementById("nitroFill");
+
+const nitroArea =
+document.getElementById("nitroArea");
+
+const messageBox =
+document.getElementById("message");
+
+
+let W;
+let H;
+let DPR;
+
+let running=false;
+
+let lastTime=0;
+
+let roadOffset=0;
+
+let player;
+let robber;
+
+let traffic=[];
+
+let particles=[];
+
+let gap=240;
+
+let nitro=0;
+
+let nitroActive=0;
+
+let spawnTimer=0;
+
+let chaseTime=0;
+
+let catchTimer=0;
+
+let messageTimer=0;
+
+let screenShake=0;
+
+let score=0;
+
+
+/* ------------------------- */
+/* SCREEN */
+/* ------------------------- */
+
+function resize(){
+
+    DPR=Math.min(
+        window.devicePixelRatio || 1,
+        2
+    );
+
+    W=window.innerWidth;
+    H=window.innerHeight;
+
+    canvas.width=W*DPR;
+    canvas.height=H*DPR;
+
+    canvas.style.width=W+"px";
+    canvas.style.height=H+"px";
+
+    ctx.setTransform(
+        DPR,0,0,DPR,0,0
+    );
+}
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+resize();
+
+
+/* ------------------------- */
+/* ROAD */
+/* ------------------------- */
+
+function getRoad(){
+
+    let bottomWidth=
+    Math.min(
+        W*.88,
+        620
+    );
+
+    let topWidth=
+    bottomWidth*.60;
+
+    return{
+
+        bottomLeft:
+        (W-bottomWidth)/2,
+
+        bottomRight:
+        (W+bottomWidth)/2,
+
+        topLeft:
+        (W-topWidth)/2,
+
+        topRight:
+        (W+topWidth)/2,
+
+        bottomWidth,
+        topWidth
+    };
+}
+
+
+function roadWidthAt(y){
+
+    let r=getRoad();
+
+    let p=y/H;
+
+    return(
+        r.topWidth+
+        (r.bottomWidth-r.topWidth)*p
+    );
+}
+
+
+function roadLeftAt(y){
+
+    return(
+        W/2-
+        roadWidthAt(y)/2
+    );
+}
+
+
+/* ------------------------- */
+/* RESET */
+/* ------------------------- */
+
+function reset(){
+
+    player={
+
+        x:W/2,
+
+        y:H*.79,
+
+        width:48,
+
+        height:88,
+
+        targetX:W/2,
+
+        speed:85,
+
+        invincible:0
+    };
+
+    robber={
+
+        x:W/2,
+
+        y:H*.20,
+
+        width:42,
+
+        height:76,
+
+        phase:0
+    };
+
+    traffic=[];
+
+    particles=[];
+
+    gap=240;
+
+    nitro=0;
+
+    nitroActive=0;
+
+    spawnTimer=.6;
+
+    roadOffset=0;
+
+    chaseTime=0;
+
+    catchTimer=0;
+
+    screenShake=0;
+
+    score=0;
+}
+
+
+/* ------------------------- */
+/* START */
+/* ------------------------- */
+
+function startGame(){
+
+    reset();
+
+    overlay.style.display="none";
+
+    running=true;
+
+    lastTime=performance.now();
+
+    requestAnimationFrame(loop);
+}
+
+
+startButton.addEventListener(
+    "click",
+    startGame
+);
+
+
+/* ------------------------- */
+/* STEERING */
+/* ------------------------- */
+
+let pointerDown=false;
+
+
+function steer(x){
+
+    if(!running) return;
+
+    let width=
+    roadWidthAt(player.y);
+
+    let left=
+    roadLeftAt(player.y);
+
+    player.targetX=
+    Math.max(
+        left+30,
+        Math.min(
+            left+width-30,
+            x
+        )
+    );
+}
+
+
+canvas.addEventListener(
+    "pointerdown",
+    e=>{
+
+        pointerDown=true;
+
+        steer(e.clientX);
+    }
+);
+
+
+canvas.addEventListener(
+    "pointermove",
+    e=>{
+
+        if(pointerDown)
+            steer(e.clientX);
+    }
+);
+
+
+window.addEventListener(
+    "pointerup",
+    ()=>pointerDown=false
+);
+
+
+/* ------------------------- */
+/* NITRO */
+/* ------------------------- */
+
+nitroArea.addEventListener(
+    "pointerdown",
+    e=>{
+
+        e.preventDefault();
+
+        if(
+            running &&
+            nitro>=100
+        ){
+
+            nitro=0;
+
+            nitroActive=2.4;
+
+            showMessage(
+                "NITRO!"
+            );
+
+            vibrate(30);
+        }
+    }
+);
+
+
+/* ------------------------- */
+/* TRAFFIC */
+/* ------------------------- */
+
+function spawnTraffic(){
+
+    const lanes=4;
+
+    let lane=
+    Math.floor(
+        Math.random()*lanes
+    );
+
+    let truck=
+    Math.random()<.18;
+
+    traffic.push({
+
+        lane,
+
+        y:-120,
+
+        width:
+        truck ? 51 : 41,
+
+        height:
+        truck ? 103 : 75,
+
+        speed:
+        25+
+        Math.random()*38,
+
+        passed:false,
+
+        truck,
+
+        color:
+        [
+            "#dddddf",
+            "#cb9e39",
+            "#477c9f",
+            "#679260",
+            "#975b88",
+            "#505b68"
+        ][
+            Math.floor(
+                Math.random()*6
+            )
+        ]
+    });
+}
+
+
+/* ------------------------- */
+/* LANE POSITION */
+/* ------------------------- */
+
+function trafficX(car){
+
+    let rw=
+    roadWidthAt(car.y);
+
+    let left=
+    roadLeftAt(car.y);
+
+    let laneWidth=
+    rw/4;
+
+    return(
+        left+
+        laneWidth*
+        (car.lane+.5)
+    );
+}
+
+
+/* ------------------------- */
+/* COLLISION */
+/* ------------------------- */
+
+function collision(a,b){
+
+    return(
+
+        Math.abs(
+            a.x-b.x
+        )
+        <
+        (a.width+b.width)/2-7
+
+        &&
+
+        Math.abs(
+            a.y-b.y
+        )
+        <
+        (a.height+b.height)/2-9
+
+    );
+}
+
+
+/* ------------------------- */
+/* PARTICLES */
+/* ------------------------- */
+
+function createSparks(
+    x,
+    y,
+    amount
+){
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ){
+
+        particles.push({
+
+            x,
+            y,
+
+            vx:
+            (Math.random()-.5)*170,
+
+            vy:
+            -40+
+            Math.random()*180,
+
+            life:
+            .25+
+            Math.random()*.45,
+
+            size:
+            2+
+            Math.random()*3
+        });
+    }
+}
+
+
+/* ------------------------- */
+/* MESSAGES */
+/* ------------------------- */
+
+function showMessage(text){
+
+    messageBox.innerHTML=text;
+
+    messageBox.style.opacity=1;
+
+    messageTimer=.8;
+}
+
+
+/* ------------------------- */
+/* VIBRATION */
+/* ------------------------- */
+
+function vibrate(pattern){
+
+    if(navigator.vibrate){
+
+        navigator.vibrate(pattern);
+    }
+}
+
+
+/* ------------------------- */
+/* UPDATE */
+/* ------------------------- */
+
+function update(dt){
+
+    chaseTime+=dt;
+
+
+    /* acceleration */
+
+    player.speed+=7.5*dt;
+
+    player.speed=
+    Math.min(
+        player.speed,
+        195
+    );
+
+
+    /* nitro */
+
+    if(nitroActive>0){
+
+        nitroActive-=dt;
+
+        player.speed+=45*dt;
+
+        player.speed=
+        Math.min(
+            player.speed,
+            235
+        );
+    }
+
+
+    /* smooth steering */
+
+    player.x+=
+    (
+        player.targetX-
+        player.x
+    )
+    *
+    Math.min(
+        1,
+        dt*10
+    );
+
+
+    if(
+        player.invincible>0
+    ){
+
+        player.invincible-=dt;
+    }
+
+
+    /* road */
+
+    roadOffset+=
+    player.speed*
+    dt*
+    2.3;
+
+
+    /* robber AI */
+
+    robber.phase+=
+    dt*
+    (
+        1+
+        player.speed/230
+    );
+
+
+    let robberRoadWidth=
+    roadWidthAt(
+        robber.y
+    );
+
+
+    let robberTarget=
+    W/2+
+    Math.sin(
+        robber.phase
+    )
+    *
+    robberRoadWidth*.27;
+
+
+    /* robber becomes panicked */
+
+    if(gap<90){
+
+        robberTarget+=
+        Math.sin(
+            robber.phase*3.3
+        )*20;
+    }
+
+
+    robber.x+=
+    (
+        robberTarget-
+        robber.x
+    )
+    *
+    dt*
+    (
+        gap<55 ?
+        2.3 :
+        1.3
+    );
+
+
+    /* closing distance */
+
+    let closingRate=
+    4.3+
+    Math.max(
+        0,
+        player.speed-105
+    )*.039;
+
+
+    if(nitroActive>0){
+
+        closingRate+=18;
+    }
+
+
+    gap-=
+    closingRate*
+    dt;
+
+
+    /* traffic spawn */
+
+    spawnTimer-=dt;
+
+
+    let spawnRate=
+    Math.max(
+        .42,
+        1.05-
+        player.speed/290
+    );
+
+
+    if(spawnTimer<=0){
+
+        spawnTraffic();
+
+        spawnTimer=
+        spawnRate*
+        (
+            .8+
+            Math.random()*.6
+        );
+    }
+
+
+    /* traffic movement */
+
+    for(
+        let i=
+        traffic.length-1;
+        i>=0;
+        i--
+    ){
+
+        let car=
+        traffic[i];
+
+
+        car.y+=
+        (
+            player.speed*.82-
+            car.speed
+        )
+        *
+        dt*
+        2.15;
+
+
+        car.x=
+        trafficX(car);
+
+
+        if(
+            car.y>
+            H+150
+        ){
+
+            traffic.splice(
+                i,
+                1
+            );
+
+            continue;
+        }
+
+
+        /* crash */
+
+        if(
+            player.invincible<=0 &&
+            collision(
+                player,
+                car
+            )
+        ){
+
+            player.speed=
+            Math.max(
+                70,
+                player.speed-60
+            );
+
+
+            gap+=34;
+
+
+            nitro=
+            Math.max(
+                0,
+                nitro-20
+            );
+
+
+            player.invincible=
+            .95;
+
+
+            screenShake=
+            18;
+
+
+            createSparks(
+                player.x,
+                player.y,
+                22
+            );
+
+
+            showMessage(
+                "CRASH! +34 m"
+            );
+
+
+            vibrate(
+                [45,35,45]
+            );
+        }
+
+
+        /* near miss */
+
+        if(
+            !car.passed &&
+            car.y>
+            player.y+
+            player.height*.60
+        ){
+
+            car.passed=true;
+
+
+            let dx=
+            Math.abs(
+                car.x-
+                player.x
+            );
+
+
+            let size=
+            (
+                car.width+
+                player.width
+            )/2;
+
+
+            if(
+                dx>
+                size-4
+                &&
+                dx<
+                size+28
+            ){
+
+                nitro=
+                Math.min(
+                    100,
+                    nitro+25
+                );
+
+
+                score+=250;
+
+
+                showMessage(
+                    "NEAR MISS +250"
+                );
+
+
+                vibrate(18);
+            }
+        }
+    }
+
+
+    /* particles */
+
+    for(
+        let i=
+        particles.length-1;
+        i>=0;
+        i--
+    ){
+
+        let p=
+        particles[i];
+
+
+        p.x+=p.vx*dt;
+
+        p.y+=p.vy*dt;
+
+        p.life-=dt;
+
+
+        if(
+            p.life<=0
+        ){
+
+            particles.splice(
+                i,
+                1
+            );
+        }
+    }
+
+
+    /* limits */
+
+    gap=
+    Math.max(
+        0,
+        Math.min(
+            gap,
+            420
+        )
+    );
+
+
+    /* capture */
+
+    if(gap<16){
+
+        catchTimer+=dt;
+
+        showMessage(
+            "STAY CLOSE!"
+        );
+
+    }else{
+
+        catchTimer=
+        Math.max(
+            0,
+            catchTimer-
+            dt*1.5
+        );
+    }
+
+
+    if(
+        catchTimer>1.35
+    ){
+
+        endGame(true);
+
+        return;
+    }
+
+
+    if(
+        gap>=420
+    ){
+
+        endGame(false);
+
+        return;
+    }
+
+
+    /* score */
+
+    score+=
+    player.speed*
+    dt*.55;
+
+
+    /* UI */
+
+    robberValue.innerHTML=
+    Math.round(gap)+" m";
+
+
+    speedValue.innerHTML=
+    Math.round(
+        player.speed
+    );
+
+
+    nitroFill.style.width=
+    nitro+"%";
+
+
+    if(messageTimer>0){
+
+        messageTimer-=dt;
+
+        if(
+            messageTimer<=0
+        ){
+
+            messageBox.style.opacity=0;
+        }
+    }
+
+
+    screenShake*=.88;
+}
+
+
+/* ------------------------- */
+/* DRAW ROUND RECT */
+/* ------------------------- */
+
+function roundedRect(
+    x,
+    y,
+    w,
+    h,
+    radius
+){
+
+    radius=
+    Math.min(
+        radius,
+        w/2,
+        h/2
+    );
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x+radius,
+        y
+    );
+
+    ctx.arcTo(
+        x+w,
+        y,
+        x+w,
+        y+h,
+        radius
+    );
+
+    ctx.arcTo(
+        x+w,
+        y+h,
+        x,
+        y+h,
+        radius
+    );
+
+    ctx.arcTo(
+        x,
+        y+h,
+        x,
+        y,
+        radius
+    );
+
+    ctx.arcTo(
+        x,
+        y,
+        x+w,
+        y,
+        radius
+    );
+
+    ctx.closePath();
+}
+
+
+/* ------------------------- */
+/* CITY */
+/* ------------------------- */
+
+function drawCity(){
+
+    let skylineY=
+    H*.16;
+
+
+    ctx.fillStyle=
+    "#07131f";
+
+
+    for(
+        let x=0;
+        x<W;
+        x+=34
+    ){
+
+        let height=
+        35+
+        (
+            (
+                x*17
+            )%75
+        );
+
+
+        ctx.fillRect(
+            x,
+            skylineY-height,
+            28,
+            height
+        );
+
+
+        ctx.fillStyle=
+        "rgba(68,157,209,.24)";
+
+
+        for(
+            let yy=
+            skylineY-height+9;
+            yy<
+            skylineY-8;
+            yy+=15
+        ){
+
+            ctx.fillRect(
+                x+7,
+                yy,
+                4,
+                4
+            );
+
+
+            ctx.fillRect(
+                x+18,
+                yy,
+                4,
+                4
+            );
+        }
+
+
+        ctx.fillStyle=
+        "#07131f";
+    }
+}
+
+
+/* ------------------------- */
+/* ROAD */
+/* ------------------------- */
+
+function drawRoad(){
+
+    let r=
+    getRoad();
+
+
+    /* sky */
+
+    let sky=
+    ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        H
+    );
+
+
+    sky.addColorStop(
+        0,
+        "#071725"
+    );
+
+    sky.addColorStop(
+        .35,
+        "#142631"
+    );
+
+    sky.addColorStop(
+        1,
+        "#152618"
+    );
+
+
+    ctx.fillStyle=sky;
+
+    ctx.fillRect(
+        0,0,W,H
+    );
+
+
+    drawCity();
+
+
+    /* roadside */
+
+    ctx.fillStyle=
+    "#142519";
+
+    ctx.fillRect(
+        0,
+        H*.15,
+        W,
+        H
+    );
+
+
+    /* main road */
+
+    let roadGradient=
+    ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        H
+    );
+
+
+    roadGradient.addColorStop(
+        0,
+        "#333940"
+    );
+
+    roadGradient.addColorStop(
+        1,
+        "#22272d"
+    );
+
+
+    ctx.fillStyle=
+    roadGradient;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        r.topLeft,
+        0
+    );
+
+    ctx.lineTo(
+        r.topRight,
+        0
+    );
+
+    ctx.lineTo(
+        r.bottomRight,
+        H
+    );
+
+    ctx.lineTo(
+        r.bottomLeft,
+        H
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /* shoulders */
+
+    ctx.strokeStyle=
+    "#d4d8dc";
+
+    ctx.lineWidth=5;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        r.topLeft,
+        0
+    );
+
+    ctx.lineTo(
+        r.bottomLeft,
+        H
+    );
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        r.topRight,
+        0
+    );
+
+    ctx.lineTo(
+        r.bottomRight,
+        H
+    );
+
+    ctx.stroke();
+
+
+    /* lane markings */
+
+    for(
+        let lane=1;
+        lane<4;
+        lane++
+    ){
+
+        for(
+            let y=
+            -80+
+            (
+                roadOffset%85
+            );
+            y<H;
+            y+=85
+        ){
+
+            let y2=
+            y+42;
+
+
+            if(y2<0)
+                continue;
+
+
+            let p1=
+            Math.max(
+                0,
+                y
+            );
+
+
+            let p2=
+            Math.min(
+                H,
+                y2
+            );
+
+
+            let width1=
+            roadWidthAt(p1);
+
+
+            let width2=
+            roadWidthAt(p2);
+
+
+            let x1=
+            roadLeftAt(p1)+
+            width1*
+            lane/4;
+
+
+            let x2=
+            roadLeftAt(p2)+
+            width2*
+            lane/4;
+
+
+            ctx.strokeStyle=
+            "rgba(255,255,255,.78)";
+
+
+            ctx.lineWidth=
+            2+
+            p2/H*2;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                x1,
+                p1
+            );
+
+            ctx.lineTo(
+                x2,
+                p2
+            );
+
+            ctx.stroke();
+        }
+    }
+
+
+    /* road reflectors */
+
+    for(
+        let y=
+        roadOffset%70;
+        y<H;
+        y+=70
+    ){
+
+        let left=
+        roadLeftAt(y);
+
+
+        let rw=
+        roadWidthAt(y);
+
+
+        ctx.fillStyle=
+        "rgba(255,210,90,.6)";
+
+
+        ctx.fillRect(
+            left+8,
+            y,
+            3,
+            6
+        );
+
+
+        ctx.fillRect(
+            left+rw-11,
+            y,
+            3,
+            6
+        );
+    }
+
+
+    /* streetlights */
+
+    for(
+        let y=
+        (roadOffset*.55)%150;
+        y<H;
+        y+=150
+    ){
+
+        let left=
+        roadLeftAt(y);
+
+
+        let rw=
+        roadWidthAt(y);
+
+
+        let scale=
+        .4+
+        y/H;
+
+
+        drawStreetLight(
+            left-15,
+            y,
+            scale,
+            1
+        );
+
+
+        drawStreetLight(
+            left+rw+15,
+            y,
+            scale,
+            -1
+        );
+    }
+
+
+    /* speed streaks */
+
+    if(
+        player &&
+        player.speed>145
+    ){
+
+        let amount=
+        Math.floor(
+            (
+                player.speed-140
+            )/7
+        );
+
+
+        ctx.strokeStyle=
+        "rgba(255,255,255,.12)";
+
+
+        for(
+            let i=0;
+            i<amount;
+            i++
+        ){
+
+            let x=
+            Math.random()*W;
+
+
+            let y=
+            Math.random()*H;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                x,
+                y
+            );
+
+            ctx.lineTo(
+                x,
+                y+
+                18+
+                Math.random()*45
+            );
+
+            ctx.stroke();
+        }
+    }
+}
+
+
+function drawStreetLight(
+    x,
+    y,
+    scale,
+    direction
+){
+
+    let height=
+    38*scale;
+
+
+    ctx.strokeStyle=
+    "rgba(150,165,175,.5)";
+
+
+    ctx.lineWidth=
+    Math.max(
+        1,
+        2*scale
+    );
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x,
+        y
+    );
+
+    ctx.lineTo(
+        x,
+        y-height
+    );
+
+    ctx.lineTo(
+        x+
+        direction*
+        8*scale,
+        y-height
+    );
+
+    ctx.stroke();
+
+
+    ctx.fillStyle=
+    "rgba(255,235,175,.8)";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x+
+        direction*
+        8*scale,
+        y-height,
+        2.5*scale,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+}
+
+
+/* ------------------------- */
+/* CAR */
+/* ------------------------- */
+
+function drawCar(
+    car,
+    color,
+    police=false,
+    suspect=false
+){
+
+    ctx.save();
+
+    ctx.translate(
+        car.x,
+        car.y
+    );
+
+
+    let w=
+    car.width;
+
+    let h=
+    car.height;
+
+
+    /* shadow */
+
+    ctx.fillStyle=
+    "rgba(0,0,0,.42)";
+
+
+    roundedRect(
+        -w/2+4,
+        -h/2+9,
+        w,
+        h,
+        10
+    );
+
+    ctx.fill();
+
+
+    /* wheels */
+
+    ctx.fillStyle=
+    "#080b0d";
+
+
+    ctx.fillRect(
+        -w/2-3,
+        -h*.29,
+        6,
+        h*.21
+    );
+
+
+    ctx.fillRect(
+        w/2-3,
+        -h*.29,
+        6,
+        h*.21
+    );
+
+
+    ctx.fillRect(
+        -w/2-3,
+        h*.14,
+        6,
+        h*.21
+    );
+
+
+    ctx.fillRect(
+        w/2-3,
+        h*.14,
+        6,
+        h*.21
+    );
+
+
+    /* body */
+
+    let body=
+    ctx.createLinearGradient(
+        -w/2,
+        0,
+        w/2,
+        0
+    );
+
+
+    body.addColorStop(
+        0,
+        shade(color,-35)
+    );
+
+    body.addColorStop(
+        .48,
+        color
+    );
+
+    body.addColorStop(
+        .7,
+        shade(color,25)
+    );
+
+    body.addColorStop(
+        1,
+        shade(color,-35)
+    );
+
+
+    ctx.fillStyle=body;
+
+
+    roundedRect(
+        -w/2,
+        -h/2,
+        w,
+        h,
+        11
+    );
+
+    ctx.fill();
+
+
+    /* hood */
+
+    ctx.fillStyle=
+    "rgba(255,255,255,.08)";
+
+
+    roundedRect(
+        -w*.33,
+        -h*.44,
+        w*.66,
+        h*.19,
+        5
+    );
+
+    ctx.fill();
+
+
+    /* windshield */
+
+    let glass=
+    ctx.createLinearGradient(
+        0,
+        -h*.25,
+        0,
+        h*.1
+    );
+
+
+    glass.addColorStop(
+        0,
+        "#9ec6d6"
+    );
+
+    glass.addColorStop(
+        1,
+        "#162b36"
+    );
+
+
+    ctx.fillStyle=glass;
+
+
+    roundedRect(
+        -w*.33,
+        -h*.22,
+        w*.66,
+        h*.29,
+        6
+    );
+
+    ctx.fill();
+
+
+    /* rear glass */
+
+    ctx.fillStyle=
+    "#18303c";
+
+
+    roundedRect(
+        -w*.32,
+        h*.12,
+        w*.64,
+        h*.19,
+        5
+    );
+
+    ctx.fill();
+
+
+    /* headlights */
+
+    ctx.fillStyle=
+    "#fff7c5";
+
+
+    ctx.fillRect(
+        -w*.36,
+        -h*.45,
+        9,
+        5
+    );
+
+
+    ctx.fillRect(
+        w*.36-9,
+        -h*.45,
+        9,
+        5
+    );
+
+
+    /* taillights */
+
+    ctx.fillStyle=
+    "#ff3746";
+
+
+    ctx.fillRect(
+        -w*.36,
+        h*.41,
+        9,
+        5
+    );
+
+
+    ctx.fillRect(
+        w*.36-9,
+        h*.41,
+        9,
+        5
+    );
+
+
+    /* police */
+
+    if(police){
+
+        ctx.fillStyle=
+        "#f2f2f2";
+
+
+        ctx.fillRect(
+            -w*.44,
+            -8,
+            w*.88,
+            15
+        );
+
+
+        ctx.fillStyle=
+        "#12314a";
+
+
+        ctx.fillRect(
+            -w*.44,
+            -8,
+            w*.88,
+            5
+        );
+
+
+        let flash=
+        (
+            Math.floor(
+                performance.now()/130
+            )%2
+        );
+
+
+        /* police light glow */
+
+        let glow=
+        ctx.createRadialGradient(
+            0,
+            -11,
+            2,
+            0,
+            -11,
+            50
+        );
+
+
+        glow.addColorStop(
+            0,
+            flash ?
+            "rgba(45,120,255,.40)" :
+            "rgba(255,40,60,.40)"
+        );
+
+
+        glow.addColorStop(
+            1,
+            "rgba(0,0,0,0)"
+        );
+
+
+        ctx.fillStyle=glow;
+
+
+        ctx.fillRect(
+            -55,
+            -65,
+            110,
+            105
+        );
+
+
+        ctx.fillStyle=
+        flash ?
+        "#3184ff" :
+        "#ff2947";
+
+
+        ctx.fillRect(
+            -14,
+            -15,
+            13,
+            6
+        );
+
+
+        ctx.fillStyle=
+        flash ?
+        "#ff2947" :
+        "#3184ff";
+
+
+        ctx.fillRect(
+            1,
+            -15,
+            13,
+            6
+        );
+
+
+        ctx.fillStyle=
+        "#13314a";
+
+
+        ctx.font=
+        "900 8px Arial";
+
+
+        ctx.textAlign=
+        "center";
+
+
+        ctx.fillText(
+            "POLICE",
+            0,
+            4
+        );
+
+
+        /* road reflection */
+
+        ctx.globalAlpha=.20;
+
+
+        ctx.fillStyle=
+        flash ?
+        "#247cff" :
+        "#ff2445";
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -30,
+            h/2
+        );
+
+        ctx.lineTo(
+            30,
+            h/2
+        );
+
+        ctx.lineTo(
+            50,
+            h/2+80
+        );
+
+        ctx.lineTo(
+            -50,
+            h/2+80
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+
+        ctx.globalAlpha=1;
+    }
+
+
+    if(suspect){
+
+        ctx.fillStyle=
+        "#111";
+
+
+        ctx.fillRect(
+            -15,
+            -5,
+            30,
+            8
+        );
+    }
+
+
+    /* invincible flash */
+
+    if(
+        police &&
+        player.invincible>0
+    ){
+
+        ctx.globalAlpha=
+        Math.floor(
+            player.invincible*12
+        )%2 ?
+        .35 :
+        1;
+    }
+
+
+    ctx.restore();
+}
+
+
+/* ------------------------- */
+/* COLOR SHADE */
+/* ------------------------- */
+
+function shade(
+    color,
+    percent
+){
+
+    let num=
+    parseInt(
+        color.slice(1),
+        16
+    );
+
+
+    let amt=
+    Math.round(
+        2.55*percent
+    );
+
+
+    let R=
+    (num>>16)+amt;
+
+
+    let G=
+    (
+        num>>8 & 0x00FF
+    )+amt;
+
+
+    let B=
+    (
+        num & 0x0000FF
+    )+amt;
+
+
+    return(
+        "#"+
+        (
+            0x1000000+
+            (
+                R<255 ?
+                R<1 ? 0 : R :
+                255
+            )*
+            0x10000+
+            (
+                G<255 ?
+                G<1 ? 0 : G :
+                255
+            )*
+            0x100+
+            (
+                B<255 ?
+                B<1 ? 0 : B :
+                255
+            )
+        )
+        .toString(16)
+        .slice(1)
+    );
+}
+
+
+/* ------------------------- */
+/* ROBBER LABEL */
+/* ------------------------- */
+
+function drawRobberLabel(){
+
+    ctx.font=
+    "900 11px Arial";
+
+
+    ctx.textAlign=
+    "center";
+
+
+    ctx.fillStyle=
+    "#e82936";
+
+
+    roundedRect(
+        robber.x-31,
+        robber.y-58,
+        62,
+        22,
+        5
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle=
+    "white";
+
+
+    ctx.fillText(
+        "ROBBER",
+        robber.x,
+        robber.y-43
+    );
+}
+
+
+/* ------------------------- */
+/* PARTICLES */
+/* ------------------------- */
+
+function drawParticles(){
+
+    for(
+        let p of particles
+    ){
+
+        ctx.globalAlpha=
+        Math.min(
+            1,
+            p.life*3
+        );
+
+
+        ctx.fillStyle=
+        "#ffc34b";
+
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            p.size,
+            p.size
+        );
+    }
+
+
+    ctx.globalAlpha=1;
+}
+
+
+/* ------------------------- */
+/* NITRO FLAMES */
+/* ------------------------- */
+
+function drawNitro(){
+
+    if(nitroActive<=0)
+        return;
+
+
+    ctx.fillStyle=
+    "rgba(40,190,255,.9)";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        player.x-11,
+        player.y+
+        player.height/2
+    );
+
+
+    ctx.lineTo(
+        player.x,
+        player.y+
+        player.height/2+
+        34+
+        Math.random()*26
+    );
+
+
+    ctx.lineTo(
+        player.x+11,
+        player.y+
+        player.height/2
+    );
+
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.fillStyle=
+    "rgba(255,255,255,.8)";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        player.x-5,
+        player.y+
+        player.height/2
+    );
+
+
+    ctx.lineTo(
+        player.x,
+        player.y+
+        player.height/2+
+        20+
+        Math.random()*16
+    );
+
+
+    ctx.lineTo(
+        player.x+5,
+        player.y+
+        player.height/2
+    );
+
+
+    ctx.fill();
+}
+
+
+/* ------------------------- */
+/* DRAW */
+/* ------------------------- */
+
+function draw(){
+
+    ctx.clearRect(
+        0,0,W,H
+    );
+
+
+    drawRoad();
+
+
+    drawRobberLabel();
+
+
+    drawCar(
+        robber,
+        "#d32631",
+        false,
+        true
+    );
+
+
+    for(
+        let car of traffic
+    ){
+
+        drawCar(
+            car,
+            car.color
+        );
+    }
+
+
+    drawNitro();
+
+
+    drawCar(
+        player,
+        "#174368",
+        true,
+        false
+    );
+
+
+    drawParticles();
+
+
+    if(gap<55){
+
+        ctx.font=
+        "900 19px Arial";
+
+
+        ctx.textAlign=
+        "center";
+
+
+        ctx.fillStyle=
+        "rgba(255,255,255,.95)";
+
+
+        ctx.fillText(
+            "CLOSING IN!",
+            W/2,
+            H*.42
+        );
+    }
+}
+
+
+/* ------------------------- */
+/* GAME END */
+/* ------------------------- */
+
+function endGame(win){
+
+    running=false;
+
+
+    overlay.style.display=
+    "flex";
+
+
+    menuCar.style.display=
+    "none";
+
+
+    if(win){
+
+        menuTitle.innerHTML=
+        "BUSTED!";
+
+
+        menuTitle.className=
+        "logo good";
+
+
+        menuSubtitle.innerHTML=
+        "SUSPECT CAPTURED";
+
+
+        description.innerHTML=
+        `
+        Mission complete!<br><br>
+        <b>Score:</b>
+        ${Math.round(score).toLocaleString()}
+        <br>
+        <b>Time:</b>
+        ${chaseTime.toFixed(1)} seconds
+        `;
+
+
+        startButton.innerHTML=
+        "CHASE AGAIN";
+
+    }else{
+
+        menuTitle.innerHTML=
+        "ESCAPED";
+
+
+        menuTitle.className=
+        "logo bad";
+
+
+        menuSubtitle.innerHTML=
+        "CHASE FAILED";
+
+
+        description.innerHTML=
+        `
+        The suspect got away.
+        Avoid collisions and use
+        your nitro after near misses.
+        `;
+
+
+        startButton.innerHTML=
+        "TRY AGAIN";
+    }
+}
+
+
+/* ------------------------- */
+/* GAME LOOP */
+/* ------------------------- */
+
+function loop(time){
+
+    if(!running)
+        return;
+
+
+    let dt=
+    Math.min(
+        .033,
+        (
+            time-lastTime
+        )/1000
+    );
+
+
+    lastTime=time;
+
+
+    update(dt);
+
+
+    if(!running)
+        return;
+
+
+    ctx.save();
+
+
+    if(screenShake>1){
+
+        ctx.translate(
+            (
+                Math.random()-.5
+            )*
+            screenShake,
+
+            (
+                Math.random()-.5
+            )*
+            screenShake
+        );
+    }
+
+
+    draw();
+
+
+    ctx.restore();
+
+
+    requestAnimationFrame(loop);
+}
+
+
+/* initial background */
+
+reset();
+draw();
+
+</script>
+
+</body>
+</html>
