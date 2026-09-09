@@ -14,7 +14,6 @@ function loadImage(store, name, file) {
 }
 
 /* Vehicles */
-
 loadImage(vehicleImages, "police", "police.png");
 loadImage(vehicleImages, "suspect", "suspect.png");
 loadImage(vehicleImages, "traffic1", "traffic1.png");
@@ -23,7 +22,6 @@ loadImage(vehicleImages, "traffic3", "traffic3.png");
 loadImage(vehicleImages, "truck", "truck.png");
 
 /* Environments */
-
 loadImage(environmentImages, "city", "city.jpg");
 loadImage(environmentImages, "highway", "highway.jpg");
 loadImage(environmentImages, "rain", "rain.jpg");
@@ -85,7 +83,6 @@ function stopDrivingSounds() {
 ===================================================== */
 
 const environments = {
-
   city: {
     name: "CITY NIGHT",
     grip: 1.00,
@@ -135,70 +132,42 @@ let selectedEnvironment = "city";
    DOM
 ===================================================== */
 
-const canvas =
-  document.getElementById("game");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-const ctx =
-  canvas.getContext("2d");
+const overlay = document.getElementById("overlay");
+const title = document.getElementById("title");
+const subtitle = document.getElementById("subtitle");
+const message = document.getElementById("message");
 
-const overlay =
-  document.getElementById("overlay");
+const startBtn = document.getElementById("startBtn");
+const soundToggle = document.getElementById("soundToggle");
 
-const title =
-  document.getElementById("title");
+const distanceValue = document.getElementById("distanceValue");
+const speedValue = document.getElementById("speedValue");
 
-const subtitle =
-  document.getElementById("subtitle");
+const environmentBadge = document.getElementById("environmentBadge");
+const chaseStatus = document.getElementById("chaseStatus");
 
-const message =
-  document.getElementById("message");
+const nitroUI = document.getElementById("nitroUI");
+const nitroFill = document.getElementById("nitroFill");
+const nitroState = document.getElementById("nitroState");
 
-const startBtn =
-  document.getElementById("startBtn");
-
-const soundToggle =
-  document.getElementById("soundToggle");
-
-const distanceValue =
-  document.getElementById("distanceValue");
-
-const speedValue =
-  document.getElementById("speedValue");
-
-const environmentBadge =
-  document.getElementById("environmentBadge");
-
-const chaseStatus =
-  document.getElementById("chaseStatus");
-
-const nitroUI =
-  document.getElementById("nitroUI");
-
-const nitroFill =
-  document.getElementById("nitroFill");
-
-const nitroState =
-  document.getElementById("nitroState");
-
-const envButtons =
-  document.querySelectorAll(".envButton");
+const envButtons = document.querySelectorAll(".envButton");
 
 /* =====================================================
    MENU
 ===================================================== */
 
 envButtons.forEach(button => {
-
   button.addEventListener("click", () => {
-
     envButtons.forEach(btn => {
       btn.classList.remove("active");
     });
 
     button.classList.add("active");
 
-    selectedEnvironment =
-      button.dataset.env;
+    selectedEnvironment = button.dataset.env;
 
     message.innerHTML = `
       <strong>${environments[selectedEnvironment].name}</strong>
@@ -206,27 +175,19 @@ envButtons.forEach(button => {
       Catch the suspect before they escape.
     `;
   });
-
 });
 
 soundToggle.addEventListener("click", () => {
-
-  soundEnabled =
-    !soundEnabled;
+  soundEnabled = !soundEnabled;
 
   soundToggle.textContent =
     soundEnabled ? "🔊" : "🔇";
 
   if (!soundEnabled) {
-
     stopDrivingSounds();
-
   } else if (running) {
-
     startDrivingSounds();
-
   }
-
 });
 
 /* =====================================================
@@ -238,7 +199,6 @@ let H = 0;
 let DPR = 1;
 
 function resize() {
-
   DPR = Math.min(
     window.devicePixelRatio || 1,
     2
@@ -247,17 +207,11 @@ function resize() {
   W = window.innerWidth;
   H = window.innerHeight;
 
-  canvas.width =
-    Math.round(W * DPR);
+  canvas.width = Math.round(W * DPR);
+  canvas.height = Math.round(H * DPR);
 
-  canvas.height =
-    Math.round(H * DPR);
-
-  canvas.style.width =
-    W + "px";
-
-  canvas.style.height =
-    H + "px";
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
 
   ctx.setTransform(
     DPR,
@@ -269,11 +223,7 @@ function resize() {
   );
 }
 
-window.addEventListener(
-  "resize",
-  resize
-);
-
+window.addEventListener("resize", resize);
 resize();
 
 /* =====================================================
@@ -323,66 +273,37 @@ let snowFlakes = [];
 let dustParticles = [];
 
 function createWeatherParticles() {
-
   rainDrops = [];
   snowFlakes = [];
   dustParticles = [];
 
   for (let i = 0; i < 110; i++) {
-
     rainDrops.push({
       x: Math.random() * W,
       y: Math.random() * H,
-
-      speed:
-        650 +
-        Math.random() * 450,
-
-      length:
-        18 +
-        Math.random() * 25
+      speed: 650 + Math.random() * 450,
+      length: 18 + Math.random() * 25
     });
-
   }
 
   for (let i = 0; i < 85; i++) {
-
     snowFlakes.push({
       x: Math.random() * W,
       y: Math.random() * H,
-
-      speed:
-        45 +
-        Math.random() * 90,
-
-      drift:
-        -20 +
-        Math.random() * 40,
-
-      size:
-        1 +
-        Math.random() * 3
+      speed: 45 + Math.random() * 90,
+      drift: -20 + Math.random() * 40,
+      size: 1 + Math.random() * 3
     });
-
   }
 
   for (let i = 0; i < 50; i++) {
-
     dustParticles.push({
       x: Math.random() * W,
       y: Math.random() * H,
-
-      speed:
-        80 +
-        Math.random() * 130,
-
-      length:
-        30 +
-        Math.random() * 60
+      speed: 80 + Math.random() * 130,
+      length: 30 + Math.random() * 60
     });
-
   }
-
 }
 
 /* =====================================================
@@ -390,14 +311,11 @@ function createWeatherParticles() {
 ===================================================== */
 
 function backgroundFrameWidth() {
-
   if (W > H) {
-
     return Math.min(
       W * 0.48,
       H * 0.82
     );
-
   }
 
   return W;
@@ -408,7 +326,6 @@ function backgroundFrameWidth() {
 ===================================================== */
 
 function roadInfo() {
-
   const frameWidth =
     backgroundFrameWidth();
 
@@ -419,7 +336,6 @@ function roadInfo() {
     );
 
   return {
-
     left:
       (W - width) / 2,
 
@@ -433,7 +349,6 @@ function roadInfo() {
 }
 
 function laneCenter(lane) {
-
   const road =
     roadInfo();
 
@@ -453,61 +368,42 @@ function laneCenter(lane) {
 ===================================================== */
 
 function resetGame() {
-
   policeWorldY = 1000;
   suspectWorldY = 650;
 
   player = {
-
     x: W / 2,
+    screenY: H * 0.76,
 
-    screenY:
-      H * 0.76,
+    targetX: W / 2,
 
-    targetX:
-      W / 2,
+    width: 78,
+    height: 142,
 
-    width:
-      78,
+    speed: 132,
 
-    height:
-      142,
+    invincible: 0,
 
-    speed:
-      132,
-
-    invincible:
-      0,
-
-    image:
-      "police"
+    image: "police"
   };
 
   robber = {
-
     x:
       laneCenter(1),
 
     screenY:
       H * 0.27,
 
-    width:
-      58,
+    width: 58,
+    height: 106,
 
-    height:
-      106,
+    speed: 123,
 
-    speed:
-      123,
+    targetLane: 1,
 
-    targetLane:
-      1,
+    laneTimer: 1.0,
 
-    laneTimer:
-      1.0,
-
-    image:
-      "suspect"
+    image: "suspect"
   };
 
   traffic = [];
@@ -559,12 +455,10 @@ function resetGame() {
     i < 15;
     i++
   ) {
-
     spawnTraffic(
       -20 -
       i * 78
     );
-
   }
 }
 
@@ -573,9 +467,7 @@ function resetGame() {
 ===================================================== */
 
 function getDistance() {
-
   return Math.max(
-
     0,
 
     Math.round(
@@ -585,7 +477,6 @@ function getDistance() {
       ) *
       0.7
     )
-
   );
 }
 
@@ -594,7 +485,6 @@ function getDistance() {
 ===================================================== */
 
 function startGame() {
-
   resetGame();
 
   title.className =
@@ -632,7 +522,6 @@ let gestureStartY = 0;
 let gestureStartTime = 0;
 
 function steer(clientX) {
-
   if (!running) return;
 
   const road =
@@ -640,28 +529,23 @@ function steer(clientX) {
 
   player.targetX =
     Math.max(
-
       road.left +
       player.width / 2 +
       8,
 
       Math.min(
-
         road.right -
         player.width / 2 -
         8,
 
         clientX
-
       )
-
     );
 }
 
 canvas.addEventListener(
   "pointerdown",
   event => {
-
     if (!running) return;
 
     pointerDown =
@@ -685,7 +569,6 @@ canvas.addEventListener(
 canvas.addEventListener(
   "pointermove",
   event => {
-
     if (
       !pointerDown ||
       !running
@@ -700,7 +583,6 @@ canvas.addEventListener(
 window.addEventListener(
   "pointerup",
   event => {
-
     if (!pointerDown) return;
 
     pointerDown =
@@ -731,11 +613,8 @@ window.addEventListener(
       duration < 700;
 
     if (swipeUp) {
-
       activateNitro();
-
     }
-
   }
 );
 
@@ -744,11 +623,9 @@ window.addEventListener(
 ===================================================== */
 
 function activateNitro() {
-
   if (!running) return;
 
   if (nitro < 100) {
-
     showStatus(
       "NITRO NOT READY"
     );
@@ -785,9 +662,7 @@ function activateNitro() {
   if (
     navigator.vibrate
   ) {
-
     navigator.vibrate(35);
-
   }
 }
 
@@ -796,7 +671,6 @@ function activateNitro() {
 ===================================================== */
 
 function showStatus(text) {
-
   chaseStatus.textContent =
     text;
 
@@ -814,7 +688,6 @@ function showStatus(text) {
 function spawnTraffic(
   forcedY = null
 ) {
-
   const road =
     roadInfo();
 
@@ -830,7 +703,6 @@ function spawnTraffic(
     roll <
     0.13
   ) {
-
     image =
       "truck";
 
@@ -846,7 +718,6 @@ function spawnTraffic(
       12;
 
   } else {
-
     const choices = [
       "traffic1",
       "traffic2",
@@ -872,10 +743,6 @@ function spawnTraffic(
       Math.random() *
       18;
   }
-
-  /*
-    Free placement across the road.
-  */
 
   const sidePadding =
     width * 0.65;
@@ -904,7 +771,6 @@ function spawnTraffic(
     Math.random() <
     0.50
   ) {
-
     const center =
       W / 2;
 
@@ -954,7 +820,6 @@ function spawnTraffic(
         );
 
       return (
-
         horizontal <
         (
           car.width +
@@ -970,22 +835,18 @@ function spawnTraffic(
           height
         ) *
         0.54
-
       );
-
     });
 
   if (
     overlapRisk &&
     forcedY !== null
   ) {
-
     for (
       let attempt = 0;
       attempt < 8;
       attempt++
     ) {
-
       const alternativeX =
         minX +
         Math.random() *
@@ -1010,7 +871,6 @@ function spawnTraffic(
             );
 
           return (
-
             horizontal <
             (
               car.width +
@@ -1026,20 +886,16 @@ function spawnTraffic(
               height
             ) *
             0.54
-
           );
-
         });
 
       if (
         !blocked
       ) {
-
         trafficX =
           alternativeX;
 
         traffic.push({
-
           x:
             trafficX,
 
@@ -1067,12 +923,10 @@ function spawnTraffic(
   if (
     overlapRisk
   ) {
-
     return;
   }
 
   traffic.push({
-
     x:
       trafficX,
 
@@ -1093,25 +947,44 @@ function spawnTraffic(
 
 /* =====================================================
    COLLISION
+
+   IMPORTANT CHANGE:
+   VISUAL SIZE stays the same.
+   COLLISION HITBOX is smaller.
 ===================================================== */
 
-function overlapScreen(
-  a,
-  b
-) {
+function overlapScreen(a, b) {
+
+  const aHitWidth =
+    a.image === "police"
+      ? a.width * 0.62
+      : a.width * 0.78;
+
+  const bHitWidth =
+    b.image === "police"
+      ? b.width * 0.62
+      : b.width * 0.78;
+
+  const aHitHeight =
+    a.image === "police"
+      ? a.height * 0.72
+      : a.height * 0.82;
+
+  const bHitHeight =
+    b.image === "police"
+      ? b.height * 0.72
+      : b.height * 0.82;
 
   return (
-
     Math.abs(
       a.x -
       b.x
     ) <
     (
-      a.width +
-      b.width
+      aHitWidth +
+      bHitWidth
     ) /
-    2 -
-    10
+    2
 
     &&
 
@@ -1120,11 +993,10 @@ function overlapScreen(
       b.screenY
     ) <
     (
-      a.height +
-      b.height
+      aHitHeight +
+      bHitHeight
     ) /
-    2 -
-    14
+    2
   );
 }
 
@@ -1136,15 +1008,12 @@ function createSparks(
   x,
   y
 ) {
-
   for (
     let i = 0;
     i < 20;
     i++
   ) {
-
     particles.push({
-
       x,
       y,
 
@@ -1168,7 +1037,6 @@ function createSparks(
 }
 
 function updateParticles(dt) {
-
   for (
     let i =
       particles.length - 1;
@@ -1177,7 +1045,6 @@ function updateParticles(dt) {
 
     i--
   ) {
-
     const p =
       particles[i];
 
@@ -1195,7 +1062,6 @@ function updateParticles(dt) {
     if (
       p.life <= 0
     ) {
-
       particles.splice(
         i,
         1
@@ -1211,7 +1077,6 @@ function updateParticles(dt) {
 function worldToScreenY(
   worldY
 ) {
-
   const midpoint =
     (
       policeWorldY +
@@ -1236,14 +1101,12 @@ function worldToScreenY(
 ===================================================== */
 
 function finish(win) {
-
   running =
     false;
 
   stopDrivingSounds();
 
   if (win) {
-
     playSound(
       sounds.capture
     );
@@ -1268,9 +1131,7 @@ function finish(win) {
       : "CHASE FAILED";
 
   if (win) {
-
     message.innerHTML = `
-
       <strong>
         ${environments[selectedEnvironment].name}
       </strong>
@@ -1296,11 +1157,8 @@ function finish(win) {
         ${elapsed.toFixed(1)} sec
       </strong>
     `;
-
   } else {
-
     message.innerHTML = `
-
       The suspect got away.
 
       <br><br>
@@ -1320,7 +1178,6 @@ function finish(win) {
 ===================================================== */
 
 function update(dt) {
-
   elapsed +=
     dt;
 
@@ -1341,7 +1198,6 @@ function update(dt) {
     nitroActive >
     0
   ) {
-
     nitroActive -=
       dt;
 
@@ -1352,7 +1208,6 @@ function update(dt) {
       nitroActive <=
       0
     ) {
-
       nitroState.textContent =
         "BUILDING";
     }
@@ -1375,7 +1230,6 @@ function update(dt) {
 
   sounds.engine.playbackRate =
     Math.max(
-
       0.85,
 
       Math.min(
@@ -1410,7 +1264,6 @@ function update(dt) {
     robber.laneTimer <=
     0
   ) {
-
     const current =
       robber.targetLane;
 
@@ -1422,12 +1275,10 @@ function update(dt) {
       lane < 4;
       lane++
     ) {
-
       if (
         lane !==
         current
       ) {
-
         laneChoices.push(
           lane
         );
@@ -1478,7 +1329,6 @@ function update(dt) {
 
   player.screenY =
     Math.max(
-
       H *
       0.58,
 
@@ -1491,7 +1341,6 @@ function update(dt) {
 
   robber.screenY =
     Math.max(
-
       H *
       0.16,
 
@@ -1513,14 +1362,12 @@ function update(dt) {
     spawnTimer <=
     0
   ) {
-
     spawnTraffic();
 
     if (
       Math.random() <
       0.28
     ) {
-
       spawnTraffic(
         -80 -
         Math.random() *
@@ -1535,10 +1382,6 @@ function update(dt) {
         elapsed /
         75
       );
-
-    /*
-      Slightly more room between new traffic.
-    */
 
     spawnTimer =
       (
@@ -1565,7 +1408,6 @@ function update(dt) {
 
     i--
   ) {
-
     const car =
       traffic[i];
 
@@ -1586,7 +1428,6 @@ function update(dt) {
       car.image ===
       "truck"
     ) {
-
       trafficScreenSpeed -=
         40;
     }
@@ -1595,7 +1436,6 @@ function update(dt) {
       nitroActive >
       0
     ) {
-
       trafficScreenSpeed +=
         75;
     }
@@ -1615,7 +1455,6 @@ function update(dt) {
       H +
       180
     ) {
-
       traffic.splice(
         i,
         1
@@ -1635,7 +1474,6 @@ function update(dt) {
         car
       )
     ) {
-
       player.speed =
         Math.max(
           105,
@@ -1675,7 +1513,6 @@ function update(dt) {
       if (
         navigator.vibrate
       ) {
-
         navigator.vibrate([
           40,
           30,
@@ -1694,7 +1531,6 @@ function update(dt) {
       player.height *
       0.50
     ) {
-
       car.passed =
         true;
 
@@ -1720,7 +1556,6 @@ function update(dt) {
         edge +
         34
       ) {
-
         nitro =
           Math.min(
             100,
@@ -1748,14 +1583,12 @@ function update(dt) {
     player.invincible >
     0
   ) {
-
     player.invincible -=
       dt;
   }
 
   player.speed =
     Math.min(
-
       154,
 
       player.speed +
@@ -1777,7 +1610,6 @@ function update(dt) {
     &&
     nitroActive <= 0
   ) {
-
     nitroState.textContent =
       "SWIPE UP";
 
@@ -1789,7 +1621,6 @@ function update(dt) {
     nitroActive <=
     0
   ) {
-
     nitroState.textContent =
       "BUILDING";
 
@@ -1802,9 +1633,7 @@ function update(dt) {
     distance <=
     18
   ) {
-
     finish(true);
-
     return;
   }
 
@@ -1812,9 +1641,7 @@ function update(dt) {
     distance >=
     520
   ) {
-
     finish(false);
-
     return;
   }
 
@@ -1822,7 +1649,6 @@ function update(dt) {
     distance <
     90
   ) {
-
     showStatus(
       "CLOSING IN!"
     );
@@ -1832,7 +1658,6 @@ function update(dt) {
     distance <
     45
   ) {
-
     showStatus(
       "STAY ON HIM!"
     );
@@ -1865,7 +1690,6 @@ function update(dt) {
     statusTimer >
     0
   ) {
-
     statusTimer -=
       dt;
 
@@ -1873,7 +1697,6 @@ function update(dt) {
       statusTimer <=
       0
     ) {
-
       chaseStatus.style.opacity =
         "0";
     }
@@ -1888,17 +1711,14 @@ function update(dt) {
 ===================================================== */
 
 function updateWeather(dt) {
-
   if (
     selectedEnvironment ===
     "rain"
   ) {
-
     for (
       const drop of
       rainDrops
     ) {
-
       drop.y +=
         drop.speed *
         dt;
@@ -1912,7 +1732,6 @@ function updateWeather(dt) {
         H +
         30
       ) {
-
         drop.y =
           -30;
 
@@ -1925,7 +1744,6 @@ function updateWeather(dt) {
         drop.x <
         -30
       ) {
-
         drop.x =
           W +
           30;
@@ -1937,12 +1755,10 @@ function updateWeather(dt) {
     selectedEnvironment ===
     "snow"
   ) {
-
     for (
       const flake of
       snowFlakes
     ) {
-
       flake.y +=
         flake.speed *
         dt;
@@ -1956,7 +1772,6 @@ function updateWeather(dt) {
         H +
         10
       ) {
-
         flake.y =
           -10;
 
@@ -1971,12 +1786,10 @@ function updateWeather(dt) {
     selectedEnvironment ===
     "desert"
   ) {
-
     for (
       const dust of
       dustParticles
     ) {
-
       dust.x +=
         dust.speed *
         dt;
@@ -1986,7 +1799,6 @@ function updateWeather(dt) {
         W +
         80
       ) {
-
         dust.x =
           -80;
 
@@ -2003,7 +1815,6 @@ function updateWeather(dt) {
 ===================================================== */
 
 function drawBackground() {
-
   const img =
     environmentImages[
       selectedEnvironment
@@ -2048,7 +1859,6 @@ function drawBackground() {
     img.naturalWidth <=
     0
   ) {
-
     return;
   }
 
@@ -2073,7 +1883,6 @@ function drawBackground() {
     imageRatio >
     frameRatio
   ) {
-
     drawHeight =
       frameHeight;
 
@@ -2082,7 +1891,6 @@ function drawBackground() {
       imageRatio;
 
   } else {
-
     drawWidth =
       frameWidth;
 
@@ -2155,7 +1963,6 @@ function drawBackground() {
 ===================================================== */
 
 function drawVehicle(car) {
-
   const img =
     vehicleImages[
       car.image
@@ -2168,7 +1975,6 @@ function drawVehicle(car) {
 
   const depth =
     Math.max(
-
       0,
 
       Math.min(
@@ -2216,7 +2022,6 @@ function drawVehicle(car) {
     2 ===
     0
   ) {
-
     ctx.globalAlpha =
       0.35;
   }
@@ -2251,7 +2056,6 @@ function drawVehicle(car) {
 ===================================================== */
 
 function drawPoliceGlow() {
-
   const flash =
     Math.floor(
       performance.now() /
@@ -2354,7 +2158,6 @@ function drawPoliceGlow() {
 ===================================================== */
 
 function drawNitro() {
-
   if (
     nitroActive <=
     0
@@ -2442,12 +2245,10 @@ function drawNitro() {
 ===================================================== */
 
 function drawWeather() {
-
   if (
     selectedEnvironment ===
     "rain"
   ) {
-
     ctx.save();
 
     ctx.strokeStyle =
@@ -2460,7 +2261,6 @@ function drawWeather() {
       const drop of
       rainDrops
     ) {
-
       ctx.beginPath();
 
       ctx.moveTo(
@@ -2486,7 +2286,6 @@ function drawWeather() {
     selectedEnvironment ===
     "snow"
   ) {
-
     ctx.save();
 
     ctx.fillStyle =
@@ -2496,7 +2295,6 @@ function drawWeather() {
       const flake of
       snowFlakes
     ) {
-
       ctx.beginPath();
 
       ctx.arc(
@@ -2519,7 +2317,6 @@ function drawWeather() {
     selectedEnvironment ===
     "desert"
   ) {
-
     ctx.save();
 
     ctx.strokeStyle =
@@ -2532,7 +2329,6 @@ function drawWeather() {
       const dust of
       dustParticles
     ) {
-
       ctx.beginPath();
 
       ctx.moveTo(
@@ -2558,7 +2354,6 @@ function drawWeather() {
     selectedEnvironment ===
     "tunnel"
   ) {
-
     const pulse =
       (
         Math.sin(
@@ -2590,12 +2385,10 @@ function drawWeather() {
 ===================================================== */
 
 function drawParticles() {
-
   for (
     const p of
     particles
   ) {
-
     ctx.globalAlpha =
       Math.min(
         1,
@@ -2623,7 +2416,6 @@ function drawParticles() {
 ===================================================== */
 
 function drawSuspectMarker() {
-
   const width =
     80;
 
@@ -2672,7 +2464,6 @@ function drawSuspectMarker() {
 ===================================================== */
 
 function drawVignette() {
-
   const gradient =
     ctx.createRadialGradient(
       W /
@@ -2726,7 +2517,6 @@ function drawVignette() {
 ===================================================== */
 
 function draw() {
-
   ctx.clearRect(
     0,
     0,
@@ -2740,7 +2530,6 @@ function draw() {
     const car of
     traffic
   ) {
-
     drawVehicle(
       car
     );
@@ -2772,7 +2561,6 @@ function draw() {
 ===================================================== */
 
 function gameLoop(time) {
-
   if (
     !running
   ) return;
@@ -2808,7 +2596,6 @@ function gameLoop(time) {
     shake >
     1
   ) {
-
     ctx.translate(
       (
         Math.random() -
