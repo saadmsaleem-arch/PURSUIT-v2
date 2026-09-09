@@ -205,7 +205,6 @@ envButtons.forEach(button => {
       Catch the suspect before they escape.
     `;
   });
-
 });
 
 soundToggle.addEventListener("click", () => {
@@ -296,25 +295,47 @@ let elapsed = 0;
 let score = 0;
 let nearMisses = 0;
 
+let combo = 0;
+let comboTimer = 0;
+
 let shake = 0;
 let statusTimer = 0;
 
 let spawnTimer = 0;
 let roadScroll = 0;
 
-let policeWorldY = 1000;
+/*
+  LONGER CHASE:
+  Bigger starting separation.
+*/
+
+let policeWorldY = 1150;
 let suspectWorldY = 650;
 
 /* =====================================================
    GAME BALANCE
 ===================================================== */
 
+/*
+  Traffic balance you already liked.
+*/
+
 const TRAFFIC_BASE_SCREEN_SPEED = 285;
 const TRAFFIC_RELATIVE_MULTIPLIER = 2.4;
 const TRAFFIC_MAX_SCREEN_SPEED = 430;
 
-const NITRO_DURATION = 2.8;
-const NITRO_SPEED_BONUS = 68;
+/*
+  Strong but not instant Nitro.
+*/
+
+const NITRO_DURATION = 2.7;
+const NITRO_SPEED_BONUS = 62;
+
+/*
+  Near-miss combo lasts this many seconds.
+*/
+
+const COMBO_WINDOW = 3.0;
 
 /* =====================================================
    WEATHER
@@ -455,7 +476,11 @@ function laneCenter(lane) {
 
 function resetGame() {
 
-  policeWorldY = 1000;
+  /*
+    LONGER CHASE starting positions.
+  */
+
+  policeWorldY = 1150;
   suspectWorldY = 650;
 
   player = {
@@ -475,8 +500,12 @@ function resetGame() {
     height:
       138,
 
+    /*
+      Smaller advantage than before.
+    */
+
     speed:
-      142,
+      138,
 
     invincible:
       0,
@@ -499,8 +528,12 @@ function resetGame() {
     height:
       103,
 
+    /*
+      Suspect is a little faster now.
+    */
+
     speed:
-      126,
+      129,
 
     targetLane:
       1,
@@ -522,12 +555,11 @@ function resetGame() {
   score = 0;
   nearMisses = 0;
 
+  combo = 0;
+  comboTimer = 0;
+
   shake = 0;
   statusTimer = 0;
-
-  /*
-    A little quicker than the very-light version.
-  */
 
   spawnTimer = 1.25;
 
@@ -537,7 +569,7 @@ function resetGame() {
     getDistance() + " m";
 
   speedValue.textContent =
-    "142 km/h";
+    "138 km/h";
 
   environmentBadge.textContent =
     environments[
@@ -557,7 +589,7 @@ function resetGame() {
   createWeatherParticles();
 
   /*
-    Start with only TWO cars.
+    Only two cars at the beginning.
   */
 
   createTrafficCar(
@@ -625,8 +657,8 @@ startBtn.addEventListener(
 /* =====================================================
    CONTROLS
 
-   NEW:
-   Swipe upward starting ANYWHERE while game is running.
+   Drag left/right = steer
+   Swipe up anywhere = Nitro
 ===================================================== */
 
 let pointerDown = false;
@@ -657,10 +689,6 @@ function steer(clientX) {
       )
     );
 }
-
-/*
-   Pointer can start anywhere on screen.
-*/
 
 window.addEventListener(
   "pointerdown",
@@ -695,10 +723,6 @@ window.addEventListener(
       !running
     ) return;
 
-    /*
-      Left/right movement still steers.
-    */
-
     steer(
       event.clientX
     );
@@ -728,13 +752,10 @@ window.addEventListener(
       performance.now() -
       gestureStartTime;
 
-    /*
-      Gesture must be mostly vertical and upward.
-    */
-
     const vertical =
       Math.abs(dy) >
-      Math.abs(dx) * 1.05;
+      Math.abs(dx) *
+      1.05;
 
     const swipeUp =
       dy < -45 &&
@@ -789,9 +810,7 @@ function activateNitro() {
   if (
     navigator.vibrate
   ) {
-
     navigator.vibrate(35);
-
   }
 }
 
@@ -836,7 +855,7 @@ function createTrafficCar(
   let speed;
 
   /*
-    Trucks stay rare.
+    Trucks remain rare.
   */
 
   if (roll < 0.06) {
@@ -927,9 +946,8 @@ function createTrafficCar(
 /* =====================================================
    TRAFFIC GROUPS
 
-   NEW BALANCE:
-   70% one car
-   30% two cars
+   70% single car
+   30% pair
 ===================================================== */
 
 function spawnTrafficGroup() {
@@ -940,10 +958,6 @@ function spawnTrafficGroup() {
     2,
     3
   ];
-
-  /*
-    Shuffle lanes.
-  */
 
   for (
     let i =
@@ -969,13 +983,6 @@ function spawnTrafficGroup() {
       lanes[i]
     ];
   }
-
-  /*
-    Slight increase in traffic.
-
-    70% single
-    30% pair
-  */
 
   const count =
     Math.random() <
@@ -1028,7 +1035,6 @@ function overlapScreen(
       : b.height * 0.74;
 
   return (
-
     Math.abs(
       a.x -
       b.x
@@ -1194,7 +1200,6 @@ function finish(win) {
   if (win) {
 
     message.innerHTML = `
-
       <strong>
         ${environments[selectedEnvironment].name}
       </strong>
@@ -1215,6 +1220,13 @@ function finish(win) {
 
       <br>
 
+      Best Combo:
+      <strong>
+        x${Math.max(1, combo)}
+      </strong>
+
+      <br>
+
       Time:
       <strong>
         ${elapsed.toFixed(1)} sec
@@ -1224,7 +1236,6 @@ function finish(win) {
   } else {
 
     message.innerHTML = `
-
       The suspect got away.
 
       <br><br>
@@ -1259,7 +1270,31 @@ function update(dt) {
   let policeSpeed =
     player.speed;
 
-  /* Nitro */
+  /* ===================================================
+     COMBO TIMER
+  =================================================== */
+
+  if (
+    comboTimer >
+    0
+  ) {
+
+    comboTimer -=
+      dt;
+
+    if (
+      comboTimer <=
+      0
+    ) {
+
+      combo =
+        0;
+    }
+  }
+
+  /* ===================================================
+     NITRO
+  =================================================== */
 
   if (
     nitroActive >
@@ -1282,7 +1317,9 @@ function update(dt) {
     }
   }
 
-  /* Chase movement */
+  /* ===================================================
+     CHASE MOVEMENT
+  =================================================== */
 
   suspectWorldY -=
     suspectSpeed *
@@ -1302,7 +1339,7 @@ function update(dt) {
       0.85,
 
       Math.min(
-        1.38,
+        1.35,
         policeSpeed /
         135
       )
@@ -1396,7 +1433,9 @@ function update(dt) {
       dt * 2.5
     );
 
-  /* Chase screen positions */
+  /* ===================================================
+     SCREEN POSITIONS
+  =================================================== */
 
   player.screenY =
     worldToScreenY(
@@ -1433,8 +1472,6 @@ function update(dt) {
 
   /* ===================================================
      TRAFFIC SPAWN
-
-     Slightly busier than previous version.
   =================================================== */
 
   spawnTimer -=
@@ -1446,7 +1483,7 @@ function update(dt) {
   ) {
 
     /*
-      Still stop new traffic when close.
+      No new traffic when very close to suspect.
     */
 
     if (
@@ -1460,11 +1497,6 @@ function update(dt) {
 
     let spawnDelay;
 
-    /*
-      First 10 sec:
-      little more traffic.
-    */
-
     if (
       elapsed <
       10
@@ -1475,11 +1507,6 @@ function update(dt) {
         Math.random() *
         0.30;
     }
-
-    /*
-      10–25 sec:
-      moderate.
-    */
 
     else if (
       elapsed <
@@ -1492,11 +1519,6 @@ function update(dt) {
         0.30;
     }
 
-    /*
-      Later:
-      busier but still playable.
-    */
-
     else {
 
       spawnDelay =
@@ -1504,10 +1526,6 @@ function update(dt) {
         Math.random() *
         0.25;
     }
-
-    /*
-      Give extra breathing room as you approach suspect.
-    */
 
     if (
       distance <
@@ -1523,9 +1541,9 @@ function update(dt) {
       environment.trafficRate;
   }
 
-  /* =====================================================
+  /* ===================================================
      TRAFFIC MOVEMENT
-  ===================================================== */
+  =================================================== */
 
   for (
     let i =
@@ -1594,7 +1612,9 @@ function update(dt) {
       continue;
     }
 
-    /* Collision */
+    /* =================================================
+       COLLISION
+    ================================================= */
 
     if (
       player.invincible <=
@@ -1610,13 +1630,17 @@ function update(dt) {
 
       player.speed =
         Math.max(
-          128,
+          126,
           player.speed -
-          10
+          9
         );
 
+      /*
+        Small distance penalty.
+      */
+
       policeWorldY +=
-        30;
+        32;
 
       player.invincible =
         1.20;
@@ -1628,8 +1652,18 @@ function update(dt) {
         Math.max(
           0,
           nitro -
-          8
+          10
         );
+
+      /*
+        Crash breaks the combo.
+      */
+
+      combo =
+        0;
+
+      comboTimer =
+        0;
 
       createSparks(
         player.x,
@@ -1641,7 +1675,7 @@ function update(dt) {
       );
 
       showStatus(
-        "HIT! KEEP GOING!"
+        "HIT! COMBO LOST"
       );
 
       if (
@@ -1656,7 +1690,9 @@ function update(dt) {
       }
     }
 
-    /* Near miss */
+    /* =================================================
+       NEAR MISS + COMBO
+    ================================================= */
 
     if (
       !car.passed
@@ -1697,25 +1733,65 @@ function update(dt) {
         40
       ) {
 
+        nearMisses++;
+
+        /*
+          Build combo.
+        */
+
+        combo =
+          Math.min(
+            5,
+            combo + 1
+          );
+
+        comboTimer =
+          COMBO_WINDOW;
+
+        /*
+          Bigger Nitro reward as combo grows.
+        */
+
+        const nitroReward =
+          24 +
+          combo * 6;
+
         nitro =
           Math.min(
             100,
             nitro +
-            40
+            nitroReward
           );
 
-        nearMisses++;
+        /*
+          Score scales with combo.
+        */
+
+        const comboScore =
+          200 *
+          combo;
 
         score +=
-          300;
+          comboScore;
 
         playSound(
           sounds.nearMiss
         );
 
-        showStatus(
-          "NEAR MISS +300"
-        );
+        if (
+          combo === 1
+        ) {
+
+          showStatus(
+            "NEAR MISS +200"
+          );
+
+        } else {
+
+          showStatus(
+            `NEAR MISS x${combo}  +${comboScore}`
+          );
+        }
       }
     }
   }
@@ -1729,15 +1805,25 @@ function update(dt) {
       dt;
   }
 
+  /* ===================================================
+     POLICE ACCELERATION
+
+     Much slower than before,
+     which makes chase last longer.
+  =================================================== */
+
   player.speed =
     Math.min(
-      162,
+      150,
+
       player.speed +
-      1.8 *
+      0.5 *
       dt
     );
 
-  /* Nitro UI */
+  /* ===================================================
+     NITRO UI
+  =================================================== */
 
   nitroFill.style.width =
     nitro +
@@ -1773,7 +1859,9 @@ function update(dt) {
     );
   }
 
-  /* Capture */
+  /* ===================================================
+     WIN / LOSE
+  =================================================== */
 
   if (
     distance <=
@@ -1785,11 +1873,9 @@ function update(dt) {
     return;
   }
 
-  /* Escape */
-
   if (
     distance >=
-    620
+    650
   ) {
 
     finish(false);
@@ -1825,7 +1911,7 @@ function update(dt) {
   score +=
     policeSpeed *
     dt *
-    0.55;
+    0.50;
 
   updateParticles(
     dt
@@ -2755,7 +2841,9 @@ function gameLoop(time) {
   lastTime =
     time;
 
-  update(dt);
+  update(
+    dt
+  );
 
   if (!running) return;
 
