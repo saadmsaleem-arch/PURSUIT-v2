@@ -14,7 +14,6 @@ function loadImage(store, name, file) {
 }
 
 /* Vehicles */
-
 loadImage(vehicleImages, "police", "police.png");
 loadImage(vehicleImages, "suspect", "suspect.png");
 loadImage(vehicleImages, "traffic1", "traffic1.png");
@@ -23,7 +22,6 @@ loadImage(vehicleImages, "traffic3", "traffic3.png");
 loadImage(vehicleImages, "truck", "truck.png");
 
 /* Environments */
-
 loadImage(environmentImages, "city", "city.jpg");
 loadImage(environmentImages, "highway", "highway.jpg");
 loadImage(environmentImages, "rain", "rain.jpg");
@@ -221,15 +219,10 @@ soundToggle.addEventListener("click", () => {
       : "🔇";
 
   if (!soundEnabled) {
-
     stopDrivingSounds();
-
   } else if (running) {
-
     startDrivingSounds();
-
   }
-
 });
 
 /* =====================================================
@@ -317,13 +310,10 @@ let suspectWorldY = 650;
 ===================================================== */
 
 const TRAFFIC_BASE_SCREEN_SPEED = 285;
-
 const TRAFFIC_RELATIVE_MULTIPLIER = 2.4;
-
 const TRAFFIC_MAX_SCREEN_SPEED = 430;
 
 const NITRO_DURATION = 2.8;
-
 const NITRO_SPEED_BONUS = 68;
 
 /* =====================================================
@@ -536,10 +526,10 @@ function resetGame() {
   statusTimer = 0;
 
   /*
-    Long opening before traffic.
+    A little quicker than the very-light version.
   */
 
-  spawnTimer = 1.6;
+  spawnTimer = 1.25;
 
   roadScroll = 0;
 
@@ -567,7 +557,7 @@ function resetGame() {
   createWeatherParticles();
 
   /*
-    Only TWO traffic cars at start.
+    Start with only TWO cars.
   */
 
   createTrafficCar(
@@ -634,13 +624,15 @@ startBtn.addEventListener(
 
 /* =====================================================
    CONTROLS
+
+   NEW:
+   Swipe upward starting ANYWHERE while game is running.
 ===================================================== */
 
 let pointerDown = false;
 
 let gestureStartX = 0;
 let gestureStartY = 0;
-
 let gestureStartTime = 0;
 
 function steer(clientX) {
@@ -666,7 +658,11 @@ function steer(clientX) {
     );
 }
 
-canvas.addEventListener(
+/*
+   Pointer can start anywhere on screen.
+*/
+
+window.addEventListener(
   "pointerdown",
   event => {
 
@@ -690,7 +686,7 @@ canvas.addEventListener(
   }
 );
 
-canvas.addEventListener(
+window.addEventListener(
   "pointermove",
   event => {
 
@@ -698,6 +694,10 @@ canvas.addEventListener(
       !pointerDown ||
       !running
     ) return;
+
+    /*
+      Left/right movement still steers.
+    */
 
     steer(
       event.clientX
@@ -728,20 +728,21 @@ window.addEventListener(
       performance.now() -
       gestureStartTime;
 
+    /*
+      Gesture must be mostly vertical and upward.
+    */
+
     const vertical =
       Math.abs(dy) >
-      Math.abs(dx) *
-      1.1;
+      Math.abs(dx) * 1.05;
 
     const swipeUp =
-      dy < -50 &&
+      dy < -45 &&
       vertical &&
-      duration < 700;
+      duration < 800;
 
     if (swipeUp) {
-
       activateNitro();
-
     }
   }
 );
@@ -835,7 +836,7 @@ function createTrafficCar(
   let speed;
 
   /*
-    Trucks very rare.
+    Trucks stay rare.
   */
 
   if (roll < 0.06) {
@@ -880,10 +881,6 @@ function createTrafficCar(
       Math.random() * 14;
   }
 
-  /*
-    Very slight lane variation.
-  */
-
   const jitter =
     (
       Math.random() -
@@ -927,10 +924,13 @@ function createTrafficCar(
   });
 }
 
-/*
-   Pick random lanes while ensuring
-   two cars don't spawn in the exact same lane.
-*/
+/* =====================================================
+   TRAFFIC GROUPS
+
+   NEW BALANCE:
+   70% one car
+   30% two cars
+===================================================== */
 
 function spawnTrafficGroup() {
 
@@ -942,7 +942,7 @@ function spawnTrafficGroup() {
   ];
 
   /*
-    Shuffle.
+    Shuffle lanes.
   */
 
   for (
@@ -971,13 +971,15 @@ function spawnTrafficGroup() {
   }
 
   /*
-    80% = ONE car
-    20% = TWO cars
+    Slight increase in traffic.
+
+    70% single
+    30% pair
   */
 
   const count =
     Math.random() <
-    0.80
+    0.70
       ? 1
       : 2;
 
@@ -998,8 +1000,6 @@ function spawnTrafficGroup() {
 
 /* =====================================================
    COLLISION
-
-   Forgiving arcade hitboxes.
 ===================================================== */
 
 function overlapScreen(
@@ -1432,7 +1432,9 @@ function update(dt) {
     getDistance();
 
   /* ===================================================
-     LIGHT TRAFFIC SYSTEM
+     TRAFFIC SPAWN
+
+     Slightly busier than previous version.
   =================================================== */
 
   spawnTimer -=
@@ -1444,7 +1446,7 @@ function update(dt) {
   ) {
 
     /*
-      NO new traffic once you're close.
+      Still stop new traffic when close.
     */
 
     if (
@@ -1459,8 +1461,8 @@ function update(dt) {
     let spawnDelay;
 
     /*
-      First 10 seconds:
-      very open.
+      First 10 sec:
+      little more traffic.
     */
 
     if (
@@ -1469,14 +1471,14 @@ function update(dt) {
     ) {
 
       spawnDelay =
-        1.40 +
+        1.15 +
         Math.random() *
-        0.40;
+        0.30;
     }
 
     /*
-      10–25 seconds:
-      moderate traffic.
+      10–25 sec:
+      moderate.
     */
 
     else if (
@@ -1485,27 +1487,26 @@ function update(dt) {
     ) {
 
       spawnDelay =
-        1.00 +
-        Math.random() *
-        0.40;
-    }
-
-    /*
-      Later:
-      still reasonable.
-    */
-
-    else {
-
-      spawnDelay =
-        0.80 +
+        0.85 +
         Math.random() *
         0.30;
     }
 
     /*
-      Approaching the suspect:
-      spread traffic even further.
+      Later:
+      busier but still playable.
+    */
+
+    else {
+
+      spawnDelay =
+        0.70 +
+        Math.random() *
+        0.25;
+    }
+
+    /*
+      Give extra breathing room as you approach suspect.
     */
 
     if (
@@ -1522,9 +1523,9 @@ function update(dt) {
       environment.trafficRate;
   }
 
-  /* ===================================================
+  /* =====================================================
      TRAFFIC MOVEMENT
-  =================================================== */
+  ===================================================== */
 
   for (
     let i =
@@ -1606,10 +1607,6 @@ function update(dt) {
         car
       )
     ) {
-
-      /*
-        Very recoverable collision.
-      */
 
       player.speed =
         Math.max(
@@ -1732,10 +1729,6 @@ function update(dt) {
       dt;
   }
 
-  /*
-    Police slowly accelerates.
-  */
-
   player.speed =
     Math.min(
       162,
@@ -1834,9 +1827,13 @@ function update(dt) {
     dt *
     0.55;
 
-  updateParticles(dt);
+  updateParticles(
+    dt
+  );
 
-  updateWeather(dt);
+  updateWeather(
+    dt
+  );
 
   distanceValue.textContent =
     distance +
