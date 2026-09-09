@@ -38,20 +38,19 @@ canvas {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 15px;
+  padding: 14px;
 }
 
 .hudBox {
-  min-width: 120px;
+  min-width: 118px;
   padding: 9px 13px;
-
   border-radius: 14px;
 
   background:
     linear-gradient(
       180deg,
-      rgba(17, 29, 43, 0.88),
-      rgba(4, 11, 18, 0.82)
+      rgba(17, 29, 43, 0.9),
+      rgba(4, 11, 18, 0.84)
     );
 
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -66,17 +65,41 @@ canvas {
 .hudLabel {
   font-size: 10px;
   letter-spacing: 1.5px;
-  opacity: 0.7;
+  opacity: 0.72;
   font-weight: 800;
 }
 
 .hudValue {
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 950;
 }
 
 #speedValue {
-  color: #39cfff;
+  color: #38cbff;
+}
+
+/* =========================
+   ENVIRONMENT BADGE
+========================= */
+
+#environmentBadge {
+  position: absolute;
+  top: 78px;
+  left: 14px;
+
+  padding: 6px 10px;
+  border-radius: 9px;
+
+  background: rgba(3, 10, 17, 0.66);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.13);
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.1px;
+
+  text-shadow: 0 2px 5px #000;
 }
 
 /* =========================
@@ -86,7 +109,7 @@ canvas {
 #chaseStatus {
   position: absolute;
 
-  top: 82px;
+  top: 84px;
   left: 50%;
 
   transform: translateX(-50%);
@@ -95,7 +118,8 @@ canvas {
 
   border-radius: 10px;
 
-  background: rgba(5, 11, 18, 0.8);
+  background:
+    rgba(5, 11, 18, 0.82);
 
   border:
     1px solid rgba(255, 255, 255, 0.15);
@@ -107,11 +131,12 @@ canvas {
 
   opacity: 0;
 
-  transition: opacity 0.15s;
+  transition:
+    opacity 0.15s;
 }
 
 /* =========================
-   NITRO
+   NITRO DISPLAY
 ========================= */
 
 #nitroUI {
@@ -122,40 +147,49 @@ canvas {
 
   bottom:
     calc(
-      20px + env(safe-area-inset-bottom)
+      18px + env(safe-area-inset-bottom)
     );
 
-  pointer-events: auto;
+  pointer-events: none;
 }
 
-#nitroTitle {
-  font-size: 12px;
+.nitroTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 6px;
+
+  font-size: 11px;
   font-weight: 950;
 
-  letter-spacing: 1.5px;
-
-  margin-bottom: 5px;
+  letter-spacing: 1.2px;
 
   text-shadow:
-    0 2px 8px black;
+    0 2px 7px black;
+}
+
+#nitroState {
+  font-size: 10px;
+  opacity: 0.68;
 }
 
 #nitroTrack {
-  height: 20px;
+  height: 18px;
 
-  border-radius: 20px;
+  border-radius: 999px;
 
   padding: 3px;
 
   background:
-    rgba(1, 6, 11, 0.78);
+    rgba(1, 6, 11, 0.76);
 
   border:
-    1px solid rgba(255, 255, 255, 0.28);
+    1px solid rgba(255, 255, 255, 0.26);
 
   box-shadow:
     0 7px 22px rgba(0, 0, 0, 0.45),
-    inset 0 0 8px rgba(0, 0, 0, 0.6);
+    inset 0 0 8px rgba(0, 0, 0, 0.62);
 }
 
 #nitroFill {
@@ -163,19 +197,34 @@ canvas {
 
   width: 0%;
 
-  border-radius: 20px;
+  border-radius: 999px;
 
   background:
     linear-gradient(
       90deg,
       #22d3ee,
-      #3489ff,
-      #7559ff,
-      #f349be
+      #318bff,
+      #705dff,
+      #f14ac1
     );
 
   box-shadow:
     0 0 14px rgba(60, 170, 255, 0.75);
+
+  transition:
+    width 0.08s linear;
+}
+
+#nitroUI.ready #nitroTrack {
+  box-shadow:
+    0 0 18px rgba(69, 208, 255, 0.75),
+    0 7px 22px rgba(0, 0, 0, 0.45),
+    inset 0 0 8px rgba(0, 0, 0, 0.62);
+}
+
+#nitroUI.ready #nitroState {
+  color: #6fe6ff;
+  opacity: 1;
 }
 
 #nitroHelp {
@@ -185,14 +234,14 @@ canvas {
 
   margin-top: 6px;
 
-  opacity: 0.65;
+  opacity: 0.72;
 
   text-shadow:
-    0 2px 6px black;
+    0 2px 6px #000;
 }
 
 /* =========================
-   START / RESULT OVERLAY
+   OVERLAY
 ========================= */
 
 #overlay {
@@ -204,41 +253,72 @@ canvas {
   align-items: center;
   justify-content: center;
 
-  padding: 24px;
+  padding: 22px;
 
   z-index: 10;
 
-  text-align: center;
   color: white;
+  text-align: center;
 
   background:
     radial-gradient(
-      circle at 50% 28%,
-      rgba(19, 71, 115, 0.52),
+      circle at 50% 24%,
+      rgba(21, 73, 118, 0.54),
       transparent 40%
     ),
-
     radial-gradient(
-      circle at 25% 70%,
-      rgba(255, 21, 55, 0.13),
-      transparent 32%
+      circle at 20% 72%,
+      rgba(255, 24, 57, 0.14),
+      transparent 28%
     ),
-
     radial-gradient(
-      circle at 75% 70%,
-      rgba(24, 100, 255, 0.16),
-      transparent 32%
+      circle at 80% 72%,
+      rgba(31, 99, 255, 0.17),
+      transparent 28%
     ),
-
     linear-gradient(
       180deg,
-      #08131f,
+      #07121d,
       #02060b
     );
 }
 
 .menu {
-  width: min(430px, 100%);
+  position: relative;
+
+  width:
+    min(
+      440px,
+      100%
+    );
+}
+
+.menuTop {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-bottom: 3px;
+}
+
+#soundToggle {
+  width: 44px;
+  height: 44px;
+
+  border: 1px solid rgba(255,255,255,.16);
+
+  border-radius: 12px;
+
+  background:
+    rgba(11, 22, 33, 0.78);
+
+  color: white;
+
+  font-size: 20px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.25);
 }
 
 #title {
@@ -246,9 +326,9 @@ canvas {
 
   font-size:
     clamp(
-      52px,
-      15vw,
-      82px
+      48px,
+      14vw,
+      78px
     );
 
   font-weight: 1000;
@@ -257,12 +337,14 @@ canvas {
 
   letter-spacing: -4px;
 
+  line-height: 0.95;
+
   background:
     linear-gradient(
       180deg,
       #ffffff,
-      #cdd8e2 65%,
-      #8796a5
+      #d7dfe7 60%,
+      #8291a0
     );
 
   -webkit-background-clip: text;
@@ -271,60 +353,154 @@ canvas {
 
   filter:
     drop-shadow(
-      -11px 0 15px rgba(255, 32, 56, 0.3)
+      -11px 0 15px rgba(255, 31, 56, 0.32)
     )
     drop-shadow(
-      11px 0 15px rgba(42, 106, 255, 0.4)
+      11px 0 15px rgba(42, 106, 255, 0.42)
     );
 }
 
 #subtitle {
-  margin-top: -3px;
-  margin-bottom: 22px;
+  margin-top: 6px;
+  margin-bottom: 17px;
 
-  font-size: 11px;
+  font-size: 10px;
 
-  letter-spacing: 5px;
+  letter-spacing: 4.5px;
 
   opacity: 0.72;
 }
 
 #message {
-  max-width: 370px;
+  max-width: 360px;
 
   margin:
-    0 auto 22px;
+    0 auto 15px;
 
-  line-height: 1.5;
+  line-height: 1.4;
 
-  font-size: 14px;
+  font-size: 13px;
 
   opacity: 0.82;
 }
 
-#startBtn {
-  width: 100%;
+/* =========================
+   ENVIRONMENT SELECTOR
+========================= */
 
-  padding: 17px;
+#environmentSelector {
+  display: grid;
 
-  border: none;
+  grid-template-columns:
+    repeat(3, 1fr);
 
-  border-radius: 18px;
+  gap: 9px;
+
+  margin-bottom: 17px;
+}
+
+.envButton {
+  appearance: none;
+
+  min-height: 82px;
+
+  padding: 10px 6px;
+
+  border:
+    1px solid rgba(255,255,255,.13);
+
+  border-radius: 14px;
 
   color: white;
 
   background:
     linear-gradient(
       180deg,
-      #2cdb60,
-      #0daa40
+      rgba(18, 32, 47, 0.88),
+      rgba(7, 16, 25, 0.92)
+    );
+
+  cursor: pointer;
+
+  box-shadow:
+    0 7px 20px rgba(0,0,0,.24),
+    inset 0 1px rgba(255,255,255,.06);
+
+  transition:
+    transform .12s,
+    border-color .12s,
+    box-shadow .12s,
+    background .12s;
+}
+
+.envButton:hover {
+  transform:
+    translateY(-2px);
+}
+
+.envButton.active {
+  border-color:
+    #36ccff;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(33, 107, 156, 0.9),
+      rgba(10, 40, 62, 0.94)
+    );
+
+  box-shadow:
+    0 0 21px rgba(54, 202, 255, 0.26),
+    inset 0 1px rgba(255,255,255,.15);
+}
+
+.envEmoji {
+  display: block;
+
+  font-size: 25px;
+
+  line-height: 1;
+
+  margin-bottom: 7px;
+}
+
+.envName {
+  display: block;
+
+  font-size: 9px;
+
+  font-weight: 950;
+
+  letter-spacing: .7px;
+}
+
+/* =========================
+   START BUTTON
+========================= */
+
+#startBtn {
+  width: 100%;
+
+  padding: 16px;
+
+  border: none;
+
+  border-radius: 17px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      180deg,
+      #27d95d,
+      #0ca940
     );
 
   box-shadow:
     0 13px 35px rgba(9, 201, 70, 0.25),
     inset 0 1px rgba(255, 255, 255, 0.3);
 
-  font-size: 20px;
+  font-size: 19px;
 
   font-weight: 1000;
 
@@ -332,14 +508,18 @@ canvas {
 }
 
 #brand {
-  margin-top: 20px;
+  margin-top: 18px;
 
-  font-size: 10px;
+  font-size: 9px;
 
   letter-spacing: 4px;
 
-  opacity: 0.43;
+  opacity: .42;
 }
+
+/* =========================
+   RESULTS
+========================= */
 
 .win {
   color: #4cff82 !important;
@@ -349,4 +529,44 @@ canvas {
 .lose {
   color: #ff4855 !important;
   -webkit-text-fill-color: #ff4855;
+}
+
+/* =========================
+   SMALLER PHONES
+========================= */
+
+@media (max-height: 740px) {
+
+  #overlay {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  #environmentSelector {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .envButton {
+    min-height: 66px;
+    padding: 7px 4px;
+  }
+
+  .envEmoji {
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+
+  #subtitle {
+    margin-bottom: 10px;
+  }
+
+  #message {
+    margin-bottom: 10px;
+  }
+
+  #brand {
+    margin-top: 10px;
+  }
+
 }
