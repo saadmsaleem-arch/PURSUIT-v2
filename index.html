@@ -18,16 +18,12 @@
 
   <title>PURSUIT — Syntax Arcade</title>
 
-  <!-- Connects to style.css -->
   <link rel="stylesheet" href="style.css">
 </head>
 
-
 <body>
 
-  <!-- GAME -->
   <canvas id="game"></canvas>
-
 
   <!-- HUD -->
   <div id="hud">
@@ -43,10 +39,9 @@
           class="hudValue"
           id="distanceValue"
         >
-          240 m
+          245 m
         </div>
       </div>
-
 
       <div class="hudBox">
         <div class="hudLabel">
@@ -63,66 +58,130 @@
 
     </div>
 
+    <div id="environmentBadge">
+      CITY NIGHT
+    </div>
 
     <div id="chaseStatus">
       NEAR MISS!
     </div>
 
-
+    <!-- Nitro is display-only now -->
     <div id="nitroUI">
 
-      <div id="nitroTitle">
-        NITRO
+      <div class="nitroTop">
+        <span>NITRO</span>
+
+        <span id="nitroState">
+          BUILDING
+        </span>
       </div>
 
       <div id="nitroTrack">
-
         <div id="nitroFill"></div>
-
       </div>
 
-
       <div id="nitroHelp">
-        DRAG TO STEER • TAP NITRO WHEN FULL
+        DRAG TO STEER • SWIPE UP TO BOOST
       </div>
 
     </div>
 
   </div>
 
-
-  <!-- START / RESULTS SCREEN -->
+  <!-- START / RESULTS OVERLAY -->
   <div id="overlay">
 
     <div class="menu">
+
+      <div class="menuTop">
+
+        <button
+          id="soundToggle"
+          type="button"
+          aria-label="Toggle sound"
+        >
+          🔊
+        </button>
+
+      </div>
 
       <h1 id="title">
         PURSUIT
       </h1>
 
-
       <div id="subtitle">
         CATCH THE CRIMINAL
       </div>
 
-
       <div id="message">
+        Choose your environment.
+      </div>
 
-        Your cruiser is faster than the suspect —
-        if you can get through traffic cleanly.
+      <div id="environmentSelector">
 
-        <br><br>
+        <button
+          class="envButton active"
+          data-env="city"
+          type="button"
+        >
+          <span class="envEmoji">🌃</span>
+          <span class="envName">CITY NIGHT</span>
+        </button>
 
-        Drag left and right to steer.
-        Near misses charge nitro.
+        <button
+          class="envButton"
+          data-env="highway"
+          type="button"
+        >
+          <span class="envEmoji">☀️</span>
+          <span class="envName">HIGHWAY</span>
+        </button>
+
+        <button
+          class="envButton"
+          data-env="rain"
+          type="button"
+        >
+          <span class="envEmoji">🌧️</span>
+          <span class="envName">RAIN</span>
+        </button>
+
+        <button
+          class="envButton"
+          data-env="snow"
+          type="button"
+        >
+          <span class="envEmoji">❄️</span>
+          <span class="envName">SNOW</span>
+        </button>
+
+        <button
+          class="envButton"
+          data-env="desert"
+          type="button"
+        >
+          <span class="envEmoji">🏜️</span>
+          <span class="envName">DESERT</span>
+        </button>
+
+        <button
+          class="envButton"
+          data-env="tunnel"
+          type="button"
+        >
+          <span class="envEmoji">🚇</span>
+          <span class="envName">TUNNEL</span>
+        </button>
 
       </div>
 
-
-      <button id="startBtn">
+      <button
+        id="startBtn"
+        type="button"
+      >
         START CHASE
       </button>
-
 
       <div id="brand">
         SYNTAX ARCADE
@@ -132,8 +191,6 @@
 
   </div>
 
-
-  <!-- Connects to game.js -->
   <script src="game.js"></script>
 
 </body>
