@@ -551,7 +551,7 @@ function resetGame() {
   createWeatherParticles();
 
   /*
-    Start with LOTS of traffic already visible / nearby.
+    Start with plenty of traffic already loaded.
   */
 
   for (
@@ -562,7 +562,7 @@ function resetGame() {
 
     spawnTraffic(
       -20 -
-      i * 70
+      i * 78
     );
 
   }
@@ -809,9 +809,6 @@ function showStatus(text) {
 
 /* =====================================================
    TRAFFIC SPAWN
-
-   IMPORTANT CHANGE:
-   Civilian traffic is NOT locked to lanes.
 ===================================================== */
 
 function spawnTraffic(
@@ -877,8 +874,7 @@ function spawnTraffic(
   }
 
   /*
-    Instead of exact lane centers,
-    cars can appear anywhere across the road.
+    Free placement across the road.
   */
 
   const sidePadding =
@@ -901,13 +897,12 @@ function spawnTraffic(
     );
 
   /*
-    Small bias toward center road so
-    we get more middle traffic.
+    Bias some traffic toward the middle.
   */
 
   if (
     Math.random() <
-    0.48
+    0.50
   ) {
 
     const center =
@@ -920,7 +915,7 @@ function spawnTraffic(
         0.5
       ) *
       road.width *
-      0.52;
+      0.56;
   }
 
   trafficX =
@@ -940,8 +935,7 @@ function spawnTraffic(
         260;
 
   /*
-    Only reject if another car is
-    ACTUALLY too close horizontally + vertically.
+    Allow busy traffic but prevent literal overlap.
   */
 
   const overlapRisk =
@@ -966,7 +960,7 @@ function spawnTraffic(
           car.width +
           width
         ) *
-        0.55
+        0.50
 
         &&
 
@@ -975,16 +969,11 @@ function spawnTraffic(
           car.height +
           height
         ) *
-        0.60
+        0.54
 
       );
 
     });
-
-  /*
-    During initial population, allow
-    another random attempt rather than simply failing.
-  */
 
   if (
     overlapRisk &&
@@ -1005,7 +994,7 @@ function spawnTraffic(
           minX
         );
 
-      const alternativeBlocked =
+      const blocked =
         traffic.some(car => {
 
           const horizontal =
@@ -1027,7 +1016,7 @@ function spawnTraffic(
               car.width +
               width
             ) *
-            0.55
+            0.50
 
             &&
 
@@ -1036,14 +1025,14 @@ function spawnTraffic(
               car.height +
               height
             ) *
-            0.60
+            0.54
 
           );
 
         });
 
       if (
-        !alternativeBlocked
+        !blocked
       ) {
 
         trafficX =
@@ -1525,15 +1514,11 @@ function update(dt) {
     0
   ) {
 
-    /*
-      Sometimes add TWO vehicles at once.
-    */
-
     spawnTraffic();
 
     if (
       Math.random() <
-      0.34
+      0.28
     ) {
 
       spawnTraffic(
@@ -1545,17 +1530,21 @@ function update(dt) {
 
     const trafficIntensity =
       Math.min(
-        1.55,
+        1.50,
         1 +
         elapsed /
-        70
+        75
       );
+
+    /*
+      Slightly more room between new traffic.
+    */
 
     spawnTimer =
       (
-        0.16 +
+        0.22 +
         Math.random() *
-        0.20
+        0.24
       )
       /
       (
@@ -1599,7 +1588,7 @@ function update(dt) {
     ) {
 
       trafficScreenSpeed -=
-        45;
+        40;
     }
 
     if (
@@ -1608,7 +1597,7 @@ function update(dt) {
     ) {
 
       trafficScreenSpeed +=
-        85;
+        75;
     }
 
     trafficScreenSpeed =
@@ -1620,10 +1609,6 @@ function update(dt) {
     car.screenY +=
       trafficScreenSpeed *
       dt;
-
-    /*
-      Remove once beyond screen.
-    */
 
     if (
       car.screenY >
@@ -1768,8 +1753,6 @@ function update(dt) {
       dt;
   }
 
-  /* Police acceleration */
-
   player.speed =
     Math.min(
 
@@ -1815,8 +1798,6 @@ function update(dt) {
     );
   }
 
-  /* Capture */
-
   if (
     distance <=
     18
@@ -1826,8 +1807,6 @@ function update(dt) {
 
     return;
   }
-
-  /* Escape */
 
   if (
     distance >=
