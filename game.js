@@ -1,8 +1,8 @@
 "use strict";
 
-/* =========================
+/* =====================================================
    ASSETS
-========================= */
+===================================================== */
 
 const vehicleImages = {};
 const environmentImages = {};
@@ -13,6 +13,7 @@ function loadImage(store, name, file) {
   store[name] = img;
 }
 
+/* Vehicles */
 loadImage(vehicleImages, "police", "police.png");
 loadImage(vehicleImages, "suspect", "suspect.png");
 loadImage(vehicleImages, "traffic1", "traffic1.png");
@@ -20,6 +21,7 @@ loadImage(vehicleImages, "traffic2", "traffic2.png");
 loadImage(vehicleImages, "traffic3", "traffic3.png");
 loadImage(vehicleImages, "truck", "truck.png");
 
+/* Environments */
 loadImage(environmentImages, "city", "city.jpg");
 loadImage(environmentImages, "highway", "highway.jpg");
 loadImage(environmentImages, "rain", "rain.jpg");
@@ -27,9 +29,10 @@ loadImage(environmentImages, "snow", "snow.jpg");
 loadImage(environmentImages, "desert", "desert.jpg");
 loadImage(environmentImages, "tunnel", "tunnel.jpg");
 
-/* =========================
+
+/* =====================================================
    SOUND
-========================= */
+===================================================== */
 
 const sounds = {
   siren: new Audio("siren.mp3"),
@@ -76,9 +79,10 @@ function stopDrivingSounds() {
   sounds.engine.pause();
 }
 
-/* =========================
+
+/* =====================================================
    ENVIRONMENTS
-========================= */
+===================================================== */
 
 const environments = {
   city: {
@@ -130,39 +134,25 @@ const environmentOrder = [
 let selectedEnvironment = "city";
 let activeEnvironment = "city";
 
-/* =========================
+
+/* =====================================================
    DOM
-========================= */
+===================================================== */
 
-const canvas =
-  document.getElementById("game");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-const ctx =
-  canvas.getContext("2d");
+const overlay = document.getElementById("overlay");
 
-const overlay =
-  document.getElementById("overlay");
+const title = document.getElementById("title");
+const subtitle = document.getElementById("subtitle");
+const message = document.getElementById("message");
 
-const title =
-  document.getElementById("title");
+const startBtn = document.getElementById("startBtn");
+const soundToggle = document.getElementById("soundToggle");
 
-const subtitle =
-  document.getElementById("subtitle");
-
-const message =
-  document.getElementById("message");
-
-const startBtn =
-  document.getElementById("startBtn");
-
-const soundToggle =
-  document.getElementById("soundToggle");
-
-const distanceValue =
-  document.getElementById("distanceValue");
-
-const speedValue =
-  document.getElementById("speedValue");
+const distanceValue = document.getElementById("distanceValue");
+const speedValue = document.getElementById("speedValue");
 
 const environmentBadge =
   document.getElementById("environmentBadge");
@@ -182,125 +172,104 @@ const nitroState =
 const envButtons =
   document.querySelectorAll(".envButton");
 
-/* =========================
-   MODE SELECTOR
-========================= */
+
+/* =====================================================
+   GAME MODE
+===================================================== */
 
 let gameMode = "quick";
+
+/*
+  Create mode buttons directly above START.
+*/
 
 const modeSelector =
   document.createElement("div");
 
-modeSelector.id =
-  "modeSelector";
+modeSelector.id = "modeSelector";
 
-modeSelector.style.display =
-  "flex";
-
-modeSelector.style.gap =
-  "10px";
-
-modeSelector.style.justifyContent =
-  "center";
-
-modeSelector.style.margin =
-  "14px 0";
+modeSelector.style.cssText = `
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  width:100%;
+  max-width:420px;
+  margin:14px auto;
+  gap:10px;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+  z-index:99999;
+`;
 
 modeSelector.innerHTML = `
-  <button
-    id="quickModeBtn"
-    type="button"
-  >
+  <button id="quickModeBtn" type="button">
     QUICK CHASE
   </button>
 
-  <button
-    id="longModeBtn"
-    type="button"
-  >
+  <button id="longModeBtn" type="button">
     LONG CHASE
   </button>
 `;
 
-if (
-  startBtn &&
-  startBtn.parentNode
-) {
-  startBtn.parentNode.insertBefore(
-    modeSelector,
-    startBtn
-  );
-}
+startBtn.insertAdjacentElement(
+  "beforebegin",
+  modeSelector
+);
 
 const quickModeBtn =
-  document.getElementById(
-    "quickModeBtn"
-  );
+  document.getElementById("quickModeBtn");
 
 const longModeBtn =
-  document.getElementById(
-    "longModeBtn"
+  document.getElementById("longModeBtn");
+
+function styleModeButton(button, active) {
+
+  button.style.cssText = `
+    display:block !important;
+    flex:1;
+    min-width:125px;
+    padding:12px 10px;
+    border-radius:12px;
+    border:2px solid ${
+      active ? "#30c8ff" : "rgba(255,255,255,.3)"
+    };
+    background:${
+      active
+        ? "rgba(25,120,180,.35)"
+        : "rgba(0,0,0,.50)"
+    };
+    color:white;
+    font-weight:900;
+    font-size:13px;
+    cursor:pointer;
+    letter-spacing:.5px;
+  `;
+}
+
+function updateModeButtons() {
+
+  styleModeButton(
+    quickModeBtn,
+    gameMode === "quick"
   );
 
-function styleModeButtons() {
-
-  [
-    quickModeBtn,
-    longModeBtn
-  ].forEach(btn => {
-
-    btn.style.border =
-      "1px solid rgba(255,255,255,.28)";
-
-    btn.style.borderRadius =
-      "10px";
-
-    btn.style.padding =
-      "10px 14px";
-
-    btn.style.fontWeight =
-      "900";
-
-    btn.style.cursor =
-      "pointer";
-
-    btn.style.background =
-      "rgba(0,0,0,.42)";
-
-    btn.style.color =
-      "#fff";
-  });
-
-  quickModeBtn.style.boxShadow =
-    gameMode === "quick"
-      ? "0 0 0 2px #2dc8ff inset"
-      : "none";
-
-  longModeBtn.style.boxShadow =
+  styleModeButton(
+    longModeBtn,
     gameMode === "long"
-      ? "0 0 0 2px #ff3b4f inset"
-      : "none";
+  );
 }
 
 function updateMenuMessage() {
 
-  if (
-    gameMode === "long"
-  ) {
+  if (gameMode === "long") {
 
     message.innerHTML = `
-      <strong>
-        LONG CHASE
-      </strong>
-
+      <strong>LONG CHASE</strong>
       <br>
-
-      Start in
-      ${environments[selectedEnvironment].name}.
-
+      Six environments • about 1 minute each
       <br>
-
-      All 6 environments • about 1 minute each • capture only at the very end.
+      Catch the suspect in the final showdown.
     `;
 
   } else {
@@ -309,9 +278,7 @@ function updateMenuMessage() {
       <strong>
         ${environments[selectedEnvironment].name}
       </strong>
-
       <br>
-
       Quick Chase • one environment.
     `;
   }
@@ -321,11 +288,9 @@ quickModeBtn.addEventListener(
   "click",
   () => {
 
-    gameMode =
-      "quick";
+    gameMode = "quick";
 
-    styleModeButtons();
-
+    updateModeButtons();
     updateMenuMessage();
   }
 );
@@ -334,20 +299,19 @@ longModeBtn.addEventListener(
   "click",
   () => {
 
-    gameMode =
-      "long";
+    gameMode = "long";
 
-    styleModeButtons();
-
+    updateModeButtons();
     updateMenuMessage();
   }
 );
 
-styleModeButtons();
+updateModeButtons();
 
-/* =========================
+
+/* =====================================================
    MENU
-========================= */
+===================================================== */
 
 envButtons.forEach(button => {
 
@@ -355,16 +319,11 @@ envButtons.forEach(button => {
     "click",
     () => {
 
-      envButtons.forEach(
-        btn =>
-          btn.classList.remove(
-            "active"
-          )
-      );
+      envButtons.forEach(btn => {
+        btn.classList.remove("active");
+      });
 
-      button.classList.add(
-        "active"
-      );
+      button.classList.add("active");
 
       selectedEnvironment =
         button.dataset.env;
@@ -382,9 +341,7 @@ soundToggle.addEventListener(
       !soundEnabled;
 
     soundToggle.textContent =
-      soundEnabled
-        ? "🔊"
-        : "🔇";
+      soundEnabled ? "🔊" : "🔇";
 
     if (!soundEnabled) {
 
@@ -397,9 +354,10 @@ soundToggle.addEventListener(
   }
 );
 
-/* =========================
+
+/* =====================================================
    SCREEN
-========================= */
+===================================================== */
 
 let W = 0;
 let H = 0;
@@ -407,28 +365,19 @@ let DPR = 1;
 
 function resize() {
 
-  DPR =
-    Math.min(
-      window.devicePixelRatio ||
-      1,
-      2
-    );
+  DPR = Math.min(
+    window.devicePixelRatio || 1,
+    2
+  );
 
-  W =
-    window.innerWidth;
-
-  H =
-    window.innerHeight;
+  W = window.innerWidth;
+  H = window.innerHeight;
 
   canvas.width =
-    Math.round(
-      W * DPR
-    );
+    Math.round(W * DPR);
 
   canvas.height =
-    Math.round(
-      H * DPR
-    );
+    Math.round(H * DPR);
 
   canvas.style.width =
     W + "px";
@@ -453,9 +402,10 @@ window.addEventListener(
 
 resize();
 
-/* =========================
+
+/* =====================================================
    GAME STATE
-========================= */
+===================================================== */
 
 let running = false;
 let lastTime = 0;
@@ -487,37 +437,59 @@ let roadScroll = 0;
 let policeWorldY = 1100;
 let suspectWorldY = 650;
 
-/* =========================
-   CHASE RULES
-========================= */
 
-const QUICK_MIN_CHASE_TIME =
-  30;
+/* =====================================================
+   CHASE LENGTH / LONG MODE
+===================================================== */
 
 /*
-  LONG CHASE:
-  every environment lasts 60 sec.
+  Quick Chase cannot finish before 30 sec.
 */
 
-const LONG_STAGE_DURATION =
-  60;
+const QUICK_MIN_CHASE_TIME = 30;
+
 
 /*
-  At 55 sec the suspect starts
-  pulling away and talking.
+  Each Long Chase environment lasts ONE MINUTE.
 */
 
-const LONG_ESCAPE_WARNING_TIME =
-  55;
+const LONG_STAGE_DURATION = 60;
+
+
+/*
+  Taunt begins here.
+*/
+
+const TAUNT_TIME = 52;
+
+
+/*
+  Escape/transition acceleration begins here.
+*/
+
+const ESCAPE_TIME = 55;
+
+
+/*
+  Strong cinematic transition begins.
+*/
+
+const CINEMATIC_TIME = 57;
+
+
+/*
+  Full environment switch at 60.
+*/
+
+let stageElapsed = 0;
 
 let environmentSequence = [];
 
 let environmentStage = 0;
 
-let stageElapsed = 0;
+let stageEscapeStarted = false;
 
-let stageEscapeStarted =
-  false;
+let transitionActive = false;
 
 let transitionFlash = 0;
 
@@ -525,31 +497,33 @@ let transitionText = "";
 
 let transitionTextTimer = 0;
 
-/* =========================
-   BALANCE
-========================= */
+let transitionCardTimer = 0;
 
-const TRAFFIC_BASE_SCREEN_SPEED =
-  285;
+let transitionCardTitle = "";
 
-const TRAFFIC_RELATIVE_MULTIPLIER =
-  2.4;
+let transitionCardSubtitle = "";
 
-const TRAFFIC_MAX_SCREEN_SPEED =
-  430;
 
-const NITRO_DURATION =
-  2.7;
+/* =====================================================
+   GAME BALANCE
+===================================================== */
 
-const NITRO_SPEED_BONUS =
-  38;
+const TRAFFIC_BASE_SCREEN_SPEED = 285;
 
-const COMBO_WINDOW =
-  3.0;
+const TRAFFIC_RELATIVE_MULTIPLIER = 2.4;
 
-/* =========================
+const TRAFFIC_MAX_SCREEN_SPEED = 430;
+
+const NITRO_DURATION = 2.7;
+
+const NITRO_SPEED_BONUS = 38;
+
+const COMBO_WINDOW = 3.0;
+
+
+/* =====================================================
    WEATHER
-========================= */
+===================================================== */
 
 let rainDrops = [];
 let snowFlakes = [];
@@ -568,16 +542,11 @@ function createWeatherParticles() {
   ) {
 
     rainDrops.push({
-      x:
-        Math.random() * W,
-
-      y:
-        Math.random() * H,
-
+      x: Math.random() * W,
+      y: Math.random() * H,
       speed:
         650 +
         Math.random() * 450,
-
       length:
         18 +
         Math.random() * 25
@@ -591,20 +560,14 @@ function createWeatherParticles() {
   ) {
 
     snowFlakes.push({
-      x:
-        Math.random() * W,
-
-      y:
-        Math.random() * H,
-
+      x: Math.random() * W,
+      y: Math.random() * H,
       speed:
         45 +
         Math.random() * 90,
-
       drift:
         -20 +
         Math.random() * 40,
-
       size:
         1 +
         Math.random() * 3
@@ -618,16 +581,11 @@ function createWeatherParticles() {
   ) {
 
     dustParticles.push({
-      x:
-        Math.random() * W,
-
-      y:
-        Math.random() * H,
-
+      x: Math.random() * W,
+      y: Math.random() * H,
       speed:
         80 +
         Math.random() * 130,
-
       length:
         30 +
         Math.random() * 60
@@ -635,15 +593,14 @@ function createWeatherParticles() {
   }
 }
 
-/* =========================
+
+/* =====================================================
    ROAD
-========================= */
+===================================================== */
 
 function backgroundFrameWidth() {
 
-  if (
-    W > H
-  ) {
+  if (W > H) {
 
     return Math.min(
       W * 0.48,
@@ -674,8 +631,7 @@ function roadInfo() {
 
     width,
 
-    lanes:
-      4
+    lanes: 4
   };
 }
 
@@ -695,9 +651,10 @@ function laneCenter(lane) {
   );
 }
 
-/* =========================
+
+/* =====================================================
    ENVIRONMENT SEQUENCE
-========================= */
+===================================================== */
 
 function buildEnvironmentSequence() {
 
@@ -706,26 +663,21 @@ function buildEnvironmentSequence() {
       selectedEnvironment
     );
 
-  if (
-    gameMode ===
-    "long"
-  ) {
+  if (gameMode === "long") {
 
-    environmentSequence =
-      [];
+    environmentSequence = [];
 
     for (
-      let offset = 0;
-      offset <
-      environmentOrder.length;
-      offset++
+      let i = 0;
+      i < environmentOrder.length;
+      i++
     ) {
 
       environmentSequence.push(
         environmentOrder[
           (
             startIndex +
-            offset
+            i
           ) %
           environmentOrder.length
         ]
@@ -740,18 +692,22 @@ function buildEnvironmentSequence() {
       ];
   }
 
+  environmentStage = 0;
+
   activeEnvironment =
     environmentSequence[0];
 
-  environmentStage =
-    0;
+  stageElapsed = 0;
 
-  stageElapsed =
-    0;
+  stageEscapeStarted = false;
 
-  stageEscapeStarted =
-    false;
+  transitionActive = false;
 }
+
+
+/* =====================================================
+   TAUNTS
+===================================================== */
 
 function getEnvironmentTaunt(
   nextEnvironment
@@ -763,106 +719,111 @@ function getEnvironmentTaunt(
       "CAN'T CATCH ME THAT FAST! LET'S SEE HOW YOU DO IN THE SNOW!",
 
     rain:
-      "CAN'T CATCH ME THAT FAST! CAN YOU KEEP UP IN THE RAIN?",
+      "STILL WITH ME? LET'S SEE IF YOU CAN KEEP UP IN THE RAIN!",
 
     tunnel:
-      "CAN'T CATCH ME THAT FAST! TRY CATCHING ME IN THE TUNNEL!",
+      "NOT BAD! NOW TRY CATCHING ME IN THE TUNNEL!",
 
     desert:
-      "CAN'T CATCH ME THAT FAST! LET'S SEE YOU HANDLE THE DESERT!",
+      "YOU'RE STILL HERE? LET'S SEE YOU HANDLE THE DESERT!",
 
     highway:
-      "CAN'T CATCH ME THAT FAST! LET'S OPEN THIS THING UP!",
+      "LET'S OPEN THIS THING UP! KEEP UP ON THE HIGHWAY!",
 
     city:
-      "CAN'T CATCH ME THAT FAST! TRY TO KEEP UP IN THE CITY!"
+      "BACK TO THE CITY! TRY TO STAY ON MY TAIL!"
   };
 
   return (
-    taunts[
-      nextEnvironment
-    ] ||
+    taunts[nextEnvironment] ||
     "CAN'T CATCH ME THAT FAST!"
   );
 }
 
-function beginStageEscape() {
 
-  if (
-    stageEscapeStarted
-  ) return;
+/* =====================================================
+   TRANSITION START
+===================================================== */
 
-  stageEscapeStarted =
-    true;
+function startEscapeSequence() {
+
+  if (stageEscapeStarted) return;
+
+  stageEscapeStarted = true;
 
   const nextEnvironment =
     environmentSequence[
-      environmentStage +
-      1
+      environmentStage + 1
     ];
 
-  transitionText =
-    nextEnvironment
-      ?
-      getEnvironmentTaunt(
-        nextEnvironment
-      )
-      :
-      "YOU MADE IT THIS FAR... NOW CATCH ME!";
+  if (!nextEnvironment) return;
 
-  transitionTextTimer =
-    5.5;
+  transitionText =
+    getEnvironmentTaunt(
+      nextEnvironment
+    );
+
+  transitionTextTimer = 7;
 
   showStatus(
     "SUSPECT IS MAKING A BREAK FOR IT!"
   );
 }
 
-function changeEnvironment(
-  stage
-) {
 
-  if (
-    stage <=
-    environmentStage ||
-    !environmentSequence[
-      stage
-    ]
-  ) {
-    return;
-  }
+/* =====================================================
+   CHANGE ENVIRONMENT
+===================================================== */
 
-  environmentStage =
-    stage;
+function changeEnvironment(stage) {
+
+  const nextEnvironment =
+    environmentSequence[stage];
+
+  if (!nextEnvironment) return;
+
+  environmentStage = stage;
 
   activeEnvironment =
-    environmentSequence[
-      stage
-    ];
+    nextEnvironment;
 
-  stageElapsed =
-    0;
+  stageElapsed = 0;
 
-  stageEscapeStarted =
-    false;
+  stageEscapeStarted = false;
 
-  transitionFlash =
-    1;
+  transitionActive = false;
 
-  traffic =
-    [];
-
-  spawnTimer =
-    1.1;
+  transitionFlash = 1;
 
   /*
-    Suspect escapes and gets
-    a fresh lead.
+    Fresh lead.
   */
 
   policeWorldY =
-    suspectWorldY +
-    430;
+    suspectWorldY + 430;
+
+  /*
+    Fresh traffic.
+  */
+
+  traffic = [];
+
+  spawnTimer = 1;
+
+  /*
+    Big transition card.
+  */
+
+  transitionCardTitle =
+    environments[
+      activeEnvironment
+    ].name;
+
+  transitionCardSubtitle =
+    `STAGE ${environmentStage + 1} OF ${environmentSequence.length}`;
+
+  transitionCardTimer =
+    2.1;
 
   environmentBadge.textContent =
     `${environments[activeEnvironment].name} • ${environmentStage + 1}/${environmentSequence.length}`;
@@ -870,17 +831,15 @@ function changeEnvironment(
   createWeatherParticles();
 }
 
-/* =========================
+
+/* =====================================================
    RESET
-========================= */
+===================================================== */
 
 function resetGame() {
 
-  policeWorldY =
-    1100;
-
-  suspectWorldY =
-    650;
+  policeWorldY = 1100;
+  suspectWorldY = 650;
 
   buildEnvironmentSequence();
 
@@ -938,78 +897,60 @@ function resetGame() {
       "suspect"
   };
 
-  traffic =
-    [];
+  traffic = [];
+  particles = [];
 
-  particles =
-    [];
+  nitro = 0;
+  nitroActive = 0;
 
-  nitro =
-    0;
+  elapsed = 0;
 
-  nitroActive =
-    0;
+  score = 0;
+  nearMisses = 0;
 
-  elapsed =
-    0;
+  combo = 0;
+  bestCombo = 0;
+  comboTimer = 0;
 
-  score =
-    0;
+  shake = 0;
+  statusTimer = 0;
 
-  nearMisses =
-    0;
+  spawnTimer = 1.25;
 
-  combo =
-    0;
+  roadScroll = 0;
 
-  bestCombo =
-    0;
+  stageElapsed = 0;
 
-  comboTimer =
-    0;
+  stageEscapeStarted = false;
 
-  shake =
-    0;
+  transitionActive = false;
 
-  statusTimer =
-    0;
+  transitionFlash = 0;
 
-  spawnTimer =
-    1.25;
+  transitionText = "";
 
-  roadScroll =
-    0;
+  transitionTextTimer = 0;
 
-  stageElapsed =
-    0;
-
-  stageEscapeStarted =
-    false;
-
-  transitionFlash =
-    0;
-
-  transitionText =
-    "";
-
-  transitionTextTimer =
-    0;
+  transitionCardTimer = 0;
 
   distanceValue.textContent =
-    getDistance() +
-    " m";
+    getDistance() + " m";
 
   speedValue.textContent =
     "136 km/h";
 
-  environmentBadge.textContent =
-    gameMode === "long"
-      ?
-      `${environments[activeEnvironment].name} • 1/${environmentSequence.length}`
-      :
+  if (gameMode === "long") {
+
+    environmentBadge.textContent =
+      `${environments[activeEnvironment].name} • 1/${environmentSequence.length}`;
+
+  } else {
+
+    environmentBadge.textContent =
       environments[
         activeEnvironment
       ].name;
+  }
 
   nitroFill.style.width =
     "0%";
@@ -1034,6 +975,11 @@ function resetGame() {
   );
 }
 
+
+/* =====================================================
+   DISTANCE
+===================================================== */
+
 function getDistance() {
 
   return Math.max(
@@ -1049,22 +995,21 @@ function getDistance() {
   );
 }
 
-/* =========================
+
+/* =====================================================
    START
-========================= */
+===================================================== */
 
 function startGame() {
 
   resetGame();
 
-  title.className =
-    "";
+  title.className = "";
 
   overlay.style.display =
     "none";
 
-  running =
-    true;
+  running = true;
 
   lastTime =
     performance.now();
@@ -1081,28 +1026,18 @@ startBtn.addEventListener(
   startGame
 );
 
-/* =========================
+
+/* =====================================================
    CONTROLS
+===================================================== */
 
-   Drag = steer
-   Swipe up anywhere = Nitro
-========================= */
+let pointerDown = false;
 
-let pointerDown =
-  false;
+let gestureStartX = 0;
+let gestureStartY = 0;
+let gestureStartTime = 0;
 
-let gestureStartX =
-  0;
-
-let gestureStartY =
-  0;
-
-let gestureStartTime =
-  0;
-
-function steer(
-  clientX
-) {
+function steer(clientX) {
 
   if (!running) return;
 
@@ -1131,8 +1066,7 @@ window.addEventListener(
 
     if (!running) return;
 
-    pointerDown =
-      true;
+    pointerDown = true;
 
     gestureStartX =
       event.clientX;
@@ -1168,12 +1102,9 @@ window.addEventListener(
   "pointerup",
   event => {
 
-    if (
-      !pointerDown
-    ) return;
+    if (!pointerDown) return;
 
-    pointerDown =
-      false;
+    pointerDown = false;
 
     if (!running) return;
 
@@ -1199,26 +1130,23 @@ window.addEventListener(
       vertical &&
       duration < 800;
 
-    if (
-      swipeUp
-    ) {
+    if (swipeUp) {
 
       activateNitro();
     }
   }
 );
 
-/* =========================
+
+/* =====================================================
    NITRO
-========================= */
+===================================================== */
 
 function activateNitro() {
 
   if (!running) return;
 
-  if (
-    nitro < 100
-  ) {
+  if (nitro < 100) {
 
     showStatus(
       "NITRO NOT READY"
@@ -1227,8 +1155,7 @@ function activateNitro() {
     return;
   }
 
-  nitro =
-    0;
+  nitro = 0;
 
   nitroActive =
     NITRO_DURATION;
@@ -1248,12 +1175,9 @@ function activateNitro() {
     "NITRO BOOST!"
   );
 
-  shake =
-    6;
+  shake = 6;
 
-  if (
-    navigator.vibrate
-  ) {
+  if (navigator.vibrate) {
 
     navigator.vibrate(
       35
@@ -1261,9 +1185,12 @@ function activateNitro() {
   }
 }
 
-function showStatus(
-  text
-) {
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+function showStatus(text) {
 
   chaseStatus.textContent =
     text;
@@ -1271,13 +1198,13 @@ function showStatus(
   chaseStatus.style.opacity =
     "1";
 
-  statusTimer =
-    0.8;
+  statusTimer = 0.8;
 }
 
-/* =========================
+
+/* =====================================================
    TRAFFIC
-========================= */
+===================================================== */
 
 function createTrafficCar(
   lane,
@@ -1299,32 +1226,24 @@ function createTrafficCar(
   let height;
   let speed;
 
-  if (
-    roll < 0.06
-  ) {
+  if (roll < 0.06) {
 
-    image =
-      "truck";
+    image = "truck";
 
-    width =
-      66;
-
-    height =
-      140;
+    width = 66;
+    height = 140;
 
     speed =
       96 +
-      Math.random() *
-      9;
+      Math.random() * 9;
 
   } else {
 
-    const choices =
-      [
-        "traffic1",
-        "traffic2",
-        "traffic3"
-      ];
+    const choices = [
+      "traffic1",
+      "traffic2",
+      "traffic3"
+    ];
 
     image =
       choices[
@@ -1334,16 +1253,12 @@ function createTrafficCar(
         )
       ];
 
-    width =
-      49;
-
-    height =
-      92;
+    width = 49;
+    height = 92;
 
     speed =
       105 +
-      Math.random() *
-      14;
+      Math.random() * 14;
   }
 
   const jitter =
@@ -1354,23 +1269,22 @@ function createTrafficCar(
     laneWidth *
     0.10;
 
-  const minX =
-    road.left +
-    width *
-    0.55;
-
-  const maxX =
-    road.right -
-    width *
-    0.55;
-
   let x =
     laneCenter(lane) +
     jitter;
 
+  const minX =
+    road.left +
+    width * 0.55;
+
+  const maxX =
+    road.right -
+    width * 0.55;
+
   x =
     Math.max(
       minX,
+
       Math.min(
         maxX,
         x
@@ -1385,20 +1299,19 @@ function createTrafficCar(
     height,
     speed,
     image,
-    passed:
-      false
+    passed: false
   });
 }
 
+
 function spawnTrafficGroup() {
 
-  const lanes =
-    [
-      0,
-      1,
-      2,
-      3
-    ];
+  const lanes = [
+    0,
+    1,
+    2,
+    3
+  ];
 
   for (
     let i =
@@ -1426,17 +1339,14 @@ function spawnTrafficGroup() {
   }
 
   /*
-    70% single,
+    70% single car.
     30% pair.
   */
 
   const count =
-    Math.random() <
-    0.70
-      ?
-      1
-      :
-      2;
+    Math.random() < 0.70
+      ? 1
+      : 2;
 
   for (
     let i = 0;
@@ -1448,58 +1358,40 @@ function spawnTrafficGroup() {
       lanes[i],
 
       -80 -
-      Math.random() *
-      50
+      Math.random() * 50
     );
   }
 }
 
-function overlapScreen(
-  a,
-  b
-) {
+
+/* =====================================================
+   COLLISION
+===================================================== */
+
+function overlapScreen(a, b) {
 
   const aHitWidth =
-    a.image ===
-    "police"
-      ?
-      a.width *
-      0.56
-      :
-      a.width *
-      0.70;
+    a.image === "police"
+      ? a.width * 0.56
+      : a.width * 0.70;
 
   const bHitWidth =
-    b.image ===
-    "police"
-      ?
-      b.width *
-      0.56
-      :
-      b.width *
-      0.70;
+    b.image === "police"
+      ? b.width * 0.56
+      : b.width * 0.70;
 
   const aHitHeight =
-    a.image ===
-    "police"
-      ?
-      a.height *
-      0.64
-      :
-      a.height *
-      0.74;
+    a.image === "police"
+      ? a.height * 0.64
+      : a.height * 0.74;
 
   const bHitHeight =
-    b.image ===
-    "police"
-      ?
-      b.height *
-      0.64
-      :
-      b.height *
-      0.74;
+    b.image === "police"
+      ? b.height * 0.64
+      : b.height * 0.74;
 
   return (
+
     Math.abs(
       a.x -
       b.x
@@ -1507,8 +1399,7 @@ function overlapScreen(
     (
       aHitWidth +
       bHitWidth
-    ) /
-    2
+    ) / 2
 
     &&
 
@@ -1519,19 +1410,16 @@ function overlapScreen(
     (
       aHitHeight +
       bHitHeight
-    ) /
-    2
+    ) / 2
   );
 }
 
-/* =========================
-   PARTICLES
-========================= */
 
-function createSparks(
-  x,
-  y
-) {
+/* =====================================================
+   PARTICLES
+===================================================== */
+
+function createSparks(x, y) {
 
   for (
     let i = 0;
@@ -1548,24 +1436,19 @@ function createSparks(
         (
           Math.random() -
           0.5
-        ) *
-        180,
+        ) * 180,
 
       vy:
-        Math.random() *
-        170,
+        Math.random() * 170,
 
       life:
         0.4 +
-        Math.random() *
-        0.35
+        Math.random() * 0.35
     });
   }
 }
 
-function updateParticles(
-  dt
-) {
+function updateParticles(dt) {
 
   for (
     let i =
@@ -1580,20 +1463,14 @@ function updateParticles(
       particles[i];
 
     p.x +=
-      p.vx *
-      dt;
+      p.vx * dt;
 
     p.y +=
-      p.vy *
-      dt;
+      p.vy * dt;
 
-    p.life -=
-      dt;
+    p.life -= dt;
 
-    if (
-      p.life <=
-      0
-    ) {
+    if (p.life <= 0) {
 
       particles.splice(
         i,
@@ -1603,45 +1480,40 @@ function updateParticles(
   }
 }
 
-function worldToScreenY(
-  worldY
-) {
+
+/* =====================================================
+   CAMERA
+===================================================== */
+
+function worldToScreenY(worldY) {
 
   const midpoint =
     (
       policeWorldY +
       suspectWorldY
-    ) /
-    2;
+    ) / 2;
 
   return (
-    H *
-    0.50
-    +
+    H * 0.50 +
     (
       worldY -
       midpoint
-    ) *
-    0.78
+    ) * 0.78
   );
 }
 
-/* =========================
+
+/* =====================================================
    FINISH
-========================= */
+===================================================== */
 
-function finish(
-  win
-) {
+function finish(win) {
 
-  running =
-    false;
+  running = false;
 
   stopDrivingSounds();
 
-  if (
-    win
-  ) {
+  if (win) {
 
     playSound(
       sounds.capture
@@ -1653,39 +1525,29 @@ function finish(
 
   title.className =
     win
-      ?
-      "win"
-      :
-      "lose";
+      ? "win"
+      : "lose";
 
   title.textContent =
     win
-      ?
-      "CAPTURED!"
-      :
-      "ESCAPED";
+      ? "CAPTURED!"
+      : "ESCAPED";
 
   subtitle.textContent =
     win
-      ?
-      "MISSION COMPLETE"
-      :
-      "CHASE FAILED";
+      ? "MISSION COMPLETE"
+      : "CHASE FAILED";
 
-  if (
-    win
-  ) {
+  if (win) {
 
     message.innerHTML = `
       <strong>
         ${
           gameMode === "long"
-            ?
-            "LONG CHASE COMPLETE"
-            :
-            environments[
-              activeEnvironment
-            ].name
+            ? "LONG CHASE COMPLETE"
+            : environments[
+                activeEnvironment
+              ].name
         }
       </strong>
 
@@ -1731,99 +1593,142 @@ function finish(
 
   startBtn.textContent =
     win
-      ?
-      "NEXT CHASE"
-      :
-      "TRY AGAIN";
+      ? "NEXT CHASE"
+      : "TRY AGAIN";
+
+  updateModeButtons();
 }
 
-/* =========================
+
+/* =====================================================
    UPDATE
-========================= */
+===================================================== */
 
-function update(
-  dt
-) {
+function update(dt) {
 
-  elapsed +=
-    dt;
+  elapsed += dt;
 
-  stageElapsed +=
-    dt;
+  stageElapsed += dt;
 
   const isLong =
-    gameMode ===
-    "long";
+    gameMode === "long";
 
   const isFinalEnvironment =
     environmentStage ===
-    environmentSequence.length -
-    1;
+    environmentSequence.length - 1;
 
-  /* ======================
-     LONG CHASE PROGRESSION
-  ====================== */
 
-  if (
-    isLong
-  ) {
+  /* ===================================================
+     LONG CHASE EVENTS
+  =================================================== */
+
+  if (isLong) {
 
     /*
-      At 55 seconds:
-      suspect starts escaping
-      and taunts the player.
+      52 seconds:
+      taunt appears.
     */
 
     if (
       !isFinalEnvironment &&
-      stageElapsed >=
-      LONG_ESCAPE_WARNING_TIME &&
+      stageElapsed >= TAUNT_TIME &&
+      transitionTextTimer <= 0
+    ) {
+
+      const nextEnvironment =
+        environmentSequence[
+          environmentStage + 1
+        ];
+
+      transitionText =
+        getEnvironmentTaunt(
+          nextEnvironment
+        );
+
+      transitionTextTimer =
+        8;
+    }
+
+
+    /*
+      55 seconds:
+      escape starts.
+    */
+
+    if (
+      !isFinalEnvironment &&
+      stageElapsed >= ESCAPE_TIME &&
       !stageEscapeStarted
     ) {
 
-      beginStageEscape();
+      startEscapeSequence();
+
+      /*
+        Clear current traffic so the
+        cinematic escape has open road.
+      */
+
+      traffic = [];
     }
 
+
     /*
-      At 60 seconds:
-      go to next environment.
+      57 seconds:
+      cinematic acceleration.
     */
 
     if (
       !isFinalEnvironment &&
-      stageElapsed >=
-      LONG_STAGE_DURATION
+      stageElapsed >= CINEMATIC_TIME
+    ) {
+
+      transitionActive =
+        true;
+    }
+
+
+    /*
+      60 seconds:
+      switch world.
+    */
+
+    if (
+      !isFinalEnvironment &&
+      stageElapsed >= LONG_STAGE_DURATION
     ) {
 
       changeEnvironment(
-        environmentStage +
-        1
+        environmentStage + 1
       );
     }
   }
 
-  if (
-    transitionFlash >
-    0
-  ) {
+
+  /* ===================================================
+     TRANSITION TIMERS
+  =================================================== */
+
+  if (transitionFlash > 0) {
 
     transitionFlash =
       Math.max(
         0,
+
         transitionFlash -
-        dt *
-        2.2
+        dt * 1.8
       );
   }
 
-  if (
-    transitionTextTimer >
-    0
-  ) {
+  if (transitionTextTimer > 0) {
 
-    transitionTextTimer -=
-      dt;
+    transitionTextTimer -= dt;
   }
+
+  if (transitionCardTimer > 0) {
+
+    transitionCardTimer -= dt;
+  }
+
 
   const environment =
     environments[
@@ -1833,46 +1738,35 @@ function update(
   let policeSpeed =
     player.speed;
 
-  /* ======================
+
+  /* ===================================================
      COMBO
-  ====================== */
+  =================================================== */
 
-  if (
-    comboTimer >
-    0
-  ) {
+  if (comboTimer > 0) {
 
-    comboTimer -=
-      dt;
+    comboTimer -= dt;
 
-    if (
-      comboTimer <=
-      0
-    ) {
+    if (comboTimer <= 0) {
 
-      combo =
-        0;
+      combo = 0;
     }
   }
 
-  /* ======================
+
+  /* ===================================================
      NITRO
-  ====================== */
+  =================================================== */
 
-  if (
-    nitroActive >
-    0
-  ) {
+  if (nitroActive > 0) {
 
-    nitroActive -=
-      dt;
+    nitroActive -= dt;
 
     policeSpeed +=
       NITRO_SPEED_BONUS;
 
     if (
-      nitroActive <=
-      0
+      nitroActive <= 0
     ) {
 
       nitroState.textContent =
@@ -1880,33 +1774,70 @@ function update(
     }
   }
 
-  /* ======================
+
+  /* ===================================================
+     ESCAPE BOOST
+  =================================================== */
+
+  let suspectSpeed =
+    robber.speed;
+
+  if (
+    isLong &&
+    stageEscapeStarted &&
+    !isFinalEnvironment
+  ) {
+
+    /*
+      Both cars speed up.
+      Suspect speeds up MORE.
+    */
+
+    suspectSpeed += 45;
+
+    policeSpeed += 28;
+
+    if (transitionActive) {
+
+      suspectSpeed += 28;
+
+      policeSpeed += 18;
+    }
+  }
+
+
+  /* ===================================================
      CHASE MOVEMENT
-  ====================== */
+  =================================================== */
 
   suspectWorldY -=
-    robber.speed *
-    dt;
+    suspectSpeed * dt;
 
   policeWorldY -=
-    policeSpeed *
-    dt;
+    policeSpeed * dt;
 
   roadScroll +=
     policeSpeed *
     dt *
-    2.4;
+    (
+      transitionActive
+        ? 4.2
+        : 2.4
+    );
+
 
   sounds.engine.playbackRate =
     Math.max(
       0.85,
 
       Math.min(
-        1.35,
-        policeSpeed /
-        135
+        1.60,
+        policeSpeed / 135
       )
     );
+
+
+  /* Steering */
 
   player.x +=
     (
@@ -1915,30 +1846,23 @@ function update(
     ) *
     Math.min(
       1,
+
       dt *
       11 *
       environment.grip
     );
 
-  /* ======================
+
+  /* ===================================================
      SUSPECT AI
-  ====================== */
+  =================================================== */
 
-  robber.laneTimer -=
-    dt;
+  robber.laneTimer -= dt;
 
-  if (
-    robber.laneTimer <=
-    0
-  ) {
+  if (robber.laneTimer <= 0) {
 
     const choices =
-      [
-        0,
-        1,
-        2,
-        3
-      ].filter(
+      [0, 1, 2, 3].filter(
         lane =>
           lane !==
           robber.targetLane
@@ -1952,29 +1876,23 @@ function update(
         )
       ];
 
-    const d =
-      getDistance();
-
     if (
-      stageElapsed >
-      45 ||
-      d <
-      80
+      stageElapsed > 45 ||
+      getDistance() < 80
     ) {
 
       robber.laneTimer =
         0.55 +
-        Math.random() *
-        0.55;
+        Math.random() * 0.55;
 
     } else {
 
       robber.laneTimer =
         1.20 +
-        Math.random() *
-        1.0;
+        Math.random() * 1.0;
     }
   }
+
 
   robber.x +=
     (
@@ -1985,13 +1903,13 @@ function update(
     ) *
     Math.min(
       1,
-      dt *
-      2.5
+      dt * 2.5
     );
 
-  /* ======================
+
+  /* ===================================================
      SCREEN POSITION
-  ====================== */
+  =================================================== */
 
   player.screenY =
     worldToScreenY(
@@ -2005,92 +1923,80 @@ function update(
 
   player.screenY =
     Math.max(
-      H *
-      0.58,
+      H * 0.58,
 
       Math.min(
-        H *
-        0.78,
+        H * 0.78,
         player.screenY
       )
     );
 
   robber.screenY =
     Math.max(
-      H *
-      0.16,
+      H * 0.16,
 
       Math.min(
-        H *
-        0.39,
+        H * 0.39,
         robber.screenY
       )
     );
 
+
   let distance =
     getDistance();
 
-  /* ======================
-     HARD LONG-CHASE LOCK
 
-     THIS is what prevents
-     the 15-second capture.
-  ====================== */
+  /* ===================================================
+     LONG CHASE CAPTURE LOCK
+  =================================================== */
 
-  if (
-    isLong
-  ) {
+  if (isLong) {
 
     const finalStageUnlocked =
       isFinalEnvironment &&
-      stageElapsed >=
-      LONG_STAGE_DURATION;
+      stageElapsed >= LONG_STAGE_DURATION;
 
     /*
-      Until final stage minute
-      is complete, keep suspect
-      ahead no matter what.
+      Until the final minute is over,
+      suspect ALWAYS remains ahead.
     */
 
-    if (
-      !finalStageUnlocked
-    ) {
+    if (!finalStageUnlocked) {
 
-      const minimumGap =
-        stageEscapeStarted
-          ?
-          150
-          :
-          48;
+      let minimumGap = 75;
 
-      if (
-        distance <
-        minimumGap
-      ) {
+      if (stageEscapeStarted) {
+
+        minimumGap = 150;
+      }
+
+      if (transitionActive) {
+
+        minimumGap = 220;
+      }
+
+      if (distance < minimumGap) {
 
         policeWorldY =
           suspectWorldY +
-          minimumGap /
-          0.7;
+          minimumGap / 0.7;
 
         distance =
           getDistance();
       }
     }
 
+
     /*
-      During last 5 sec,
-      suspect visibly escapes.
+      Prevent Long Chase from
+      ending due to large gap.
     */
 
-    if (
-      stageEscapeStarted &&
-      !isFinalEnvironment
-    ) {
+    if (distance > 560) {
 
-      policeWorldY +=
-        38 *
-        dt;
+      policeWorldY =
+        suspectWorldY +
+        560 / 0.7;
 
       distance =
         getDistance();
@@ -2099,15 +2005,12 @@ function update(
   } else {
 
     /*
-      Quick chase also gets
-      a minimum length.
+      Quick chase minimum length.
     */
 
     if (
-      elapsed <
-      QUICK_MIN_CHASE_TIME &&
-      distance <
-      42
+      elapsed < QUICK_MIN_CHASE_TIME &&
+      distance < 42
     ) {
 
       policeWorldY =
@@ -2119,89 +2022,97 @@ function update(
     }
   }
 
-  /* ======================
+
+  /* ===================================================
      TRAFFIC SPAWN
-  ====================== */
 
-  spawnTimer -=
-    dt;
+     LONG MODE TRAFFIC DOES NOT DISAPPEAR
+     BASED ON DISTANCE.
+  =================================================== */
 
-  if (
-    spawnTimer <=
-    0
-  ) {
+  spawnTimer -= dt;
+
+  if (spawnTimer <= 0) {
+
+    let allowTraffic = true;
+
+    /*
+      Only stop traffic during
+      cinematic escape.
+    */
 
     if (
-      distance >
-      110 &&
-      !stageEscapeStarted
+      isLong &&
+      stageEscapeStarted &&
+      !isFinalEnvironment
     ) {
+
+      allowTraffic = false;
+    }
+
+    /*
+      Quick mode still clears traffic
+      when extremely close.
+    */
+
+    if (
+      !isLong &&
+      distance <= 110
+    ) {
+
+      allowTraffic = false;
+    }
+
+    if (allowTraffic) {
 
       spawnTrafficGroup();
     }
 
-    let spawnDelay;
 
     const localTime =
       isLong
-        ?
-        stageElapsed
-        :
-        elapsed;
+        ? stageElapsed
+        : elapsed;
 
-    if (
-      localTime <
-      10
-    ) {
+    let spawnDelay;
+
+    if (localTime < 10) {
 
       spawnDelay =
         1.15 +
-        Math.random() *
-        0.30;
+        Math.random() * 0.30;
 
     } else if (
-      localTime <
-      25
+      localTime < 25
     ) {
 
       spawnDelay =
         0.85 +
-        Math.random() *
-        0.30;
+        Math.random() * 0.30;
 
     } else {
 
       spawnDelay =
         0.70 +
-        Math.random() *
-        0.25;
+        Math.random() * 0.25;
     }
 
-    if (
-      distance <
-      180
-    ) {
-
-      spawnDelay *=
-        1.5;
-    }
 
     spawnTimer =
       spawnDelay /
       environment.trafficRate;
   }
 
-  /* ======================
+
+  /* ===================================================
      TRAFFIC MOVEMENT
-  ====================== */
+  =================================================== */
 
   for (
     let i =
-      traffic.length -
-      1;
+      traffic.length - 1;
 
-    i >=
-    0;
+    i >= 0;
 
     i--
   ) {
@@ -2212,6 +2123,7 @@ function update(
     const relativeSpeed =
       Math.max(
         0,
+
         policeSpeed -
         car.speed
       );
@@ -2221,23 +2133,18 @@ function update(
       relativeSpeed *
       TRAFFIC_RELATIVE_MULTIPLIER;
 
-    if (
-      car.image ===
-      "truck"
-    ) {
 
-      trafficScreenSpeed -=
-        25;
+    if (car.image === "truck") {
+
+      trafficScreenSpeed -= 25;
     }
 
-    if (
-      nitroActive >
-      0
-    ) {
 
-      trafficScreenSpeed +=
-        55;
+    if (nitroActive > 0) {
+
+      trafficScreenSpeed += 55;
     }
+
 
     trafficScreenSpeed =
       Math.min(
@@ -2245,14 +2152,15 @@ function update(
         trafficScreenSpeed
       );
 
+
     car.screenY +=
       trafficScreenSpeed *
       dt;
 
+
     if (
       car.screenY >
-      H +
-      180
+      H + 180
     ) {
 
       traffic.splice(
@@ -2263,11 +2171,13 @@ function update(
       continue;
     }
 
-    /* COLLISION */
+
+    /* =================================================
+       COLLISION
+    ================================================= */
 
     if (
-      player.invincible <=
-      0 &&
+      player.invincible <= 0 &&
       overlapScreen(
         player,
         car
@@ -2277,31 +2187,25 @@ function update(
       player.speed =
         Math.max(
           126,
-          player.speed -
-          9
+
+          player.speed - 9
         );
 
-      policeWorldY +=
-        28;
+      policeWorldY += 28;
 
       player.invincible =
         1.2;
 
-      shake =
-        10;
+      shake = 10;
 
       nitro =
         Math.max(
           0,
-          nitro -
-          10
+          nitro - 10
         );
 
-      combo =
-        0;
-
-      comboTimer =
-        0;
+      combo = 0;
+      comboTimer = 0;
 
       createSparks(
         player.x,
@@ -2320,28 +2224,27 @@ function update(
         navigator.vibrate
       ) {
 
-        navigator.vibrate(
-          [
-            25,
-            20,
-            25
-          ]
-        );
+        navigator.vibrate([
+          25,
+          20,
+          25
+        ]);
       }
     }
 
-    /* NEAR MISS */
+
+    /* =================================================
+       NEAR MISS
+    ================================================= */
 
     if (
       !car.passed &&
       car.screenY >
       player.screenY +
-      player.height *
-      0.48
+      player.height * 0.48
     ) {
 
-      car.passed =
-        true;
+      car.passed = true;
 
       const horizontalGap =
         Math.abs(
@@ -2353,16 +2256,14 @@ function update(
         (
           car.width +
           player.width
-        ) /
-        2;
+        ) / 2;
+
 
       if (
         horizontalGap >
-        edge -
-        8 &&
+        edge - 8 &&
         horizontalGap <
-        edge +
-        40
+        edge + 40
       ) {
 
         nearMisses++;
@@ -2370,8 +2271,7 @@ function update(
         combo =
           Math.min(
             5,
-            combo +
-            1
+            combo + 1
           );
 
         bestCombo =
@@ -2385,19 +2285,18 @@ function update(
 
         const nitroReward =
           24 +
-          combo *
-          6;
+          combo * 6;
 
         nitro =
           Math.min(
             100,
+
             nitro +
             nitroReward
           );
 
         const comboScore =
-          200 *
-          combo;
+          200 * combo;
 
         score +=
           comboScore;
@@ -2407,52 +2306,45 @@ function update(
         );
 
         showStatus(
-          combo ===
-          1
-            ?
-            "NEAR MISS +200"
-            :
-            `NEAR MISS x${combo} +${comboScore}`
+          combo === 1
+            ? "NEAR MISS +200"
+            : `NEAR MISS x${combo} +${comboScore}`
         );
       }
     }
   }
 
-  if (
-    player.invincible >
-    0
-  ) {
 
-    player.invincible -=
-      dt;
+  if (player.invincible > 0) {
+
+    player.invincible -= dt;
   }
 
-  /*
-    Slow natural acceleration.
-  */
+
+  /* ===================================================
+     NORMAL ACCELERATION
+  =================================================== */
 
   player.speed =
     Math.min(
       141,
 
       player.speed +
-      0.12 *
-      dt
+      0.12 * dt
     );
 
-  /* ======================
+
+  /* ===================================================
      NITRO UI
-  ====================== */
+  =================================================== */
 
   nitroFill.style.width =
-    nitro +
-    "%";
+    nitro + "%";
+
 
   if (
-    nitro >=
-    100 &&
-    nitroActive <=
-    0
+    nitro >= 100 &&
+    nitroActive <= 0
   ) {
 
     nitroState.textContent =
@@ -2463,8 +2355,7 @@ function update(
     );
 
   } else if (
-    nitroActive <=
-    0
+    nitroActive <= 0
   ) {
 
     nitroState.textContent =
@@ -2475,24 +2366,19 @@ function update(
     );
   }
 
-  /* ======================
-     WIN RULES
-  ====================== */
 
-  if (
-    !isLong
-  ) {
+  /* ===================================================
+     WIN RULES
+  =================================================== */
+
+  if (!isLong) {
 
     if (
-      distance <=
-      18 &&
-      elapsed >=
-      QUICK_MIN_CHASE_TIME
+      distance <= 18 &&
+      elapsed >= QUICK_MIN_CHASE_TIME
     ) {
 
-      finish(
-        true
-      );
+      finish(true);
 
       return;
     }
@@ -2504,65 +2390,41 @@ function update(
       stageElapsed >=
       LONG_STAGE_DURATION;
 
+
     /*
-      ONLY HERE can Long Chase
-      actually be won.
+      Long Chase ONLY wins here.
     */
 
     if (
       finalStageUnlocked &&
-      distance <=
-      18
+      distance <= 18
     ) {
 
-      finish(
-        true
-      );
+      finish(true);
 
       return;
     }
   }
 
-  /*
-    Quick mode can lose normally.
-  */
+
+  /* ===================================================
+     QUICK MODE LOSE
+  =================================================== */
 
   if (
     !isLong &&
-    distance >=
-    650
+    distance >= 650
   ) {
 
-    finish(
-      false
-    );
+    finish(false);
 
     return;
   }
 
-  /*
-    Long mode never ends just because
-    suspect gets a temporary lead.
-  */
 
-  if (
-    isLong &&
-    distance >
-    560
-  ) {
-
-    policeWorldY =
-      suspectWorldY +
-      560 /
-      0.7;
-
-    distance =
-      getDistance();
-  }
-
-  /* ======================
-     STATUS MESSAGES
-  ====================== */
+  /* ===================================================
+     FINAL ENVIRONMENT MESSAGES
+  =================================================== */
 
   if (
     isLong &&
@@ -2570,10 +2432,8 @@ function update(
   ) {
 
     if (
-      stageElapsed >=
-      50 &&
-      stageElapsed <
-      58
+      stageElapsed >= 50 &&
+      stageElapsed < 58
     ) {
 
       showStatus(
@@ -2581,47 +2441,32 @@ function update(
       );
     }
 
+
     if (
-      stageElapsed >=
-      58 &&
-      distance <
-      100
+      stageElapsed >= 58 &&
+      distance < 110
     ) {
 
       showStatus(
         "TAKE HIM DOWN!"
       );
     }
-
-  } else if (
-    !isLong &&
-    elapsed >=
-    22 &&
-    elapsed <
-    QUICK_MIN_CHASE_TIME
-  ) {
-
-    showStatus(
-      "FINAL PURSUIT!"
-    );
   }
+
 
   score +=
     policeSpeed *
     dt *
     0.50;
 
-  updateParticles(
-    dt
-  );
 
-  updateWeather(
-    dt
-  );
+  updateParticles(dt);
+  updateWeather(dt);
+
 
   distanceValue.textContent =
-    distance +
-    " m";
+    distance + " m";
+
 
   speedValue.textContent =
     Math.round(
@@ -2629,17 +2474,13 @@ function update(
     ) +
     " km/h";
 
-  if (
-    statusTimer >
-    0
-  ) {
 
-    statusTimer -=
-      dt;
+  if (statusTimer > 0) {
+
+    statusTimer -= dt;
 
     if (
-      statusTimer <=
-      0
+      statusTimer <= 0
     ) {
 
       chaseStatus.style.opacity =
@@ -2647,130 +2488,114 @@ function update(
     }
   }
 
-  shake *=
-    0.88;
+
+  shake *= 0.88;
 }
 
-/* =========================
-   WEATHER UPDATE
-========================= */
 
-function updateWeather(
-  dt
-) {
+/* =====================================================
+   WEATHER UPDATE
+===================================================== */
+
+function updateWeather(dt) {
 
   if (
-    activeEnvironment ===
-    "rain"
+    activeEnvironment === "rain"
   ) {
 
     for (
-      const drop of
-      rainDrops
+      const drop of rainDrops
     ) {
 
       drop.y +=
-        drop.speed *
-        dt;
+        drop.speed * dt;
 
       drop.x -=
-        85 *
-        dt;
+        85 * dt;
+
 
       if (
         drop.y >
-        H +
-        30
+        H + 30
       ) {
 
-        drop.y =
-          -30;
+        drop.y = -30;
 
         drop.x =
-          Math.random() *
-          W;
+          Math.random() * W;
       }
 
+
       if (
-        drop.x <
-        -30
+        drop.x < -30
       ) {
 
         drop.x =
-          W +
-          30;
+          W + 30;
       }
     }
   }
 
+
   if (
-    activeEnvironment ===
-    "snow"
+    activeEnvironment === "snow"
   ) {
 
     for (
-      const flake of
-      snowFlakes
+      const flake of snowFlakes
     ) {
 
       flake.y +=
-        flake.speed *
-        dt;
+        flake.speed * dt;
 
       flake.x +=
-        flake.drift *
-        dt;
+        flake.drift * dt;
+
 
       if (
         flake.y >
-        H +
-        10
+        H + 10
       ) {
 
-        flake.y =
-          -10;
+        flake.y = -10;
 
         flake.x =
-          Math.random() *
-          W;
+          Math.random() * W;
       }
     }
   }
 
+
   if (
-    activeEnvironment ===
-    "desert"
+    activeEnvironment === "desert"
   ) {
 
     for (
-      const dust of
-      dustParticles
+      const dust of dustParticles
     ) {
 
       dust.x +=
-        dust.speed *
-        dt;
+        dust.speed * dt;
+
 
       if (
         dust.x >
-        W +
-        80
+        W + 80
       ) {
 
-        dust.x =
-          -80;
+        dust.x = -80;
 
         dust.y =
-          Math.random() *
-          H;
+          Math.random() * H;
       }
     }
   }
 }
 
-/* =========================
+
+/* =====================================================
    BACKGROUND
-========================= */
+===================================================== */
 
 function drawBackground() {
 
@@ -2812,15 +2637,16 @@ function drawBackground() {
     H
   );
 
+
   if (
     !img ||
     !img.complete ||
-    img.naturalWidth <=
-    0
+    img.naturalWidth <= 0
   ) {
 
     return;
   }
+
 
   const frameWidth =
     backgroundFrameWidth();
@@ -2838,6 +2664,7 @@ function drawBackground() {
 
   let drawWidth;
   let drawHeight;
+
 
   if (
     imageRatio >
@@ -2861,27 +2688,60 @@ function drawBackground() {
       imageRatio;
   }
 
+
   const frameX =
     (
       W -
       frameWidth
-    ) /
-    2;
+    ) / 2;
+
 
   const drawX =
     frameX +
     (
       frameWidth -
       drawWidth
-    ) /
-    2;
+    ) / 2;
+
 
   const drawY =
     (
       H -
       drawHeight
-    ) /
-    2;
+    ) / 2;
+
+
+  /*
+    Cinematic transition zoom.
+  */
+
+  let zoom = 1;
+
+  if (transitionActive) {
+
+    const progress =
+      Math.min(
+        1,
+
+        Math.max(
+          0,
+
+          (
+            stageElapsed -
+            CINEMATIC_TIME
+          ) /
+          (
+            LONG_STAGE_DURATION -
+            CINEMATIC_TIME
+          )
+        )
+      );
+
+    zoom =
+      1 +
+      progress * 0.12;
+  }
+
 
   ctx.save();
 
@@ -2896,6 +2756,23 @@ function drawBackground() {
 
   ctx.clip();
 
+
+  ctx.translate(
+    W / 2,
+    H / 2
+  );
+
+  ctx.scale(
+    zoom,
+    zoom
+  );
+
+  ctx.translate(
+    -W / 2,
+    -H / 2
+  );
+
+
   ctx.drawImage(
     img,
     drawX,
@@ -2904,16 +2781,16 @@ function drawBackground() {
     drawHeight
   );
 
+
   ctx.restore();
 }
 
-/* =========================
-   VEHICLES
-========================= */
 
-function drawVehicle(
-  car
-) {
+/* =====================================================
+   VEHICLES
+===================================================== */
+
+function drawVehicle(car) {
 
   const img =
     vehicleImages[
@@ -2923,10 +2800,8 @@ function drawVehicle(
   if (
     !img ||
     !img.complete
-  ) {
+  ) return;
 
-    return;
-  }
 
   const depth =
     Math.max(
@@ -2934,51 +2809,61 @@ function drawVehicle(
 
       Math.min(
         1,
-        car.screenY /
-        H
+        car.screenY / H
       )
     );
 
-  const scale =
+
+  let scale =
     0.68 +
-    depth *
-    0.37;
+    depth * 0.37;
+
+
+  /*
+    Cars appear to surge forward
+    during transition.
+  */
+
+  if (transitionActive) {
+
+    scale *= 1.06;
+  }
+
 
   const width =
-    car.width *
-    scale;
+    car.width * scale;
 
   const height =
-    car.height *
-    scale;
+    car.height * scale;
+
 
   ctx.save();
+
 
   ctx.translate(
     car.x,
     car.screenY
   );
 
+
   ctx.rotate(
     Math.PI
   );
 
+
   if (
-    car.image ===
-    "police" &&
-    player.invincible >
-    0 &&
+    car.image === "police" &&
+    player.invincible > 0 &&
     Math.floor(
-      player.invincible *
-      12
+      player.invincible * 12
     ) %
-    2 ===
-    0
+    2 === 0
   ) {
 
     ctx.globalAlpha =
       0.35;
   }
+
 
   ctx.shadowColor =
     "rgba(0,0,0,.6)";
@@ -2989,25 +2874,25 @@ function drawVehicle(
   ctx.shadowOffsetY =
     8;
 
+
   ctx.drawImage(
     img,
 
-    -width /
-    2,
-
-    -height /
-    2,
+    -width / 2,
+    -height / 2,
 
     width,
     height
   );
 
+
   ctx.restore();
 }
 
-/* =========================
+
+/* =====================================================
    POLICE LIGHTS
-========================= */
+===================================================== */
 
 function drawPoliceGlow() {
 
@@ -3016,26 +2901,20 @@ function drawPoliceGlow() {
       performance.now() /
       150
     ) %
-    2 ===
-    0;
+    2 === 0;
+
 
   const redX =
     flash
-      ?
-      player.x -
-      28
-      :
-      player.x +
-      28;
+      ? player.x - 28
+      : player.x + 28;
+
 
   const blueX =
     flash
-      ?
-      player.x +
-      28
-      :
-      player.x -
-      28;
+      ? player.x + 28
+      : player.x - 28;
+
 
   const red =
     ctx.createRadialGradient(
@@ -3048,6 +2927,7 @@ function drawPoliceGlow() {
       145
     );
 
+
   red.addColorStop(
     0,
     "rgba(255,20,50,.46)"
@@ -3058,19 +2938,17 @@ function drawPoliceGlow() {
     "rgba(255,20,50,0)"
   );
 
-  ctx.fillStyle =
-    red;
+
+  ctx.fillStyle = red;
+
 
   ctx.fillRect(
-    player.x -
-    170,
-
-    player.screenY -
-    160,
-
+    player.x - 170,
+    player.screenY - 160,
     340,
     320
   );
+
 
   const blue =
     ctx.createRadialGradient(
@@ -3083,6 +2961,7 @@ function drawPoliceGlow() {
       145
     );
 
+
   blue.addColorStop(
     0,
     "rgba(20,100,255,.48)"
@@ -3093,50 +2972,44 @@ function drawPoliceGlow() {
     "rgba(20,100,255,0)"
   );
 
-  ctx.fillStyle =
-    blue;
+
+  ctx.fillStyle = blue;
+
 
   ctx.fillRect(
-    player.x -
-    170,
-
-    player.screenY -
-    160,
-
+    player.x - 170,
+    player.screenY - 160,
     340,
     320
   );
 }
 
-/* =========================
-   NITRO VISUAL
-========================= */
+
+/* =====================================================
+   NITRO DRAW
+===================================================== */
 
 function drawNitro() {
 
   if (
-    nitroActive <=
-    0
-  ) {
+    nitroActive <= 0
+  ) return;
 
-    return;
-  }
 
   const gradient =
     ctx.createLinearGradient(
       player.x,
 
       player.screenY +
-      player.height /
-      2,
+      player.height / 2,
 
       player.x,
 
       player.screenY +
-      player.height /
-      2 +
+      player.height / 2 +
       85
     );
+
 
   gradient.addColorStop(
     0,
@@ -3158,56 +3031,56 @@ function drawNitro() {
     "rgba(80,40,255,0)"
   );
 
+
   ctx.fillStyle =
     gradient;
 
+
   ctx.beginPath();
 
+
   ctx.moveTo(
-    player.x -
-    16,
+    player.x - 16,
 
     player.screenY +
-    player.height /
-    2 -
+    player.height / 2 -
     5
   );
+
 
   ctx.lineTo(
     player.x,
 
     player.screenY +
-    player.height /
-    2 +
+    player.height / 2 +
     78 +
-    Math.random() *
-    18
+    Math.random() * 18
   );
+
 
   ctx.lineTo(
-    player.x +
-    16,
+    player.x + 16,
 
     player.screenY +
-    player.height /
-    2 -
+    player.height / 2 -
     5
   );
+
 
   ctx.closePath();
 
   ctx.fill();
 }
 
-/* =========================
+
+/* =====================================================
    WEATHER DRAW
-========================= */
+===================================================== */
 
 function drawWeather() {
 
   if (
-    activeEnvironment ===
-    "rain"
+    activeEnvironment === "rain"
   ) {
 
     ctx.save();
@@ -3218,9 +3091,9 @@ function drawWeather() {
     ctx.lineWidth =
       1.2;
 
+
     for (
-      const drop of
-      rainDrops
+      const drop of rainDrops
     ) {
 
       ctx.beginPath();
@@ -3231,9 +3104,7 @@ function drawWeather() {
       );
 
       ctx.lineTo(
-        drop.x -
-        8,
-
+        drop.x - 8,
         drop.y +
         drop.length
       );
@@ -3244,9 +3115,9 @@ function drawWeather() {
     ctx.restore();
   }
 
+
   if (
-    activeEnvironment ===
-    "snow"
+    activeEnvironment === "snow"
   ) {
 
     ctx.save();
@@ -3254,9 +3125,9 @@ function drawWeather() {
     ctx.fillStyle =
       "rgba(255,255,255,.9)";
 
+
     for (
-      const flake of
-      snowFlakes
+      const flake of snowFlakes
     ) {
 
       ctx.beginPath();
@@ -3266,8 +3137,7 @@ function drawWeather() {
         flake.y,
         flake.size,
         0,
-        Math.PI *
-        2
+        Math.PI * 2
       );
 
       ctx.fill();
@@ -3276,9 +3146,9 @@ function drawWeather() {
     ctx.restore();
   }
 
+
   if (
-    activeEnvironment ===
-    "desert"
+    activeEnvironment === "desert"
   ) {
 
     ctx.save();
@@ -3286,12 +3156,11 @@ function drawWeather() {
     ctx.strokeStyle =
       "rgba(240,190,120,.20)";
 
-    ctx.lineWidth =
-      2;
+    ctx.lineWidth = 2;
+
 
     for (
-      const dust of
-      dustParticles
+      const dust of dustParticles
     ) {
 
       ctx.beginPath();
@@ -3305,8 +3174,7 @@ function drawWeather() {
         dust.x +
         dust.length,
 
-        dust.y +
-        5
+        dust.y + 5
       );
 
       ctx.stroke();
@@ -3315,9 +3183,9 @@ function drawWeather() {
     ctx.restore();
   }
 
+
   if (
-    activeEnvironment ===
-    "tunnel"
+    activeEnvironment === "tunnel"
   ) {
 
     const pulse =
@@ -3327,15 +3195,15 @@ function drawWeather() {
           0.045
         ) +
         1
-      ) /
-      2;
+      ) / 2;
+
 
     ctx.fillStyle =
       `rgba(255,205,120,${
         0.012 +
-        pulse *
-        0.026
+        pulse * 0.026
       })`;
+
 
     ctx.fillRect(
       0,
@@ -3346,22 +3214,21 @@ function drawWeather() {
   }
 }
 
-/* =========================
-   PARTICLE DRAW
-========================= */
+
+/* =====================================================
+   PARTICLES DRAW
+===================================================== */
 
 function drawParticles() {
 
   for (
-    const p of
-    particles
+    const p of particles
   ) {
 
     ctx.globalAlpha =
       Math.min(
         1,
-        p.life *
-        2
+        p.life * 2
       );
 
     ctx.fillStyle =
@@ -3375,35 +3242,32 @@ function drawParticles() {
     );
   }
 
-  ctx.globalAlpha =
-    1;
+  ctx.globalAlpha = 1;
 }
 
-/* =========================
+
+/* =====================================================
    SUSPECT LABEL
-========================= */
+===================================================== */
 
 function drawSuspectMarker() {
 
-  const width =
-    80;
-
-  const height =
-    25;
+  const width = 80;
+  const height = 25;
 
   const y =
     robber.screenY -
-    robber.height *
-    0.48 -
+    robber.height * 0.48 -
     35;
+
 
   ctx.fillStyle =
     "#ed2038";
 
+
   ctx.fillRect(
     robber.x -
-    width /
-    2,
+    width / 2,
 
     y,
 
@@ -3411,57 +3275,139 @@ function drawSuspectMarker() {
     height
   );
 
+
   ctx.fillStyle =
     "#fff";
+
 
   ctx.font =
     "900 11px Arial";
 
+
   ctx.textAlign =
     "center";
+
 
   ctx.fillText(
     "SUSPECT",
     robber.x,
-    y +
-    17
+    y + 17
   );
 }
 
-/* =========================
-   TRANSITION / TAUNT
-========================= */
+
+/* =====================================================
+   SPEED LINES
+===================================================== */
+
+function drawSpeedLines() {
+
+  if (!transitionActive) return;
+
+
+  const progress =
+    Math.min(
+      1,
+
+      (
+        stageElapsed -
+        CINEMATIC_TIME
+      ) /
+      (
+        LONG_STAGE_DURATION -
+        CINEMATIC_TIME
+      )
+    );
+
+
+  ctx.save();
+
+
+  ctx.strokeStyle =
+    `rgba(255,255,255,${
+      0.12 +
+      progress * 0.38
+    })`;
+
+
+  ctx.lineWidth =
+    2;
+
+
+  const count =
+    20 +
+    Math.floor(
+      progress * 30
+    );
+
+
+  for (
+    let i = 0;
+    i < count;
+    i++
+  ) {
+
+    const x =
+      Math.random() * W;
+
+    const y =
+      Math.random() * H;
+
+    const length =
+      30 +
+      Math.random() *
+      (
+        80 +
+        progress * 100
+      );
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      x,
+      y
+    );
+
+    ctx.lineTo(
+      x,
+      y + length
+    );
+
+    ctx.stroke();
+  }
+
+
+  ctx.restore();
+}
+
+
+/* =====================================================
+   TEXT WRAP
+===================================================== */
 
 function wrapText(
   text,
-  maxChars =
-  30
+  maxChars = 30
 ) {
 
   const words =
-    text.split(
-      " "
-    );
+    text.split(" ");
 
-  const lines =
-    [];
+  const lines = [];
 
-  let line =
-    "";
+  let line = "";
+
 
   for (
-    const word of
-    words
+    const word of words
   ) {
 
     const test =
       line
-        ?
-        line +
-        " " +
-        word
-        :
-        word;
+        ? line + " " + word
+        : word;
+
 
     if (
       test.length >
@@ -3469,44 +3415,263 @@ function wrapText(
       line
     ) {
 
-      lines.push(
-        line
-      );
+      lines.push(line);
 
-      line =
-        word;
+      line = word;
 
     } else {
 
-      line =
-        test;
+      line = test;
     }
   }
 
-  if (
-    line
-  ) {
 
-    lines.push(
-      line
-    );
+  if (line) {
+
+    lines.push(line);
   }
+
 
   return lines;
 }
 
-function drawTransition() {
+
+/* =====================================================
+   SUSPECT TAUNT
+===================================================== */
+
+function drawTaunt() {
 
   if (
-    transitionFlash >
-    0
-  ) {
+    transitionTextTimer <= 0
+  ) return;
+
+
+  ctx.save();
+
+
+  ctx.textAlign =
+    "center";
+
+
+  ctx.shadowColor =
+    "rgba(0,0,0,.95)";
+
+  ctx.shadowBlur =
+    14;
+
+
+  ctx.font =
+    "900 14px Arial";
+
+
+  ctx.fillStyle =
+    "#ff4052";
+
+
+  ctx.fillText(
+    "SUSPECT",
+    W / 2,
+    H * 0.32
+  );
+
+
+  const lines =
+    wrapText(
+      transitionText,
+
+      W < 500
+        ? 24
+        : 36
+    );
+
+
+  const fontSize =
+    W < 500
+      ? 21
+      : 27;
+
+
+  ctx.font =
+    `900 ${fontSize}px Arial`;
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+
+  lines.forEach(
+    (
+      line,
+      index
+    ) => {
+
+      ctx.fillText(
+        line,
+
+        W / 2,
+
+        H * 0.38 +
+        index *
+        (
+          fontSize +
+          7
+        )
+      );
+    }
+  );
+
+
+  ctx.restore();
+}
+
+
+/* =====================================================
+   TRANSITION SCREEN
+===================================================== */
+
+function drawTransitionScreen() {
+
+  if (
+    transitionCardTimer <= 0
+  ) return;
+
+
+  /*
+    Black cinematic screen.
+  */
+
+  ctx.save();
+
+
+  ctx.fillStyle =
+    "rgba(0,0,0,.82)";
+
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+
+  ctx.textAlign =
+    "center";
+
+
+  ctx.fillStyle =
+    "#ff4052";
+
+
+  ctx.font =
+    "900 15px Arial";
+
+
+  ctx.fillText(
+    "CHASE CONTINUES",
+    W / 2,
+    H * 0.40
+  );
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+
+  ctx.font =
+    W < 500
+      ? "900 34px Arial"
+      : "900 46px Arial";
+
+
+  ctx.fillText(
+    transitionCardTitle,
+    W / 2,
+    H * 0.49
+  );
+
+
+  ctx.font =
+    "800 15px Arial";
+
+
+  ctx.fillStyle =
+    "rgba(255,255,255,.75)";
+
+
+  ctx.fillText(
+    transitionCardSubtitle,
+    W / 2,
+    H * 0.55
+  );
+
+
+  ctx.restore();
+}
+
+
+/* =====================================================
+   FINAL TRANSITION DARKENING
+===================================================== */
+
+function drawCinematicFade() {
+
+  if (!transitionActive) return;
+
+
+  const progress =
+    Math.min(
+      1,
+
+      Math.max(
+        0,
+
+        (
+          stageElapsed -
+          CINEMATIC_TIME
+        ) /
+        (
+          LONG_STAGE_DURATION -
+          CINEMATIC_TIME
+        )
+      )
+    );
+
+
+  ctx.fillStyle =
+    `rgba(0,0,0,${
+      progress * 0.38
+    })`;
+
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+
+  /*
+    White flash immediately before switch.
+  */
+
+  if (progress > 0.84) {
+
+    const flash =
+      (
+        progress -
+        0.84
+      ) /
+      0.16;
+
 
     ctx.fillStyle =
       `rgba(255,255,255,${
-        transitionFlash *
-        0.55
+        flash * 0.75
       })`;
+
 
     ctx.fillRect(
       0,
@@ -3515,141 +3680,50 @@ function drawTransition() {
       H
     );
   }
-
-  if (
-    transitionTextTimer <=
-    0
-  ) {
-
-    return;
-  }
-
-  ctx.save();
-
-  ctx.textAlign =
-    "center";
-
-  ctx.shadowColor =
-    "rgba(0,0,0,.95)";
-
-  ctx.shadowBlur =
-    12;
-
-  ctx.font =
-    "900 14px Arial";
-
-  ctx.fillStyle =
-    "#ff3b4f";
-
-  ctx.fillText(
-    "SUSPECT",
-    W /
-    2,
-
-    H *
-    0.36
-  );
-
-  const maxChars =
-    W <
-    500
-      ?
-      25
-      :
-      36;
-
-  const lines =
-    wrapText(
-      transitionText,
-      maxChars
-    );
-
-  const fontSize =
-    W <
-    500
-      ?
-      22
-      :
-      27;
-
-  const lineHeight =
-    fontSize +
-    7;
-
-  ctx.font =
-    `900 ${fontSize}px Arial`;
-
-  ctx.fillStyle =
-    "#ffffff";
-
-  lines.forEach(
-    (
-      line,
-      i
-    ) => {
-
-      ctx.fillText(
-        line,
-
-        W /
-        2,
-
-        H *
-        0.42 +
-        i *
-        lineHeight
-      );
-    }
-  );
-
-  ctx.restore();
 }
 
-/* =========================
+
+/* =====================================================
    VIGNETTE
-========================= */
+===================================================== */
 
 function drawVignette() {
 
   const gradient =
     ctx.createRadialGradient(
-      W /
-      2,
-
-      H /
-      2,
+      W / 2,
+      H / 2,
 
       Math.min(
         W,
         H
-      ) *
-      0.18,
+      ) * 0.18,
 
-      W /
-      2,
-
-      H /
-      2,
+      W / 2,
+      H / 2,
 
       Math.max(
         W,
         H
-      ) *
-      0.7
+      ) * 0.7
     );
+
 
   gradient.addColorStop(
     0,
     "rgba(0,0,0,0)"
   );
 
+
   gradient.addColorStop(
     1,
     "rgba(0,0,0,.34)"
   );
 
+
   ctx.fillStyle =
     gradient;
+
 
   ctx.fillRect(
     0,
@@ -3659,9 +3733,10 @@ function drawVignette() {
   );
 }
 
-/* =========================
+
+/* =====================================================
    DRAW
-========================= */
+===================================================== */
 
 function draw() {
 
@@ -3672,108 +3747,126 @@ function draw() {
     H
   );
 
+
   drawBackground();
 
+
   for (
-    const car of
-    traffic
+    const car of traffic
   ) {
 
-    drawVehicle(
-      car
-    );
+    drawVehicle(car);
   }
 
+
   drawSuspectMarker();
+
 
   drawVehicle(
     robber
   );
 
+
   drawPoliceGlow();
 
+
   drawNitro();
+
 
   drawVehicle(
     player
   );
 
+
   drawParticles();
+
 
   drawWeather();
 
+
+  drawSpeedLines();
+
+
   drawVignette();
 
-  drawTransition();
+
+  drawCinematicFade();
+
+
+  drawTaunt();
+
+
+  drawTransitionScreen();
 }
 
-/* =========================
-   LOOP
-========================= */
 
-function gameLoop(
-  time
-) {
+/* =====================================================
+   LOOP
+===================================================== */
+
+function gameLoop(time) {
 
   if (!running) return;
+
 
   let dt =
     (
       time -
       lastTime
-    ) /
-    1000;
+    ) / 1000;
+
 
   dt =
     Math.min(
       0.033,
-      dt ||
-      0.016
+      dt || 0.016
     );
+
 
   lastTime =
     time;
 
-  update(
-    dt
-  );
+
+  update(dt);
+
 
   if (!running) return;
 
+
   ctx.save();
 
-  if (
-    shake >
-    1
-  ) {
+
+  if (shake > 1) {
 
     ctx.translate(
       (
         Math.random() -
         0.5
-      ) *
-      shake,
+      ) * shake,
 
       (
         Math.random() -
         0.5
-      ) *
-      shake
+      ) * shake
     );
   }
 
+
   draw();
 
+
   ctx.restore();
+
 
   requestAnimationFrame(
     gameLoop
   );
 }
 
-/* =========================
+
+/* =====================================================
    INITIAL DISPLAY
-========================= */
+===================================================== */
 
 resetGame();
 
