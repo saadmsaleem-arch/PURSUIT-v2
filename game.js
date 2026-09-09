@@ -10,25 +10,31 @@ const environmentImages = {};
 
 
 function loadImage(store, name, file) {
-  const img = new Image();
 
-  img.src = file;
+  const img =
+    new Image();
 
-  store[name] = img;
+  img.src =
+    file;
+
+  store[name] =
+    img;
 }
 
 
-/* Vehicles */
+/* VEHICLES */
 
 loadImage(vehicleImages, "police", "police.png");
 loadImage(vehicleImages, "suspect", "suspect.png");
+
 loadImage(vehicleImages, "traffic1", "traffic1.png");
 loadImage(vehicleImages, "traffic2", "traffic2.png");
 loadImage(vehicleImages, "traffic3", "traffic3.png");
+
 loadImage(vehicleImages, "truck", "truck.png");
 
 
-/* Backgrounds */
+/* BACKGROUNDS */
 
 loadImage(environmentImages, "city", "city.jpg");
 loadImage(environmentImages, "highway", "highway.jpg");
@@ -43,25 +49,41 @@ loadImage(environmentImages, "tunnel", "tunnel.jpg");
 ===================================================== */
 
 const sounds = {
-  siren: new Audio("siren.mp3"),
-  engine: new Audio("engine.mp3"),
-  crash: new Audio("crash.mp3"),
-  nitro: new Audio("nitro.mp3"),
-  nearMiss: new Audio("near-miss.mp3"),
-  capture: new Audio("capture.mp3")
+
+  siren:
+    new Audio("siren.mp3"),
+
+  engine:
+    new Audio("engine.mp3"),
+
+  crash:
+    new Audio("crash.mp3"),
+
+  nitro:
+    new Audio("nitro.mp3"),
+
+  nearMiss:
+    new Audio("near-miss.mp3"),
+
+  capture:
+    new Audio("capture.mp3")
+
 };
 
 
 sounds.siren.loop = true;
 sounds.engine.loop = true;
 
+
 sounds.siren.volume = 0.27;
 sounds.engine.volume = 0.21;
 
 sounds.crash.volume = 0.72;
+
 sounds.nitro.volume = 0.78;
 
 sounds.nearMiss.volume = 0.55;
+
 sounds.capture.volume = 0.80;
 
 
@@ -69,38 +91,54 @@ let soundEnabled = true;
 
 
 function playSound(sound) {
-  if (!soundEnabled) return;
+
+  if (!soundEnabled) {
+    return;
+  }
+
 
   try {
+
     sound.currentTime = 0;
 
-    sound
-      .play()
+    sound.play()
       .catch(() => {});
 
   } catch (error) {}
+
 }
 
 
 function startDrivingSounds() {
-  if (!soundEnabled) return;
+
+  if (!soundEnabled) {
+    return;
+  }
+
 
   sounds.siren.currentTime = 0;
+
   sounds.engine.currentTime = 0;
+
 
   sounds.siren
     .play()
     .catch(() => {});
 
+
   sounds.engine
     .play()
     .catch(() => {});
+
 }
 
 
 function stopDrivingSounds() {
+
   sounds.siren.pause();
+
   sounds.engine.pause();
+
 }
 
 
@@ -116,11 +154,13 @@ const environments = {
     trafficRate: 1.00
   },
 
+
   highway: {
     name: "HIGHWAY",
     grip: 1.05,
     trafficRate: 0.90
   },
+
 
   tunnel: {
     name: "TUNNEL",
@@ -128,17 +168,20 @@ const environments = {
     trafficRate: 0.96
   },
 
+
   rain: {
     name: "RAIN",
     grip: 0.84,
     trafficRate: 0.92
   },
 
+
   desert: {
     name: "DESERT",
     grip: 0.94,
     trafficRate: 0.82
   },
+
 
   snow: {
     name: "SNOW",
@@ -150,99 +193,141 @@ const environments = {
 
 
 const environmentOrder = [
+
   "city",
+
   "highway",
+
   "tunnel",
+
   "rain",
+
   "desert",
+
   "snow"
+
 ];
 
 
-let selectedEnvironment = "city";
-let activeEnvironment = "city";
+let selectedEnvironment =
+  "city";
+
+
+let activeEnvironment =
+  "city";
 
 
 /* =====================================================
-   DIFFICULTY
+   DIFFICULTY SETTINGS
 ===================================================== */
 
 const difficultySettings = {
 
   easy: {
-    label: "EASY",
 
-    trafficMultiplier: 1.00,
+    label:
+      "EASY",
 
-    stalledMinTime: Infinity,
-    stalledMaxTime: Infinity,
+    trafficMultiplier:
+      1.00,
 
-    doubleStallChance: 0,
+    stalledMin:
+      Infinity,
 
-    stalledTruckChance: 0,
+    stalledMax:
+      Infinity,
 
-    crashSpeedLoss: 12,
+    doubleStallChance:
+      0,
 
-    suspectAggression: 1.00,
+    stalledTruckChance:
+      0,
 
-    nitroMultiplier: 1.00,
+    crashSpeedLoss:
+      12,
 
-    scoreMultiplier: 1.00
+    suspectAggression:
+      1.00,
+
+    nitroMultiplier:
+      1.00,
+
+    scoreMultiplier:
+      1.00
+
   },
 
 
   medium: {
-    label: "MEDIUM",
 
-    trafficMultiplier: 1.08,
+    label:
+      "MEDIUM",
 
-    stalledMinTime: 12,
-    stalledMaxTime: 18,
+    trafficMultiplier:
+      1.08,
 
-    doubleStallChance: 0.12,
+    stalledMin:
+      12,
 
-    stalledTruckChance: 0.15,
+    stalledMax:
+      18,
 
-    crashSpeedLoss: 16,
+    doubleStallChance:
+      0.10,
 
-    suspectAggression: 1.20,
+    stalledTruckChance:
+      0.15,
 
-    nitroMultiplier: 0.95,
+    crashSpeedLoss:
+      16,
 
-    scoreMultiplier: 1.50
+    suspectAggression:
+      1.20,
+
+    nitroMultiplier:
+      0.95,
+
+    scoreMultiplier:
+      1.50
+
   },
 
 
   hard: {
-    label: "HARD",
 
-    trafficMultiplier: 1.16,
+    label:
+      "HARD",
 
-    stalledMinTime: 6,
-    stalledMaxTime: 10,
+    trafficMultiplier:
+      1.16,
 
-    /*
-      Two stalled lanes sometimes.
-      NEVER more than two.
-    */
+    stalledMin:
+      6,
 
-    doubleStallChance: 0.38,
+    stalledMax:
+      10,
 
-    stalledTruckChance: 0.35,
+    doubleStallChance:
+      0.35,
 
-    crashSpeedLoss: 20,
+    stalledTruckChance:
+      0.35,
 
-    suspectAggression: 1.50,
+    crashSpeedLoss:
+      20,
 
-    nitroMultiplier: 0.85,
+    suspectAggression:
+      1.50,
 
-    scoreMultiplier: 2.00
+    nitroMultiplier:
+      0.85,
+
+    scoreMultiplier:
+      2.00
+
   }
 
 };
-
-
-let selectedDifficulty = "easy";
 
 
 /* =====================================================
@@ -251,6 +336,7 @@ let selectedDifficulty = "easy";
 
 const canvas =
   document.getElementById("game");
+
 
 const ctx =
   canvas.getContext("2d");
@@ -263,8 +349,10 @@ const overlay =
 const title =
   document.getElementById("title");
 
+
 const subtitle =
   document.getElementById("subtitle");
+
 
 const message =
   document.getElementById("message");
@@ -273,12 +361,14 @@ const message =
 const startBtn =
   document.getElementById("startBtn");
 
+
 const soundToggle =
   document.getElementById("soundToggle");
 
 
 const quickModeBtn =
   document.getElementById("quickModeBtn");
+
 
 const longModeBtn =
   document.getElementById("longModeBtn");
@@ -287,6 +377,7 @@ const longModeBtn =
 const duration30Btn =
   document.getElementById("duration30Btn");
 
+
 const duration60Btn =
   document.getElementById("duration60Btn");
 
@@ -294,8 +385,10 @@ const duration60Btn =
 const easyBtn =
   document.getElementById("easyBtn");
 
+
 const mediumBtn =
   document.getElementById("mediumBtn");
+
 
 const hardBtn =
   document.getElementById("hardBtn");
@@ -303,6 +396,7 @@ const hardBtn =
 
 const distanceValue =
   document.getElementById("distanceValue");
+
 
 const speedValue =
   document.getElementById("speedValue");
@@ -315,6 +409,7 @@ const heartsValue =
 const scoreValue =
   document.getElementById("scoreValue");
 
+
 const bestScoreValue =
   document.getElementById("bestScoreValue");
 
@@ -322,8 +417,10 @@ const bestScoreValue =
 const environmentBadge =
   document.getElementById("environmentBadge");
 
+
 const stageTimer =
   document.getElementById("stageTimer");
+
 
 const chaseStatus =
   document.getElementById("chaseStatus");
@@ -332,8 +429,10 @@ const chaseStatus =
 const nitroUI =
   document.getElementById("nitroUI");
 
+
 const nitroFill =
   document.getElementById("nitroFill");
+
 
 const nitroState =
   document.getElementById("nitroState");
@@ -341,6 +440,295 @@ const nitroState =
 
 const envButtons =
   document.querySelectorAll(".envButton");
+
+
+/* =====================================================
+   MENU SETTINGS
+===================================================== */
+
+let gameMode =
+  "quick";
+
+
+let selectedStageDuration =
+  60;
+
+
+let selectedDifficulty =
+  "easy";
+
+
+function updateMenuText() {
+
+  const mode =
+    gameMode === "long"
+      ? "LONG"
+      : "QUICK";
+
+
+  const duration =
+    selectedStageDuration === 30
+      ? "30 SEC"
+      : "1 MIN";
+
+
+  const difficulty =
+    difficultySettings[
+      selectedDifficulty
+    ];
+
+
+  message.textContent =
+
+    `${mode} • ${duration} • ` +
+
+    `${difficulty.label} • ` +
+
+    `×${difficulty.scoreMultiplier} SCORE • 5 LIVES`;
+
+}
+
+
+/* =====================================================
+   BUTTON SELECTION
+
+   USING DIRECT ONCLICK HANDLERS
+===================================================== */
+
+quickModeBtn.onclick =
+  function () {
+
+    gameMode =
+      "quick";
+
+
+    quickModeBtn
+      .classList
+      .add("active");
+
+
+    longModeBtn
+      .classList
+      .remove("active");
+
+
+    updateMenuText();
+
+  };
+
+
+longModeBtn.onclick =
+  function () {
+
+    gameMode =
+      "long";
+
+
+    longModeBtn
+      .classList
+      .add("active");
+
+
+    quickModeBtn
+      .classList
+      .remove("active");
+
+
+    updateMenuText();
+
+  };
+
+
+duration30Btn.onclick =
+  function () {
+
+    selectedStageDuration =
+      30;
+
+
+    duration30Btn
+      .classList
+      .add("active");
+
+
+    duration60Btn
+      .classList
+      .remove("active");
+
+
+    updateMenuText();
+
+  };
+
+
+duration60Btn.onclick =
+  function () {
+
+    selectedStageDuration =
+      60;
+
+
+    duration60Btn
+      .classList
+      .add("active");
+
+
+    duration30Btn
+      .classList
+      .remove("active");
+
+
+    updateMenuText();
+
+  };
+
+
+easyBtn.onclick =
+  function () {
+
+    selectedDifficulty =
+      "easy";
+
+
+    easyBtn
+      .classList
+      .add("active");
+
+
+    mediumBtn
+      .classList
+      .remove("active");
+
+
+    hardBtn
+      .classList
+      .remove("active");
+
+
+    updateMenuText();
+
+  };
+
+
+mediumBtn.onclick =
+  function () {
+
+    selectedDifficulty =
+      "medium";
+
+
+    mediumBtn
+      .classList
+      .add("active");
+
+
+    easyBtn
+      .classList
+      .remove("active");
+
+
+    hardBtn
+      .classList
+      .remove("active");
+
+
+    updateMenuText();
+
+  };
+
+
+hardBtn.onclick =
+  function () {
+
+    selectedDifficulty =
+      "hard";
+
+
+    hardBtn
+      .classList
+      .add("active");
+
+
+    easyBtn
+      .classList
+      .remove("active");
+
+
+    mediumBtn
+      .classList
+      .remove("active");
+
+
+    updateMenuText();
+
+  };
+
+
+/* =====================================================
+   ENVIRONMENT BUTTONS
+===================================================== */
+
+envButtons.forEach(
+
+  button => {
+
+    button.onclick =
+      function () {
+
+        envButtons.forEach(
+
+          btn =>
+            btn.classList
+              .remove("active")
+
+        );
+
+
+        button.classList
+          .add("active");
+
+
+        selectedEnvironment =
+          button.dataset.env;
+
+
+        updateMenuText();
+
+      };
+
+  }
+
+);
+
+
+/* =====================================================
+   SOUND BUTTON
+===================================================== */
+
+soundToggle.onclick =
+  function () {
+
+    soundEnabled =
+      !soundEnabled;
+
+
+    soundToggle.textContent =
+      soundEnabled
+        ? "🔊"
+        : "🔇";
+
+
+    if (!soundEnabled) {
+
+      stopDrivingSounds();
+
+    } else if (running) {
+
+      startDrivingSounds();
+
+    }
+
+  };
 
 
 /* =====================================================
@@ -366,276 +754,8 @@ try {
 } catch (error) {
 
   highScore = 0;
+
 }
-
-
-function saveHighScore() {
-
-  const rounded =
-    Math.round(score);
-
-
-  if (
-    rounded <= highScore
-  ) {
-
-    return;
-  }
-
-
-  highScore = rounded;
-
-
-  try {
-
-    localStorage.setItem(
-      HIGH_SCORE_KEY,
-      String(highScore)
-    );
-
-  } catch (error) {}
-}
-
-
-/* =====================================================
-   MENU SETTINGS
-===================================================== */
-
-let gameMode = "quick";
-
-let selectedStageDuration = 60;
-
-
-function updateMenuText() {
-
-  const modeText =
-    gameMode === "long"
-      ? "LONG"
-      : "QUICK";
-
-
-  const timeText =
-    selectedStageDuration === 30
-      ? "30 SEC"
-      : "1 MIN";
-
-
-  const difficulty =
-    difficultySettings[
-      selectedDifficulty
-    ];
-
-
-  const multiplier =
-    difficulty.scoreMultiplier;
-
-
-  message.textContent =
-
-    `${modeText} • ${timeText} • ` +
-
-    `${difficulty.label} • ` +
-
-    `×${multiplier} SCORE • 5 LIVES`;
-}
-
-
-/* =====================================================
-   MODE
-===================================================== */
-
-function setGameMode(mode) {
-
-  gameMode = mode;
-
-
-  quickModeBtn
-    .classList
-    .toggle(
-      "active",
-      mode === "quick"
-    );
-
-
-  longModeBtn
-    .classList
-    .toggle(
-      "active",
-      mode === "long"
-    );
-
-
-  updateMenuText();
-}
-
-
-quickModeBtn.addEventListener(
-  "click",
-  () => setGameMode("quick")
-);
-
-
-longModeBtn.addEventListener(
-  "click",
-  () => setGameMode("long")
-);
-
-
-/* =====================================================
-   LEVEL LENGTH
-===================================================== */
-
-function setStageDuration(seconds) {
-
-  selectedStageDuration =
-    seconds;
-
-
-  duration30Btn
-    .classList
-    .toggle(
-      "active",
-      seconds === 30
-    );
-
-
-  duration60Btn
-    .classList
-    .toggle(
-      "active",
-      seconds === 60
-    );
-
-
-  updateMenuText();
-}
-
-
-duration30Btn.addEventListener(
-  "click",
-  () => setStageDuration(30)
-);
-
-
-duration60Btn.addEventListener(
-  "click",
-  () => setStageDuration(60)
-);
-
-
-/* =====================================================
-   DIFFICULTY
-===================================================== */
-
-function setDifficulty(level) {
-
-  selectedDifficulty =
-    level;
-
-
-  easyBtn
-    .classList
-    .toggle(
-      "active",
-      level === "easy"
-    );
-
-
-  mediumBtn
-    .classList
-    .toggle(
-      "active",
-      level === "medium"
-    );
-
-
-  hardBtn
-    .classList
-    .toggle(
-      "active",
-      level === "hard"
-    );
-
-
-  updateMenuText();
-}
-
-
-easyBtn.addEventListener(
-  "click",
-  () => setDifficulty("easy")
-);
-
-
-mediumBtn.addEventListener(
-  "click",
-  () => setDifficulty("medium")
-);
-
-
-hardBtn.addEventListener(
-  "click",
-  () => setDifficulty("hard")
-);
-
-
-/* =====================================================
-   ENVIRONMENT MENU
-===================================================== */
-
-envButtons.forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      envButtons.forEach(btn => {
-
-        btn
-          .classList
-          .remove("active");
-      });
-
-
-      button
-        .classList
-        .add("active");
-
-
-      selectedEnvironment =
-        button.dataset.env;
-
-
-      updateMenuText();
-    }
-  );
-});
-
-
-soundToggle.addEventListener(
-  "click",
-  () => {
-
-    soundEnabled =
-      !soundEnabled;
-
-
-    soundToggle.textContent =
-      soundEnabled
-        ? "🔊"
-        : "🔇";
-
-
-    if (!soundEnabled) {
-
-      stopDrivingSounds();
-
-    } else if (running) {
-
-      startDrivingSounds();
-    }
-  }
-);
 
 
 /* =====================================================
@@ -643,7 +763,9 @@ soundToggle.addEventListener(
 ===================================================== */
 
 let W = 0;
+
 let H = 0;
+
 let DPR = 1;
 
 
@@ -658,6 +780,7 @@ function resize() {
 
   W =
     window.innerWidth;
+
 
   H =
     window.innerHeight;
@@ -691,6 +814,7 @@ function resize() {
     0,
     0
   );
+
 }
 
 
@@ -704,135 +828,210 @@ resize();
 
 
 /* =====================================================
-   STATE
+   GAME STATE
 ===================================================== */
 
-let running = false;
+let running =
+  false;
 
-let lastTime = 0;
+
+let lastTime =
+  0;
 
 
 let player;
+
 let robber;
 
 
-let traffic = [];
-let particles = [];
+let traffic =
+  [];
 
 
-let elapsed = 0;
-let stageElapsed = 0;
+let particles =
+  [];
 
 
-let score = 0;
-
-let displayedSpeed = 136;
-
-
-let nearMisses = 0;
-
-let combo = 0;
-let bestCombo = 0;
-let comboTimer = 0;
+let elapsed =
+  0;
 
 
-const MAX_HEARTS = 5;
-
-let hearts = MAX_HEARTS;
-
-
-let nitro = 0;
-let nitroActive = 0;
+let stageElapsed =
+  0;
 
 
-let spawnTimer = 0;
-
-let stalledSpawnTimer = Infinity;
-
-
-let shake = 0;
-
-let statusTimer = 0;
-
-let roadScroll = 0;
+let score =
+  0;
 
 
-let policeWorldY = 1100;
-let suspectWorldY = 650;
+let displayedSpeed =
+  136;
+
+
+let nearMisses =
+  0;
+
+
+let combo =
+  0;
+
+
+let bestCombo =
+  0;
+
+
+let comboTimer =
+  0;
+
+
+const MAX_HEARTS =
+  5;
+
+
+let hearts =
+  MAX_HEARTS;
+
+
+let nitro =
+  0;
+
+
+let nitroActive =
+  0;
+
+
+let spawnTimer =
+  0;
+
+
+let stalledSpawnTimer =
+  Infinity;
+
+
+let shake =
+  0;
+
+
+let statusTimer =
+  0;
+
+
+let roadScroll =
+  0;
+
+
+let policeWorldY =
+  1100;
+
+
+let suspectWorldY =
+  650;
 
 
 /* =====================================================
-   TRANSITION STATE
+   ENVIRONMENT PROGRESSION
 ===================================================== */
 
-let environmentSequence = [];
-
-let environmentStage = 0;
-
-
-let stageEscape = false;
-
-let stageTauntStarted = false;
-
-let cinematic = false;
-
-let switchingEnvironment = false;
+let environmentSequence =
+  [];
 
 
-let transitionCardTimer = 0;
-
-let transitionTitle = "";
-
-let transitionSubtitle = "";
+let environmentStage =
+  0;
 
 
-let tauntTimer = 0;
+let stageEscape =
+  false;
 
-let tauntText = "";
+
+let stageTauntStarted =
+  false;
+
+
+let cinematic =
+  false;
+
+
+let transitionCardTimer =
+  0;
+
+
+let transitionTitle =
+  "";
+
+
+let transitionSubtitle =
+  "";
+
+
+let tauntTimer =
+  0;
+
+
+let tauntText =
+  "";
 
 
 /* =====================================================
    BALANCE
 ===================================================== */
 
-const TRAFFIC_BASE_SPEED = 285;
-
-const TRAFFIC_RELATIVE_MULTIPLIER = 2.4;
-
-const TRAFFIC_MAX_SPEED = 430;
+const TRAFFIC_BASE_SPEED =
+  285;
 
 
-const NITRO_DURATION = 2.7;
-
-const NITRO_SPEED_BONUS = 38;
-
-
-const MIN_CRASH_SPEED = 104;
+const TRAFFIC_RELATIVE_MULTIPLIER =
+  2.4;
 
 
-/*
-  About 2 km/h recovery per second.
-*/
+const TRAFFIC_MAX_SPEED =
+  430;
 
-const SPEED_RECOVERY_RATE = 2.0;
+
+const NITRO_DURATION =
+  2.7;
+
+
+const NITRO_SPEED_BONUS =
+  38;
+
+
+const MIN_CRASH_SPEED =
+  104;
+
+
+const SPEED_RECOVERY_RATE =
+  2.0;
 
 
 /* =====================================================
    WEATHER
 ===================================================== */
 
-let rainDrops = [];
-let snowFlakes = [];
-let dustParticles = [];
+let rainDrops =
+  [];
+
+
+let snowFlakes =
+  [];
+
+
+let dustParticles =
+  [];
 
 
 function createWeatherParticles() {
 
-  rainDrops = [];
+  rainDrops =
+    [];
 
-  snowFlakes = [];
 
-  dustParticles = [];
+  snowFlakes =
+    [];
+
+
+  dustParticles =
+    [];
 
 
   for (
@@ -858,6 +1057,7 @@ function createWeatherParticles() {
         Math.random() * 25
 
     });
+
   }
 
 
@@ -888,6 +1088,7 @@ function createWeatherParticles() {
         Math.random() * 3
 
     });
+
   }
 
 
@@ -910,7 +1111,9 @@ function createWeatherParticles() {
         Math.random() * 130
 
     });
+
   }
+
 }
 
 
@@ -926,10 +1129,12 @@ function backgroundFrameWidth() {
       W * 0.48,
       H * 0.82
     );
+
   }
 
 
   return W;
+
 }
 
 
@@ -956,9 +1161,11 @@ function roadInfo() {
 
     width,
 
-    lanes: 4
+    lanes:
+      4
 
   };
+
 }
 
 
@@ -978,10 +1185,12 @@ function laneCenter(lane) {
     ) *
 
     (
-      lane + 0.5
+      lane +
+      0.5
     )
 
   );
+
 }
 
 
@@ -1001,13 +1210,15 @@ function buildEnvironmentSequence() {
     gameMode === "quick"
   ) {
 
-    environmentSequence = [
-      selectedEnvironment
-    ];
+    environmentSequence =
+      [
+        selectedEnvironment
+      ];
 
   } else {
 
-    environmentSequence = [];
+    environmentSequence =
+      [];
 
 
     for (
@@ -1020,28 +1231,33 @@ function buildEnvironmentSequence() {
 
         environmentOrder[
           (
-            startIndex + i
+            startIndex +
+            i
           ) %
           environmentOrder.length
         ]
 
       );
+
     }
+
   }
 
 
-  environmentStage = 0;
+  environmentStage =
+    0;
 
 
   activeEnvironment =
     environmentSequence[0];
+
 }
 
 
 /* =====================================================
-   TRANSITION TIMING
+   TRANSITION TIMES
 
-   Relative to selected level length.
+   Works for BOTH 30 sec and 60 sec.
 ===================================================== */
 
 function getTauntTime() {
@@ -1050,6 +1266,7 @@ function getTauntTime() {
     5,
     selectedStageDuration - 8
   );
+
 }
 
 
@@ -1059,6 +1276,7 @@ function getEscapeTime() {
     7,
     selectedStageDuration - 5
   );
+
 }
 
 
@@ -1068,6 +1286,7 @@ function getCinematicTime() {
     9,
     selectedStageDuration - 3
   );
+
 }
 
 
@@ -1082,17 +1301,22 @@ function environmentTaunt(environment) {
     city:
       "BACK TO THE CITY. TRY TO KEEP UP!",
 
+
     highway:
       "CAN'T CATCH ME THAT FAST! LET'S OPEN IT UP ON THE HIGHWAY!",
+
 
     tunnel:
       "STILL THERE? TRY CATCHING ME IN THE TUNNEL!",
 
+
     rain:
       "LET'S SEE HOW YOU DO IN THE RAIN!",
 
+
     desert:
       "LET'S SEE YOU HANDLE THE DESERT!",
+
 
     snow:
       "YOU MADE IT THIS FAR? LET'S SEE HOW YOU DO IN THE SNOW!"
@@ -1104,16 +1328,18 @@ function environmentTaunt(environment) {
     taunts[environment] ||
     "CAN'T CATCH ME THAT FAST!"
   );
+
 }
 
 
 /* =====================================================
-   HEART HUD
+   HEARTS
 ===================================================== */
 
 function updateHeartsHUD() {
 
-  let output = "";
+  let output =
+    "";
 
 
   for (
@@ -1129,16 +1355,21 @@ function updateHeartsHUD() {
 
 
     if (
-      i < MAX_HEARTS - 1
+      i <
+      MAX_HEARTS - 1
     ) {
 
-      output += " ";
+      output +=
+        " ";
+
     }
+
   }
 
 
   heartsValue.textContent =
     output;
+
 }
 
 
@@ -1157,17 +1388,17 @@ function updateScoreHUD() {
 
 
   bestScoreValue.textContent =
-
     Math.max(
       highScore,
       rounded
     )
     .toLocaleString();
+
 }
 
 
 /* =====================================================
-   STALLED VEHICLE TIMER
+   STALLED TIMER
 ===================================================== */
 
 function resetStalledTimer() {
@@ -1180,7 +1411,7 @@ function resetStalledTimer() {
 
   if (
     !Number.isFinite(
-      settings.stalledMinTime
+      settings.stalledMin
     )
   ) {
 
@@ -1188,19 +1419,21 @@ function resetStalledTimer() {
       Infinity;
 
     return;
+
   }
 
 
   stalledSpawnTimer =
 
-    settings.stalledMinTime +
+    settings.stalledMin +
 
     Math.random() *
 
     (
-      settings.stalledMaxTime -
-      settings.stalledMinTime
+      settings.stalledMax -
+      settings.stalledMin
     );
+
 }
 
 
@@ -1217,9 +1450,12 @@ function resetGame() {
     environmentSequence[0];
 
 
-  policeWorldY = 1100;
+  policeWorldY =
+    1100;
 
-  suspectWorldY = 650;
+
+  suspectWorldY =
+    650;
 
 
   player = {
@@ -1233,15 +1469,20 @@ function resetGame() {
     screenY:
       H * 0.73,
 
-    width: 76,
+    width:
+      76,
 
-    height: 138,
+    height:
+      138,
 
-    speed: 136,
+    speed:
+      136,
 
-    invincible: 0,
+    invincible:
+      0,
 
-    image: "police"
+    image:
+      "police"
 
   };
 
@@ -1254,92 +1495,132 @@ function resetGame() {
     screenY:
       H * 0.27,
 
-    width: 56,
+    width:
+      56,
 
-    height: 103,
+    height:
+      103,
 
-    speed: 131,
+    speed:
+      131,
 
-    targetLane: 1,
+    targetLane:
+      1,
 
-    laneTimer: 1.5,
+    laneTimer:
+      1.5,
 
-    image: "suspect"
+    image:
+      "suspect"
 
   };
 
 
-  traffic = [];
-
-  particles = [];
-
-
-  elapsed = 0;
-
-  stageElapsed = 0;
+  traffic =
+    [];
 
 
-  score = 0;
-
-  displayedSpeed = 136;
-
-
-  hearts = MAX_HEARTS;
+  particles =
+    [];
 
 
-  nearMisses = 0;
-
-  combo = 0;
-
-  bestCombo = 0;
-
-  comboTimer = 0;
+  elapsed =
+    0;
 
 
-  nitro = 0;
+  stageElapsed =
+    0;
 
-  nitroActive = 0;
+
+  score =
+    0;
 
 
-  spawnTimer = 1.1;
+  displayedSpeed =
+    136;
+
+
+  hearts =
+    MAX_HEARTS;
+
+
+  nearMisses =
+    0;
+
+
+  combo =
+    0;
+
+
+  bestCombo =
+    0;
+
+
+  comboTimer =
+    0;
+
+
+  nitro =
+    0;
+
+
+  nitroActive =
+    0;
+
+
+  spawnTimer =
+    1.1;
 
 
   resetStalledTimer();
 
 
-  shake = 0;
-
-  statusTimer = 0;
-
-  roadScroll = 0;
+  shake =
+    0;
 
 
-  stageEscape = false;
-
-  stageTauntStarted = false;
-
-  cinematic = false;
-
-  switchingEnvironment = false;
+  statusTimer =
+    0;
 
 
-  transitionCardTimer = 0;
+  roadScroll =
+    0;
 
-  tauntTimer = 0;
+
+  stageEscape =
+    false;
 
 
-  nitroFill.style.width = "0%";
+  stageTauntStarted =
+    false;
+
+
+  cinematic =
+    false;
+
+
+  transitionCardTimer =
+    0;
+
+
+  tauntTimer =
+    0;
+
+
+  nitroFill.style.width =
+    "0%";
+
 
   nitroState.textContent =
     "BUILDING";
 
 
-  nitroUI
-    .classList
+  nitroUI.classList
     .remove("ready");
 
 
   updateHeartsHUD();
+
 
   updateScoreHUD();
 
@@ -1360,6 +1641,7 @@ function resetGame() {
 
 
   updateHUD();
+
 }
 
 
@@ -1378,11 +1660,13 @@ function getDistance() {
       (
         policeWorldY -
         suspectWorldY
-      ) * 0.7
+      ) *
+      0.7
 
     )
 
   );
+
 }
 
 
@@ -1411,7 +1695,8 @@ function startGame() {
     "none";
 
 
-  running = true;
+  running =
+    true;
 
 
   lastTime =
@@ -1424,30 +1709,39 @@ function startGame() {
   requestAnimationFrame(
     gameLoop
   );
+
 }
 
 
-startBtn.addEventListener(
-  "click",
-  startGame
-);
+startBtn.onclick =
+  startGame;
 
 
 /* =====================================================
    CONTROLS
 ===================================================== */
 
-let pointerDown = false;
+let pointerDown =
+  false;
 
-let gestureStartX = 0;
-let gestureStartY = 0;
 
-let gestureStartTime = 0;
+let gestureStartX =
+  0;
+
+
+let gestureStartY =
+  0;
+
+
+let gestureStartTime =
+  0;
 
 
 function steer(clientX) {
 
-  if (!running) return;
+  if (!running) {
+    return;
+  }
 
 
   const road =
@@ -1470,21 +1764,28 @@ function steer(clientX) {
       )
 
     );
+
 }
 
 
 window.addEventListener(
+
   "pointerdown",
+
   event => {
 
-    if (!running) return;
+    if (!running) {
+      return;
+    }
 
 
-    pointerDown = true;
+    pointerDown =
+      true;
 
 
     gestureStartX =
       event.clientX;
+
 
     gestureStartY =
       event.clientY;
@@ -1497,38 +1798,55 @@ window.addEventListener(
     steer(
       event.clientX
     );
+
   }
+
 );
 
 
 window.addEventListener(
+
   "pointermove",
+
   event => {
 
     if (
       !pointerDown ||
       !running
-    ) return;
+    ) {
+
+      return;
+
+    }
 
 
     steer(
       event.clientX
     );
+
   }
+
 );
 
 
 window.addEventListener(
+
   "pointerup",
+
   event => {
 
-    if (!pointerDown) return;
+    if (!pointerDown) {
+      return;
+    }
 
 
-    pointerDown = false;
+    pointerDown =
+      false;
 
 
-    if (!running) return;
+    if (!running) {
+      return;
+    }
 
 
     const dx =
@@ -1551,7 +1869,9 @@ window.addEventListener(
       dy < -45 &&
 
       Math.abs(dy) >
-      Math.abs(dx) * 1.05 &&
+
+      Math.abs(dx) *
+      1.05 &&
 
       duration < 800;
 
@@ -1559,8 +1879,11 @@ window.addEventListener(
     if (swipeUp) {
 
       activateNitro();
+
     }
+
   }
+
 );
 
 
@@ -1579,10 +1902,13 @@ function activateNitro() {
     );
 
     return;
+
   }
 
 
-  nitro = 0;
+  nitro =
+    0;
+
 
   nitroActive =
     NITRO_DURATION;
@@ -1598,15 +1924,20 @@ function activateNitro() {
   );
 
 
-  shake = 7;
+  shake =
+    7;
 
 
   if (
     navigator.vibrate
   ) {
 
-    navigator.vibrate(35);
+    navigator.vibrate(
+      35
+    );
+
   }
+
 }
 
 
@@ -1624,12 +1955,14 @@ function showStatus(text) {
     "1";
 
 
-  statusTimer = 1.0;
+  statusTimer =
+    1;
+
 }
 
 
 /* =====================================================
-   NORMAL TRAFFIC
+   TRAFFIC
 ===================================================== */
 
 function createTrafficCar(
@@ -1646,21 +1979,32 @@ function createTrafficCar(
 
 
   const isTruck =
-    Math.random() < 0.06;
+    Math.random() <
+    0.06;
 
 
   let image;
+
   let width;
+
   let height;
+
   let speed;
 
 
   if (isTruck) {
 
-    image = "truck";
+    image =
+      "truck";
 
-    width = 66;
-    height = 140;
+
+    width =
+      66;
+
+
+    height =
+      140;
+
 
     speed =
       96 +
@@ -1669,9 +2013,13 @@ function createTrafficCar(
   } else {
 
     const choices = [
+
       "traffic1",
+
       "traffic2",
+
       "traffic3"
+
     ];
 
 
@@ -1684,13 +2032,18 @@ function createTrafficCar(
       ];
 
 
-    width = 49;
-    height = 92;
+    width =
+      49;
+
+
+    height =
+      92;
 
 
     speed =
       105 +
       Math.random() * 14;
+
   }
 
 
@@ -1728,21 +2081,27 @@ function createTrafficCar(
   traffic.push({
 
     x,
+
     lane,
+
     screenY,
 
     width,
+
     height,
 
     speed,
 
     image,
 
-    passed: false,
+    passed:
+      false,
 
-    stalled: false
+    stalled:
+      false
 
   });
+
 }
 
 
@@ -1770,23 +2129,35 @@ function createStalledVehicle(
 
 
   let image;
+
   let width;
+
   let height;
 
 
   if (useTruck) {
 
-    image = "truck";
+    image =
+      "truck";
 
-    width = 68;
-    height = 144;
+
+    width =
+      68;
+
+
+    height =
+      144;
 
   } else {
 
     const choices = [
+
       "traffic1",
+
       "traffic2",
+
       "traffic3"
+
     ];
 
 
@@ -1799,8 +2170,13 @@ function createStalledVehicle(
       ];
 
 
-    width = 50;
-    height = 94;
+    width =
+      50;
+
+
+    height =
+      94;
+
   }
 
 
@@ -1817,29 +2193,23 @@ function createStalledVehicle(
 
     height,
 
-    /*
-      Stationary vehicle.
-    */
-
-    speed: 0,
+    speed:
+      0,
 
     image,
 
-    passed: false,
+    passed:
+      false,
 
-    stalled: true
+    stalled:
+      true
 
   });
+
 }
 
 
 function spawnStalledFormation() {
-
-  const settings =
-    difficultySettings[
-      selectedDifficulty
-    ];
-
 
   if (
     selectedDifficulty ===
@@ -1847,7 +2217,14 @@ function spawnStalledFormation() {
   ) {
 
     return;
+
   }
+
+
+  const settings =
+    difficultySettings[
+      selectedDifficulty
+    ];
 
 
   const lanes = [
@@ -1857,10 +2234,6 @@ function spawnStalledFormation() {
     3
   ];
 
-
-  /*
-    Shuffle lanes.
-  */
 
   for (
     let i =
@@ -1886,16 +2259,9 @@ function spawnStalledFormation() {
       lanes[j],
       lanes[i]
     ];
+
   }
 
-
-  /*
-    Medium mostly 1 stalled lane.
-
-    Hard sometimes 2.
-
-    Never 3 or 4.
-  */
 
   const count =
 
@@ -1903,6 +2269,7 @@ function spawnStalledFormation() {
     settings.doubleStallChance
 
       ? 2
+
       : 1;
 
 
@@ -1916,23 +2283,29 @@ function spawnStalledFormation() {
 
       lanes[i],
 
-      -120 -
+      -130 -
       Math.random() * 45
 
     );
+
   }
 
 
   showStatus(
+
     count === 2
+
       ? "⚠️ ROAD HAZARD!"
+
       : "⚠️ STALLED VEHICLE!"
+
   );
+
 }
 
 
 /* =====================================================
-   TRAFFIC GROUP
+   NORMAL TRAFFIC GROUP
 ===================================================== */
 
 function spawnTrafficGroup() {
@@ -1969,12 +2342,9 @@ function spawnTrafficGroup() {
       lanes[j],
       lanes[i]
     ];
+
   }
 
-
-  /*
-    Preserve our playable traffic balance.
-  */
 
   const count =
     Math.random() < 0.70
@@ -1996,7 +2366,9 @@ function spawnTrafficGroup() {
       Math.random() * 60
 
     );
+
   }
+
 }
 
 
@@ -2051,6 +2423,7 @@ function overlap(a, b) {
     ) / 2
 
   );
+
 }
 
 
@@ -2062,7 +2435,11 @@ function handleCrash() {
 
   if (
     player.invincible > 0
-  ) return;
+  ) {
+
+    return;
+
+  }
 
 
   const settings =
@@ -2076,14 +2453,6 @@ function handleCrash() {
 
   updateHeartsHUD();
 
-
-  /*
-    Difficulty-based speed penalty.
-
-    EASY   -12
-    MEDIUM -16
-    HARD   -20
-  */
 
   player.speed =
     Math.max(
@@ -2100,25 +2469,17 @@ function handleCrash() {
     player.speed;
 
 
-  /*
-    Suspect gains ground.
-  */
-
-  policeWorldY += 35;
+  policeWorldY +=
+    35;
 
 
-  /*
-    Combo lost.
-  */
-
-  combo = 0;
-
-  comboTimer = 0;
+  combo =
+    0;
 
 
-  /*
-    Lose some Nitro.
-  */
+  comboTimer =
+    0;
+
 
   nitro =
     Math.max(
@@ -2127,10 +2488,12 @@ function handleCrash() {
     );
 
 
-  player.invincible = 1.25;
+  player.invincible =
+    1.25;
 
 
-  shake = 12;
+  shake =
+    12;
 
 
   createSparks(
@@ -2153,6 +2516,7 @@ function handleCrash() {
       30,
       45
     ]);
+
   }
 
 
@@ -2166,6 +2530,7 @@ function handleCrash() {
     );
 
     return;
+
   }
 
 
@@ -2178,6 +2543,7 @@ function handleCrash() {
     } LEFT`
 
   );
+
 }
 
 
@@ -2196,6 +2562,7 @@ function createSparks(x, y) {
     particles.push({
 
       x,
+
       y,
 
       vx:
@@ -2212,7 +2579,9 @@ function createSparks(x, y) {
         Math.random() * 0.4
 
     });
+
   }
+
 }
 
 
@@ -2239,7 +2608,8 @@ function updateParticles(dt) {
       p.vy * dt;
 
 
-    p.life -= dt;
+    p.life -=
+      dt;
 
 
     if (
@@ -2250,8 +2620,11 @@ function updateParticles(dt) {
         i,
         1
       );
+
     }
+
   }
+
 }
 
 
@@ -2279,22 +2652,31 @@ function worldToScreenY(worldY) {
     ) * 0.78
 
   );
+
 }
 
 
 /* =====================================================
-   LONG CHASE TRANSITION
+   STAGE TRANSITION
 ===================================================== */
 
 function startStageEscape() {
 
-  if (stageEscape) return;
+  if (
+    stageEscape
+  ) {
+
+    return;
+
+  }
 
 
-  stageEscape = true;
+  stageEscape =
+    true;
 
 
-  traffic = [];
+  traffic =
+    [];
 
 
   const next =
@@ -2306,28 +2688,25 @@ function startStageEscape() {
   if (next) {
 
     tauntText =
-      environmentTaunt(next);
+      environmentTaunt(
+        next
+      );
 
 
-    tauntTimer = 7;
+    tauntTimer =
+      7;
+
   }
 
 
   showStatus(
     "SUSPECT IS MAKING A BREAK FOR IT!"
   );
+
 }
 
 
 function switchToNextEnvironment() {
-
-  if (
-    switchingEnvironment
-  ) return;
-
-
-  switchingEnvironment = true;
-
 
   const nextStage =
     environmentStage + 1;
@@ -2338,9 +2717,8 @@ function switchToNextEnvironment() {
     environmentSequence.length
   ) {
 
-    switchingEnvironment = false;
-
     return;
+
   }
 
 
@@ -2349,10 +2727,6 @@ function switchToNextEnvironment() {
       selectedDifficulty
     ];
 
-
-  /*
-    Stage completion bonus.
-  */
 
   score +=
     Math.round(
@@ -2371,31 +2745,36 @@ function switchToNextEnvironment() {
     ];
 
 
-  stageElapsed = 0;
+  stageElapsed =
+    0;
 
 
-  stageEscape = false;
-
-  stageTauntStarted = false;
-
-  cinematic = false;
+  stageEscape =
+    false;
 
 
-  traffic = [];
+  stageTauntStarted =
+    false;
 
 
-  spawnTimer = 1;
+  cinematic =
+    false;
+
+
+  traffic =
+    [];
+
+
+  spawnTimer =
+    1;
 
 
   resetStalledTimer();
 
 
-  /*
-    Fresh suspect lead.
-  */
-
   policeWorldY =
-    suspectWorldY + 430;
+    suspectWorldY +
+    430;
 
 
   transitionTitle =
@@ -2409,7 +2788,8 @@ function switchToNextEnvironment() {
     "STAGE " +
 
     (
-      environmentStage + 1
+      environmentStage +
+      1
     ) +
 
     " OF " +
@@ -2417,7 +2797,8 @@ function switchToNextEnvironment() {
     environmentSequence.length;
 
 
-  transitionCardTimer = 2.2;
+  transitionCardTimer =
+    2.2;
 
 
   createWeatherParticles();
@@ -2425,8 +2806,6 @@ function switchToNextEnvironment() {
 
   updateScoreHUD();
 
-
-  switchingEnvironment = false;
 }
 
 
@@ -2436,29 +2815,31 @@ function switchToNextEnvironment() {
 
 function update(dt) {
 
-  /*
-    Transition card pauses gameplay.
-  */
-
   if (
     transitionCardTimer > 0
   ) {
 
-    transitionCardTimer -= dt;
+    transitionCardTimer -=
+      dt;
 
 
     updateWeather(dt);
+
 
     updateHUD();
 
 
     return;
+
   }
 
 
-  elapsed += dt;
+  elapsed +=
+    dt;
 
-  stageElapsed += dt;
+
+  stageElapsed +=
+    dt;
 
 
   const isLong =
@@ -2469,7 +2850,8 @@ function update(dt) {
 
     environmentStage ===
 
-    environmentSequence.length - 1;
+    environmentSequence.length -
+    1;
 
 
   const difficulty =
@@ -2478,9 +2860,7 @@ function update(dt) {
     ];
 
 
-  /* ===================================================
-     LONG CHASE TIMING
-  =================================================== */
+  /* LONG CHASE TRANSITIONS */
 
   if (
     isLong &&
@@ -2493,7 +2873,8 @@ function update(dt) {
       !stageTauntStarted
     ) {
 
-      stageTauntStarted = true;
+      stageTauntStarted =
+        true;
 
 
       const next =
@@ -2506,7 +2887,9 @@ function update(dt) {
         environmentTaunt(next);
 
 
-      tauntTimer = 8;
+      tauntTimer =
+        8;
+
     }
 
 
@@ -2517,6 +2900,7 @@ function update(dt) {
     ) {
 
       startStageEscape();
+
     }
 
 
@@ -2525,7 +2909,9 @@ function update(dt) {
       getCinematicTime()
     ) {
 
-      cinematic = true;
+      cinematic =
+        true;
+
     }
 
 
@@ -2537,7 +2923,9 @@ function update(dt) {
       switchToNextEnvironment();
 
       return;
+
     }
+
   }
 
 
@@ -2545,33 +2933,35 @@ function update(dt) {
     tauntTimer > 0
   ) {
 
-    tauntTimer -= dt;
+    tauntTimer -=
+      dt;
+
   }
 
 
-  /* ===================================================
-     COMBO
-  =================================================== */
+  /* COMBO */
 
   if (
     comboTimer > 0
   ) {
 
-    comboTimer -= dt;
+    comboTimer -=
+      dt;
 
 
     if (
       comboTimer <= 0
     ) {
 
-      combo = 0;
+      combo =
+        0;
+
     }
+
   }
 
 
-  /* ===================================================
-     SPEED
-  =================================================== */
+  /* SPEED */
 
   let policeSpeed =
     player.speed;
@@ -2585,17 +2975,15 @@ function update(dt) {
     nitroActive > 0
   ) {
 
-    nitroActive -= dt;
+    nitroActive -=
+      dt;
 
 
     policeSpeed +=
       NITRO_SPEED_BONUS;
+
   }
 
-
-  /*
-    Transition escape.
-  */
 
   if (
     isLong &&
@@ -2603,17 +2991,25 @@ function update(dt) {
     !isFinalStage
   ) {
 
-    policeSpeed += 28;
+    policeSpeed +=
+      28;
 
-    suspectSpeed += 47;
+
+    suspectSpeed +=
+      47;
 
 
     if (cinematic) {
 
-      policeSpeed += 17;
+      policeSpeed +=
+        17;
 
-      suspectSpeed += 26;
+
+      suspectSpeed +=
+        26;
+
     }
+
   }
 
 
@@ -2655,9 +3051,7 @@ function update(dt) {
     );
 
 
-  /* ===================================================
-     STEERING
-  =================================================== */
+  /* STEERING */
 
   const environment =
     environments[
@@ -2683,11 +3077,10 @@ function update(dt) {
     );
 
 
-  /* ===================================================
-     SUSPECT AI
-  =================================================== */
+  /* SUSPECT AI */
 
-  robber.laneTimer -= dt;
+  robber.laneTimer -=
+    dt;
 
 
   if (
@@ -2695,10 +3088,12 @@ function update(dt) {
   ) {
 
     const choices = [
+
       0,
       1,
       2,
       3
+
     ].filter(
 
       lane =>
@@ -2723,28 +3118,24 @@ function update(dt) {
     const baseDelay =
 
       stageElapsed >
-      selectedStageDuration * 0.70
+      selectedStageDuration *
+      0.70
 
-        ?
+        ? 0.65 +
+          Math.random() *
+          0.65
 
-        0.65 +
-        Math.random() * 0.65
+        : 1.2 +
+          Math.random();
 
-        :
-
-        1.2 +
-        Math.random() * 1.0;
-
-
-    /*
-      Hard suspect changes lanes faster.
-    */
 
     robber.laneTimer =
 
       baseDelay /
 
-      difficulty.suspectAggression;
+      difficulty
+        .suspectAggression;
+
   }
 
 
@@ -2763,9 +3154,7 @@ function update(dt) {
     );
 
 
-  /* ===================================================
-     SCREEN POSITIONS
-  =================================================== */
+  /* SCREEN */
 
   player.screenY =
     worldToScreenY(
@@ -2809,9 +3198,7 @@ function update(dt) {
     getDistance();
 
 
-  /* ===================================================
-     CAPTURE LOCK
-  =================================================== */
+  /* CAPTURE LOCK */
 
   if (isLong) {
 
@@ -2825,18 +3212,23 @@ function update(dt) {
 
     if (!captureUnlocked) {
 
-      let minimumDistance = 75;
+      let minimumDistance =
+        75;
 
 
       if (stageEscape) {
 
-        minimumDistance = 150;
+        minimumDistance =
+          150;
+
       }
 
 
       if (cinematic) {
 
-        minimumDistance = 220;
+        minimumDistance =
+          220;
+
       }
 
 
@@ -2849,19 +3241,17 @@ function update(dt) {
 
           suspectWorldY +
 
-          minimumDistance / 0.7;
+          minimumDistance /
+          0.7;
 
 
         distance =
           getDistance();
+
       }
+
     }
 
-
-    /*
-      No automatic Long Chase failure
-      from distance.
-    */
 
     if (
       distance > 560
@@ -2876,13 +3266,10 @@ function update(dt) {
 
       distance =
         getDistance();
+
     }
 
   } else {
-
-    /*
-      Quick chase lasts selected time.
-    */
 
     if (
       elapsed <
@@ -2891,20 +3278,22 @@ function update(dt) {
     ) {
 
       policeWorldY =
-        suspectWorldY + 60;
+        suspectWorldY +
+        60;
 
 
       distance =
         getDistance();
+
     }
+
   }
 
 
-  /* ===================================================
-     NORMAL TRAFFIC SPAWN
-  =================================================== */
+  /* NORMAL TRAFFIC SPAWN */
 
-  spawnTimer -= dt;
+  spawnTimer -=
+    dt;
 
 
   if (
@@ -2923,6 +3312,7 @@ function update(dt) {
     if (allowTraffic) {
 
       spawnTrafficGroup();
+
     }
 
 
@@ -2935,7 +3325,8 @@ function update(dt) {
 
       spawnDelay =
         1.15 +
-        Math.random() * 0.30;
+        Math.random() *
+        0.30;
 
     } else if (
       stageElapsed < 25
@@ -2943,20 +3334,18 @@ function update(dt) {
 
       spawnDelay =
         0.85 +
-        Math.random() * 0.30;
+        Math.random() *
+        0.30;
 
     } else {
 
       spawnDelay =
         0.70 +
-        Math.random() * 0.25;
+        Math.random() *
+        0.25;
+
     }
 
-
-    /*
-      Higher difficulty =
-      slightly more ordinary traffic.
-    */
 
     spawnTimer =
 
@@ -2965,20 +3354,21 @@ function update(dt) {
       (
         environment.trafficRate *
 
-        difficulty.trafficMultiplier
+        difficulty
+          .trafficMultiplier
       );
+
   }
 
 
-  /* ===================================================
-     STALLED VEHICLE SPAWN
-  =================================================== */
+  /* STALLED VEHICLES */
 
   if (
     !stageEscape
   ) {
 
-    stalledSpawnTimer -= dt;
+    stalledSpawnTimer -=
+      dt;
 
 
     if (
@@ -2989,13 +3379,13 @@ function update(dt) {
 
 
       resetStalledTimer();
+
     }
+
   }
 
 
-  /* ===================================================
-     TRAFFIC UPDATE
-  =================================================== */
+  /* TRAFFIC MOVEMENT */
 
   for (
     let i =
@@ -3029,16 +3419,13 @@ function update(dt) {
       TRAFFIC_RELATIVE_MULTIPLIER;
 
 
-    /*
-      Stalled cars feel faster
-      because they have zero road speed.
-    */
-
     if (
       car.stalled
     ) {
 
-      movement += 35;
+      movement +=
+        35;
+
     }
 
 
@@ -3047,7 +3434,9 @@ function update(dt) {
       !car.stalled
     ) {
 
-      movement -= 25;
+      movement -=
+        25;
+
     }
 
 
@@ -3055,7 +3444,9 @@ function update(dt) {
       nitroActive > 0
     ) {
 
-      movement += 55;
+      movement +=
+        55;
+
     }
 
 
@@ -3081,10 +3472,11 @@ function update(dt) {
       );
 
       continue;
+
     }
 
 
-    /* Collision */
+    /* CRASH */
 
     if (
       player.invincible <= 0 &&
@@ -3100,11 +3492,13 @@ function update(dt) {
       if (!running) {
 
         return;
+
       }
+
     }
 
 
-    /* Near miss */
+    /* NEAR MISS */
 
     if (
 
@@ -3114,11 +3508,13 @@ function update(dt) {
 
       player.screenY +
 
-      player.height * 0.48
+      player.height *
+      0.48
 
     ) {
 
-      car.passed = true;
+      car.passed =
+        true;
 
 
       const gap =
@@ -3163,12 +3559,9 @@ function update(dt) {
           );
 
 
-        comboTimer = 3;
+        comboTimer =
+          3;
 
-
-        /*
-          Hard charges Nitro slightly slower.
-        */
 
         nitro =
           Math.min(
@@ -3182,21 +3575,11 @@ function update(dt) {
               combo * 6
             ) *
 
-            difficulty.nitroMultiplier
+            difficulty
+              .nitroMultiplier
 
           );
 
-
-        /*
-          EASY:
-          300 / 600 / 900 / ...
-
-          MEDIUM:
-          450 / 900 / 1350 / ...
-
-          HARD:
-          600 / 1200 / 1800 / ...
-        */
 
         const reward =
           Math.round(
@@ -3205,12 +3588,14 @@ function update(dt) {
 
             combo *
 
-            difficulty.scoreMultiplier
+            difficulty
+              .scoreMultiplier
 
           );
 
 
-        score += reward;
+        score +=
+          reward;
 
 
         updateScoreHUD();
@@ -3225,35 +3610,30 @@ function update(dt) {
 
           combo === 1
 
-            ?
+            ? `NEAR MISS +${reward}`
 
-            `NEAR MISS +${reward}`
-
-            :
-
-            `NEAR MISS x${combo} +${reward}`
+            : `NEAR MISS x${combo} +${reward}`
 
         );
+
       }
+
     }
+
   }
 
-
-  /* ===================================================
-     INVINCIBILITY
-  =================================================== */
 
   if (
     player.invincible > 0
   ) {
 
-    player.invincible -= dt;
+    player.invincible -=
+      dt;
+
   }
 
 
-  /* ===================================================
-     SPEED RECOVERY
-  =================================================== */
+  /* SPEED RECOVERY */
 
   player.speed =
     Math.min(
@@ -3262,14 +3642,13 @@ function update(dt) {
 
       player.speed +
 
-      SPEED_RECOVERY_RATE * dt
+      SPEED_RECOVERY_RATE *
+      dt
 
     );
 
 
-  /* ===================================================
-     NITRO HUD
-  =================================================== */
+  /* NITRO HUD */
 
   nitroFill.style.width =
     nitro + "%";
@@ -3284,8 +3663,7 @@ function update(dt) {
       "SWIPE UP";
 
 
-    nitroUI
-      .classList
+    nitroUI.classList
       .add("ready");
 
   } else if (
@@ -3301,15 +3679,13 @@ function update(dt) {
       "BUILDING";
 
 
-    nitroUI
-      .classList
+    nitroUI.classList
       .remove("ready");
+
   }
 
 
-  /* ===================================================
-     WIN
-  =================================================== */
+  /* WIN */
 
   if (
     gameMode === "quick"
@@ -3318,13 +3694,15 @@ function update(dt) {
     if (
       elapsed >=
       selectedStageDuration &&
-
       distance <= 18
     ) {
 
-      finishGame(true);
+      finishGame(
+        true
+      );
 
       return;
+
     }
 
   } else {
@@ -3342,16 +3720,18 @@ function update(dt) {
       distance <= 18
     ) {
 
-      finishGame(true);
+      finishGame(
+        true
+      );
 
       return;
+
     }
+
   }
 
 
-  /* ===================================================
-     QUICK MODE ESCAPE
-  =================================================== */
+  /* QUICK LOSE */
 
   if (
     gameMode === "quick" &&
@@ -3364,12 +3744,11 @@ function update(dt) {
     );
 
     return;
+
   }
 
 
-  /* ===================================================
-     FINAL PURSUIT
-  =================================================== */
+  /* FINAL LONG CHASE */
 
   if (
     isLong &&
@@ -3378,33 +3757,37 @@ function update(dt) {
 
     if (
       stageElapsed >=
-      selectedStageDuration - 10 &&
+      selectedStageDuration -
+      10 &&
       stageElapsed <
-      selectedStageDuration - 3
+      selectedStageDuration -
+      3
     ) {
 
       showStatus(
         "FINAL PURSUIT!"
       );
+
     }
 
 
     if (
       stageElapsed >=
-      selectedStageDuration - 3 &&
+      selectedStageDuration -
+      3 &&
       distance < 110
     ) {
 
       showStatus(
         "TAKE HIM DOWN!"
       );
+
     }
+
   }
 
 
-  /* ===================================================
-     DRIVING SCORE
-  =================================================== */
+  /* DRIVING SCORE */
 
   score +=
 
@@ -3414,12 +3797,19 @@ function update(dt) {
 
     0.10 *
 
-    difficulty.scoreMultiplier;
+    difficulty
+      .scoreMultiplier;
 
 
-  updateParticles(dt);
+  updateParticles(
+    dt
+  );
 
-  updateWeather(dt);
+
+  updateWeather(
+    dt
+  );
+
 
   updateHUD();
 
@@ -3428,7 +3818,8 @@ function update(dt) {
     statusTimer > 0
   ) {
 
-    statusTimer -= dt;
+    statusTimer -=
+      dt;
 
 
     if (
@@ -3437,11 +3828,15 @@ function update(dt) {
 
       chaseStatus.style.opacity =
         "0";
+
     }
+
   }
 
 
-  shake *= 0.88;
+  shake *=
+    0.88;
+
 }
 
 
@@ -3464,7 +3859,8 @@ function getEnvironmentHudText() {
       " • " +
 
       (
-        environmentStage + 1
+        environmentStage +
+        1
       ) +
 
       "/" +
@@ -3472,19 +3868,22 @@ function getEnvironmentHudText() {
       environmentSequence.length
 
     );
+
   }
 
 
   return environments[
     activeEnvironment
   ].name;
+
 }
 
 
 function updateHUD() {
 
   distanceValue.textContent =
-    getDistance() + " m";
+    getDistance() +
+    " m";
 
 
   speedValue.textContent =
@@ -3522,7 +3921,8 @@ function updateHUD() {
       "STAGE " +
 
       (
-        environmentStage + 1
+        environmentStage +
+        1
       ) +
 
       "/" +
@@ -3538,11 +3938,14 @@ function updateHUD() {
   } else {
 
     stageTimer.textContent =
-      seconds + "s";
+      seconds +
+      "s";
+
   }
 
 
   updateScoreHUD();
+
 }
 
 
@@ -3556,27 +3959,37 @@ function updateWeather(dt) {
     activeEnvironment === "rain"
   ) {
 
-    rainDrops.forEach(drop => {
+    rainDrops.forEach(
 
-      drop.y +=
-        drop.speed * dt;
+      drop => {
 
-
-      drop.x -=
-        85 * dt;
+        drop.y +=
+          drop.speed * dt;
 
 
-      if (
-        drop.y > H + 30
-      ) {
-
-        drop.y = -30;
+        drop.x -=
+          85 * dt;
 
 
-        drop.x =
-          Math.random() * W;
+        if (
+          drop.y >
+          H + 30
+        ) {
+
+          drop.y =
+            -30;
+
+
+          drop.x =
+            Math.random() *
+            W;
+
+        }
+
       }
-    });
+
+    );
+
   }
 
 
@@ -3584,27 +3997,37 @@ function updateWeather(dt) {
     activeEnvironment === "snow"
   ) {
 
-    snowFlakes.forEach(flake => {
+    snowFlakes.forEach(
 
-      flake.y +=
-        flake.speed * dt;
+      flake => {
 
-
-      flake.x +=
-        flake.drift * dt;
+        flake.y +=
+          flake.speed * dt;
 
 
-      if (
-        flake.y > H + 10
-      ) {
-
-        flake.y = -10;
+        flake.x +=
+          flake.drift * dt;
 
 
-        flake.x =
-          Math.random() * W;
+        if (
+          flake.y >
+          H + 10
+        ) {
+
+          flake.y =
+            -10;
+
+
+          flake.x =
+            Math.random() *
+            W;
+
+        }
+
       }
-    });
+
+    );
+
   }
 
 
@@ -3612,24 +4035,35 @@ function updateWeather(dt) {
     activeEnvironment === "desert"
   ) {
 
-    dustParticles.forEach(dust => {
+    dustParticles.forEach(
 
-      dust.x +=
-        dust.speed * dt;
+      dust => {
 
-
-      if (
-        dust.x > W + 80
-      ) {
-
-        dust.x = -80;
+        dust.x +=
+          dust.speed * dt;
 
 
-        dust.y =
-          Math.random() * H;
+        if (
+          dust.x >
+          W + 80
+        ) {
+
+          dust.x =
+            -80;
+
+
+          dust.y =
+            Math.random() *
+            H;
+
+        }
+
       }
-    });
+
+    );
+
   }
+
 }
 
 
@@ -3642,7 +4076,8 @@ function finishGame(
   reason = ""
 ) {
 
-  running = false;
+  running =
+    false;
 
 
   stopDrivingSounds();
@@ -3656,22 +4091,20 @@ function finishGame(
 
   if (win) {
 
-    /*
-      Remaining-heart bonus.
-    */
-
     score +=
 
       hearts *
 
       500 *
 
-      difficulty.scoreMultiplier;
+      difficulty
+        .scoreMultiplier;
 
 
     playSound(
       sounds.capture
     );
+
   }
 
 
@@ -3680,10 +4113,12 @@ function finishGame(
 
 
   if (
-    roundedScore > highScore
+    roundedScore >
+    highScore
   ) {
 
-    highScore = roundedScore;
+    highScore =
+      roundedScore;
 
 
     try {
@@ -3694,6 +4129,7 @@ function finishGame(
       );
 
     } catch (error) {}
+
   }
 
 
@@ -3717,8 +4153,7 @@ function finishGame(
     win
       ? "MISSION COMPLETE"
       : (
-          reason ===
-          "VEHICLE DISABLED"
+          reason === "VEHICLE DISABLED"
             ? "VEHICLE DISABLED"
             : "CHASE FAILED"
         );
@@ -3726,7 +4161,9 @@ function finishGame(
 
   const heartResults =
 
-    "❤️".repeat(hearts) +
+    "❤️".repeat(
+      hearts
+    ) +
 
     "🖤".repeat(
       MAX_HEARTS -
@@ -3755,8 +4192,7 @@ function finishGame(
 
     <br>
 
-    BEST COMBO
-    x${Math.max(1,bestCombo)}
+    BEST COMBO x${Math.max(1,bestCombo)}
 
     &nbsp; • &nbsp;
 
@@ -3764,8 +4200,7 @@ function finishGame(
 
     <br>
 
-    CHASE TIME
-    ${elapsed.toFixed(1)} SEC
+    CHASE TIME ${elapsed.toFixed(1)} SEC
 
     ${
       reason
@@ -3780,6 +4215,7 @@ function finishGame(
     win
       ? "CHASE AGAIN"
       : "TRY AGAIN";
+
 }
 
 
@@ -3814,6 +4250,7 @@ function drawBackground() {
   ) {
 
     return;
+
   }
 
 
@@ -3836,6 +4273,7 @@ function drawBackground() {
 
 
   let drawWidth;
+
   let drawHeight;
 
 
@@ -3861,35 +4299,46 @@ function drawBackground() {
     drawHeight =
       drawWidth /
       imgRatio;
+
   }
 
 
-  let zoom = 1;
+  let zoom =
+    1;
 
 
   if (cinematic) {
 
+    const denominator =
+
+      selectedStageDuration -
+      getCinematicTime();
+
+
     const progress =
-      Math.min(
+      denominator > 0
 
-        1,
+        ? Math.min(
 
-        (
-          stageElapsed -
-          getCinematicTime()
-        ) /
+            1,
 
-        (
-          selectedStageDuration -
-          getCinematicTime()
-        )
+            (
+              stageElapsed -
+              getCinematicTime()
+            ) /
 
-      );
+            denominator
+
+          )
+
+        : 1;
 
 
     zoom =
       1 +
-      progress * 0.12;
+      progress *
+      0.12;
+
   }
 
 
@@ -3960,6 +4409,7 @@ function drawBackground() {
 
 
   ctx.restore();
+
 }
 
 
@@ -3981,6 +4431,7 @@ function drawVehicle(car) {
   ) {
 
     return;
+
   }
 
 
@@ -3999,21 +4450,26 @@ function drawVehicle(car) {
 
   let scale =
     0.68 +
-    depth * 0.37;
+    depth *
+    0.37;
 
 
   if (cinematic) {
 
-    scale *= 1.05;
+    scale *=
+      1.05;
+
   }
 
 
   const width =
-    car.width * scale;
+    car.width *
+    scale;
 
 
   const height =
-    car.height * scale;
+    car.height *
+    scale;
 
 
   ctx.save();
@@ -4034,11 +4490,14 @@ function drawVehicle(car) {
     car.image === "police" &&
     player.invincible > 0 &&
     Math.floor(
-      player.invincible * 12
+      player.invincible *
+      12
     ) % 2 === 0
   ) {
 
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha =
+      0.35;
+
   }
 
 
@@ -4046,9 +4505,12 @@ function drawVehicle(car) {
     "rgba(0,0,0,.65)";
 
 
-  ctx.shadowBlur = 13;
+  ctx.shadowBlur =
+    13;
 
-  ctx.shadowOffsetY = 7;
+
+  ctx.shadowOffsetY =
+    7;
 
 
   ctx.drawImage(
@@ -4069,10 +4531,6 @@ function drawVehicle(car) {
   ctx.restore();
 
 
-  /*
-    Hazard lights for stalled cars.
-  */
-
   if (
     car.stalled
   ) {
@@ -4082,12 +4540,14 @@ function drawVehicle(car) {
       width,
       height
     );
+
   }
+
 }
 
 
 /* =====================================================
-   STALLED HAZARD LIGHTS
+   HAZARD LIGHTS
 ===================================================== */
 
 function drawHazardLights(
@@ -4099,22 +4559,29 @@ function drawHazardLights(
   const on =
 
     Math.floor(
-      performance.now() / 280
+      performance.now() /
+      280
     ) % 2 === 0;
 
 
-  if (!on) return;
+  if (!on) {
+
+    return;
+
+  }
 
 
   const lightY =
 
     car.screenY +
 
-    height * 0.20;
+    height *
+    0.18;
 
 
   const spacing =
-    width * 0.27;
+    width *
+    0.27;
 
 
   ctx.save();
@@ -4124,7 +4591,8 @@ function drawHazardLights(
     "#ffb11f";
 
 
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur =
+    18;
 
 
   ctx.fillStyle =
@@ -4132,6 +4600,7 @@ function drawHazardLights(
 
 
   ctx.beginPath();
+
 
   ctx.arc(
     car.x - spacing,
@@ -4141,10 +4610,12 @@ function drawHazardLights(
     Math.PI * 2
   );
 
+
   ctx.fill();
 
 
   ctx.beginPath();
+
 
   ctx.arc(
     car.x + spacing,
@@ -4154,15 +4625,17 @@ function drawHazardLights(
     Math.PI * 2
   );
 
+
   ctx.fill();
 
 
   ctx.restore();
+
 }
 
 
 /* =====================================================
-   POLICE LIGHTS
+   POLICE GLOW
 ===================================================== */
 
 function drawPoliceGlow() {
@@ -4170,7 +4643,8 @@ function drawPoliceGlow() {
   const flash =
 
     Math.floor(
-      performance.now() / 140
+      performance.now() /
+      140
     ) % 2 === 0;
 
 
@@ -4179,6 +4653,7 @@ function drawPoliceGlow() {
     flash
 
       ? [
+
           [
             player.x - 27,
             "255,25,55"
@@ -4188,9 +4663,11 @@ function drawPoliceGlow() {
             player.x + 27,
             "35,110,255"
           ]
+
         ]
 
       : [
+
           [
             player.x + 27,
             "255,25,55"
@@ -4200,58 +4677,65 @@ function drawPoliceGlow() {
             player.x - 27,
             "35,110,255"
           ]
+
         ];
 
 
-  lights.forEach(light => {
+  lights.forEach(
 
-    const gradient =
-      ctx.createRadialGradient(
+    light => {
 
-        light[0],
-        player.screenY,
-        5,
+      const gradient =
+        ctx.createRadialGradient(
 
-        light[0],
-        player.screenY,
-        145
+          light[0],
+          player.screenY,
+          5,
 
+          light[0],
+          player.screenY,
+          145
+
+        );
+
+
+      gradient.addColorStop(
+        0,
+        `rgba(${light[1]},.48)`
       );
 
 
-    gradient.addColorStop(
-      0,
-      `rgba(${light[1]},.48)`
-    );
+      gradient.addColorStop(
+        1,
+        `rgba(${light[1]},0)`
+      );
 
 
-    gradient.addColorStop(
-      1,
-      `rgba(${light[1]},0)`
-    );
+      ctx.fillStyle =
+        gradient;
 
 
-    ctx.fillStyle =
-      gradient;
+      ctx.fillRect(
 
+        player.x - 170,
 
-    ctx.fillRect(
+        player.screenY - 160,
 
-      player.x - 170,
+        340,
 
-      player.screenY - 160,
+        320
 
-      340,
+      );
 
-      320
+    }
 
-    );
-  });
+  );
+
 }
 
 
 /* =====================================================
-   NITRO
+   NITRO VISUAL
 ===================================================== */
 
 function drawNitro() {
@@ -4261,6 +4745,7 @@ function drawNitro() {
   ) {
 
     return;
+
   }
 
 
@@ -4286,15 +4771,18 @@ function drawNitro() {
     "#d5ffff"
   );
 
+
   gradient.addColorStop(
     .22,
     "#45dfff"
   );
 
+
   gradient.addColorStop(
     .55,
     "#4775ff"
   );
+
 
   gradient.addColorStop(
     1,
@@ -4345,7 +4833,9 @@ function drawNitro() {
 
   ctx.closePath();
 
+
   ctx.fill();
+
 }
 
 
@@ -4356,7 +4846,8 @@ function drawNitro() {
 function drawWeather() {
 
   if (
-    activeEnvironment === "rain"
+    activeEnvironment ===
+    "rain"
   ) {
 
     ctx.save();
@@ -4366,40 +4857,48 @@ function drawWeather() {
       "rgba(220,240,255,.5)";
 
 
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth =
+      1.2;
 
 
-    rainDrops.forEach(drop => {
+    rainDrops.forEach(
 
-      ctx.beginPath();
+      drop => {
 
-
-      ctx.moveTo(
-        drop.x,
-        drop.y
-      );
+        ctx.beginPath();
 
 
-      ctx.lineTo(
-
-        drop.x - 8,
-
-        drop.y +
-        drop.length
-
-      );
+        ctx.moveTo(
+          drop.x,
+          drop.y
+        );
 
 
-      ctx.stroke();
-    });
+        ctx.lineTo(
+
+          drop.x - 8,
+
+          drop.y +
+          drop.length
+
+        );
+
+
+        ctx.stroke();
+
+      }
+
+    );
 
 
     ctx.restore();
+
   }
 
 
   if (
-    activeEnvironment === "snow"
+    activeEnvironment ===
+    "snow"
   ) {
 
     ctx.save();
@@ -4409,36 +4908,43 @@ function drawWeather() {
       "rgba(255,255,255,.9)";
 
 
-    snowFlakes.forEach(flake => {
+    snowFlakes.forEach(
 
-      ctx.beginPath();
+      flake => {
 
-
-      ctx.arc(
-
-        flake.x,
-
-        flake.y,
-
-        flake.size,
-
-        0,
-
-        Math.PI * 2
-
-      );
+        ctx.beginPath();
 
 
-      ctx.fill();
-    });
+        ctx.arc(
+
+          flake.x,
+
+          flake.y,
+
+          flake.size,
+
+          0,
+
+          Math.PI * 2
+
+        );
+
+
+        ctx.fill();
+
+      }
+
+    );
 
 
     ctx.restore();
+
   }
 
 
   if (
-    activeEnvironment === "desert"
+    activeEnvironment ===
+    "desert"
   ) {
 
     ctx.save();
@@ -4448,72 +4954,87 @@ function drawWeather() {
       "rgba(238,190,120,.20)";
 
 
-    ctx.lineWidth = 2;
+    ctx.lineWidth =
+      2;
 
 
-    dustParticles.forEach(dust => {
+    dustParticles.forEach(
 
-      ctx.beginPath();
+      dust => {
 
-
-      ctx.moveTo(
-        dust.x,
-        dust.y
-      );
+        ctx.beginPath();
 
 
-      ctx.lineTo(
-
-        dust.x + 40,
-
-        dust.y + 5
-
-      );
+        ctx.moveTo(
+          dust.x,
+          dust.y
+        );
 
 
-      ctx.stroke();
-    });
+        ctx.lineTo(
+
+          dust.x + 40,
+
+          dust.y + 5
+
+        );
+
+
+        ctx.stroke();
+
+      }
+
+    );
 
 
     ctx.restore();
+
   }
+
 }
 
 
 /* =====================================================
-   PARTICLES DRAW
+   PARTICLE DRAW
 ===================================================== */
 
 function drawParticles() {
 
-  particles.forEach(p => {
+  particles.forEach(
 
-    ctx.globalAlpha =
-      Math.min(
-        1,
-        p.life * 2
+    p => {
+
+      ctx.globalAlpha =
+        Math.min(
+          1,
+          p.life * 2
+        );
+
+
+      ctx.fillStyle =
+        "#ffc653";
+
+
+      ctx.fillRect(
+        p.x,
+        p.y,
+        3,
+        8
       );
 
+    }
 
-    ctx.fillStyle =
-      "#ffc653";
-
-
-    ctx.fillRect(
-      p.x,
-      p.y,
-      3,
-      8
-    );
-  });
+  );
 
 
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha =
+    1;
+
 }
 
 
 /* =====================================================
-   SUSPECT LABEL
+   SUSPECT MARKER
 ===================================================== */
 
 function drawSuspectMarker() {
@@ -4522,7 +5043,8 @@ function drawSuspectMarker() {
 
     robber.screenY -
 
-    robber.height * 0.48 -
+    robber.height *
+    0.48 -
 
     34;
 
@@ -4565,6 +5087,7 @@ function drawSuspectMarker() {
     y + 18
 
   );
+
 }
 
 
@@ -4574,25 +5097,36 @@ function drawSuspectMarker() {
 
 function drawSpeedLines() {
 
-  if (!cinematic) return;
+  if (!cinematic) {
+
+    return;
+
+  }
+
+
+  const denominator =
+
+    selectedStageDuration -
+    getCinematicTime();
 
 
   const progress =
-    Math.min(
+    denominator > 0
 
-      1,
+      ? Math.min(
 
-      (
-        stageElapsed -
-        getCinematicTime()
-      ) /
+          1,
 
-      (
-        selectedStageDuration -
-        getCinematicTime()
-      )
+          (
+            stageElapsed -
+            getCinematicTime()
+          ) /
 
-    );
+          denominator
+
+        )
+
+      : 1;
 
 
   ctx.save();
@@ -4608,7 +5142,8 @@ function drawSpeedLines() {
     )`;
 
 
-  ctx.lineWidth = 2;
+  ctx.lineWidth =
+    2;
 
 
   const lines =
@@ -4653,15 +5188,17 @@ function drawSpeedLines() {
 
 
     ctx.stroke();
+
   }
 
 
   ctx.restore();
+
 }
 
 
 /* =====================================================
-   TEXT WRAP
+   WRAP TEXT
 ===================================================== */
 
 function wrapText(
@@ -4673,47 +5210,66 @@ function wrapText(
     text.split(" ");
 
 
-  const lines = [];
+  const lines =
+    [];
 
 
-  let current = "";
+  let current =
+    "";
 
 
-  words.forEach(word => {
+  words.forEach(
 
-    const test =
+    word => {
 
-      current
+      const test =
 
-        ? current + " " + word
+        current
 
-        : word;
+          ? current +
+            " " +
+            word
+
+          : word;
 
 
-    if (
-      test.length >
-      maxChars &&
-      current
-    ) {
+      if (
+        test.length >
+        maxChars &&
+        current
+      ) {
 
-      lines.push(current);
+        lines.push(
+          current
+        );
 
-      current = word;
 
-    } else {
+        current =
+          word;
 
-      current = test;
+      } else {
+
+        current =
+          test;
+
+      }
+
     }
-  });
+
+  );
 
 
   if (current) {
 
-    lines.push(current);
+    lines.push(
+      current
+    );
+
   }
 
 
   return lines;
+
 }
 
 
@@ -4728,6 +5284,7 @@ function drawTaunt() {
   ) {
 
     return;
+
   }
 
 
@@ -4754,7 +5311,8 @@ function drawTaunt() {
     "rgba(0,0,0,.95)";
 
 
-  ctx.shadowBlur = 14;
+  ctx.shadowBlur =
+    14;
 
 
   ctx.fillStyle =
@@ -4791,6 +5349,7 @@ function drawTaunt() {
 
 
   lines.forEach(
+
     (
       line,
       index
@@ -4810,11 +5369,14 @@ function drawTaunt() {
         )
 
       );
+
     }
+
   );
 
 
   ctx.restore();
+
 }
 
 
@@ -4829,6 +5391,7 @@ function drawTransitionCard() {
   ) {
 
     return;
+
   }
 
 
@@ -4914,6 +5477,7 @@ function drawTransitionCard() {
 
 
   ctx.restore();
+
 }
 
 
@@ -4923,25 +5487,36 @@ function drawTransitionCard() {
 
 function drawCinematicFade() {
 
-  if (!cinematic) return;
+  if (!cinematic) {
+
+    return;
+
+  }
+
+
+  const denominator =
+
+    selectedStageDuration -
+    getCinematicTime();
 
 
   const progress =
-    Math.min(
+    denominator > 0
 
-      1,
+      ? Math.min(
 
-      (
-        stageElapsed -
-        getCinematicTime()
-      ) /
+          1,
 
-      (
-        selectedStageDuration -
-        getCinematicTime()
-      )
+          (
+            stageElapsed -
+            getCinematicTime()
+          ) /
 
-    );
+          denominator
+
+        )
+
+      : 1;
 
 
   ctx.fillStyle =
@@ -4991,7 +5566,9 @@ function drawCinematicFade() {
       W,
       H
     );
+
   }
+
 }
 
 
@@ -5052,6 +5629,7 @@ function draw() {
 
 
   drawTransitionCard();
+
 }
 
 
@@ -5061,7 +5639,11 @@ function draw() {
 
 function gameLoop(time) {
 
-  if (!running) return;
+  if (!running) {
+
+    return;
+
+  }
 
 
   let dt =
@@ -5069,7 +5651,8 @@ function gameLoop(time) {
     (
       time -
       lastTime
-    ) / 1000;
+    ) /
+    1000;
 
 
   dt =
@@ -5079,13 +5662,18 @@ function gameLoop(time) {
     );
 
 
-  lastTime = time;
+  lastTime =
+    time;
 
 
   update(dt);
 
 
-  if (!running) return;
+  if (!running) {
+
+    return;
+
+  }
 
 
   ctx.save();
@@ -5100,14 +5688,17 @@ function gameLoop(time) {
       (
         Math.random() -
         0.5
-      ) * shake,
+      ) *
+      shake,
 
       (
         Math.random() -
         0.5
-      ) * shake
+      ) *
+      shake
 
     );
+
   }
 
 
@@ -5120,22 +5711,18 @@ function gameLoop(time) {
   requestAnimationFrame(
     gameLoop
   );
+
 }
 
 
 /* =====================================================
-   INITIAL
+   INITIAL DISPLAY
 ===================================================== */
 
-setGameMode("quick");
-
-setStageDuration(60);
-
-setDifficulty("easy");
+updateMenuText();
 
 
 resetGame();
 
-updateMenuText();
 
 draw();
