@@ -120,7 +120,7 @@ function resetGame() {
 
   robber = {
     x: W / 2,
-    y: H * 0.10,
+    y: H * 0.16,
     width: 48,
     height: 92,
     phase: 0,
@@ -247,9 +247,7 @@ function spawnTraffic() {
 
     image =
       trafficChoices[
-        Math.floor(
-          Math.random() * trafficChoices.length
-        )
+        Math.floor(Math.random() * trafficChoices.length)
       ];
 
     width = 52;
@@ -332,6 +330,7 @@ function updateParticles(dt) {
 
 function finish(win) {
   running = false;
+
   overlay.style.display = "flex";
 
   title.className = win ? "win" : "lose";
@@ -375,7 +374,7 @@ function finish(win) {
 function update(dt) {
   elapsed += dt;
 
-  /* auto acceleration */
+  /* automatic acceleration */
 
   player.speed = Math.min(
     190,
@@ -393,7 +392,7 @@ function update(dt) {
     );
   }
 
-  /* smooth steering */
+  /* steering */
 
   player.x +=
     (player.targetX - player.x) *
@@ -403,16 +402,15 @@ function update(dt) {
     player.invincible -= dt;
   }
 
-  roadScroll +=
-    player.speed * dt * 2.3;
+  roadScroll += player.speed * dt * 2.3;
 
-  /* robber horizontal movement */
+  const road = roadInfo();
+
+  /* suspect movement */
 
   robber.phase +=
     dt *
     (1.2 + player.speed / 220);
-
-  const road = roadInfo();
 
   const movement = Math.min(
     road.width * 0.27,
@@ -443,7 +441,11 @@ function update(dt) {
     )
   );
 
-  /* police gradually closes distance */
+  /* suspect stays ahead */
+
+  robber.y = H * 0.16;
+
+  /* close the distance */
 
   let closingRate =
     4.3 +
@@ -451,37 +453,34 @@ function update(dt) {
       0,
       player.speed - 100
     ) *
-    0.038;
+      0.038;
 
   if (nitroActive > 0) {
     closingRate += 18;
   }
 
-  distanceGap -=
-    closingRate * dt;
+  distanceGap -= closingRate * dt;
 
-  /* IMPORTANT:
-     robber vertical position now reflects distance
-     far away = near top
-     close = lower on screen
-  */
+  /* =========================================
+     VISUAL CHASE POSITION
+     Police moves toward suspect as gap closes
+  ========================================= */
 
-  const farY = H * 0.09;
-  const closeY = H * 0.47;
+  const gapRatio = Math.max(
+    0,
+    Math.min(
+      1,
+      distanceGap / 240
+    )
+  );
 
-  const gapRatio =
-    Math.max(
-      0,
-      Math.min(
-        1,
-        distanceGap / 240
-      )
-    );
+  const policeFarY = H * 0.84;
+  const policeCloseY = H * 0.34;
 
-  robber.y =
-    closeY -
+  player.y =
+    policeCloseY +
     gapRatio *
-    (closeY - farY);
+    (policeFarY - policeCloseY);
 
   /* traffic */
 
@@ -542,7 +541,9 @@ function update(dt) {
         player.y
       );
 
-      showStatus("CRASH! SUSPECT PULLS AWAY");
+      showStatus(
+        "CRASH! SUSPECT PULLS AWAY"
+      );
 
       if (navigator.vibrate) {
         navigator.vibrate([
@@ -597,7 +598,7 @@ function update(dt) {
     )
   );
 
-  /* actual capture */
+  /* capture */
 
   if (distanceGap < 18) {
     catchTimer += dt;
@@ -658,8 +659,7 @@ function update(dt) {
 ===================================================== */
 
 function drawVehicle(car) {
-  const img =
-    vehicleImages[car.image];
+  const img = vehicleImages[car.image];
 
   if (!img || !img.complete) {
     return;
@@ -675,9 +675,7 @@ function drawVehicle(car) {
     ctx.globalAlpha = 0.35;
   }
 
-  ctx.shadowColor =
-    "rgba(0,0,0,.55)";
-
+  ctx.shadowColor = "rgba(0,0,0,.55)";
   ctx.shadowBlur = 14;
   ctx.shadowOffsetY = 9;
 
@@ -785,8 +783,7 @@ function drawParticles() {
         p.life * 2
       );
 
-    ctx.fillStyle =
-      "#ffc04b";
+    ctx.fillStyle = "#ffc04b";
 
     ctx.fillRect(
       p.x,
@@ -1021,17 +1018,13 @@ function draw() {
 
   ctx.fillStyle = "white";
 
-  ctx.font =
-    "900 11px Arial";
-
+  ctx.font = "900 11px Arial";
   ctx.textAlign = "center";
 
   ctx.fillText(
     "SUSPECT",
     robber.x,
-    robber.y -
-      robber.height / 2 -
-      18
+    robber.y - robber.height / 2 - 18
   );
 
   drawPoliceGlow();
