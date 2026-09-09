@@ -1,7 +1,8 @@
 "use strict";
-/* ================================
+
+/* =====================================================
    VEHICLE ARTWORK
-================================ */
+===================================================== */
 
 const vehicleImages = {};
 
@@ -17,6 +18,7 @@ loadVehicle("traffic1", "traffic1.png");
 loadVehicle("traffic2", "traffic2.png");
 loadVehicle("traffic3", "traffic3.png");
 loadVehicle("truck", "truck.png");
+
 /* =====================================================
    DOM
 ===================================================== */
@@ -30,20 +32,11 @@ const subtitle = document.getElementById("subtitle");
 const message = document.getElementById("message");
 const startBtn = document.getElementById("startBtn");
 
-const distanceValue =
-  document.getElementById("distanceValue");
-
-const speedValue =
-  document.getElementById("speedValue");
-
-const nitroFill =
-  document.getElementById("nitroFill");
-
-const nitroUI =
-  document.getElementById("nitroUI");
-
-const chaseStatus =
-  document.getElementById("chaseStatus");
+const distanceValue = document.getElementById("distanceValue");
+const speedValue = document.getElementById("speedValue");
+const nitroFill = document.getElementById("nitroFill");
+const nitroUI = document.getElementById("nitroUI");
+const chaseStatus = document.getElementById("chaseStatus");
 
 /* =====================================================
    SCREEN
@@ -54,10 +47,7 @@ let H = 0;
 let DPR = 1;
 
 function resize() {
-  DPR = Math.min(
-    window.devicePixelRatio || 1,
-    2
-  );
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
 
   W = window.innerWidth;
   H = window.innerHeight;
@@ -68,21 +58,10 @@ function resize() {
   canvas.style.width = W + "px";
   canvas.style.height = H + "px";
 
-  ctx.setTransform(
-    DPR,
-    0,
-    0,
-    DPR,
-    0,
-    0
-  );
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
 
-window.addEventListener(
-  "resize",
-  resize
-);
-
+window.addEventListener("resize", resize);
 resize();
 
 /* =====================================================
@@ -90,34 +69,23 @@ resize();
 ===================================================== */
 
 let running = false;
-
 let lastTime = 0;
-
 let roadScroll = 0;
-
 let spawnTimer = 0;
-
 let shake = 0;
-
 let statusTimer = 0;
 
 let player;
 let robber;
 
 let traffic = [];
-
 let particles = [];
 
 let distanceGap = 240;
-
 let nitro = 0;
-
 let nitroActive = 0;
-
 let catchTimer = 0;
-
 let elapsed = 0;
-
 let score = 0;
 
 /* =====================================================
@@ -125,19 +93,11 @@ let score = 0;
 ===================================================== */
 
 function roadInfo() {
-  const width =
-    Math.min(
-      W * 0.84,
-      540
-    );
+  const width = Math.min(W * 0.84, 540);
 
   return {
-    left:
-      (W - width) / 2,
-
-    right:
-      (W + width) / 2,
-
+    left: (W - width) / 2,
+    right: (W + width) / 2,
     width
   };
 }
@@ -150,48 +110,39 @@ function resetGame() {
   player = {
     x: W / 2,
     y: H * 0.80,
-
     targetX: W / 2,
-
-    width: 48,
-    height: 88,
-
+    width: 62,
+    height: 115,
     speed: 82,
-
-    invincible: 0
+    invincible: 0,
+    image: "police"
   };
 
   robber = {
     x: W / 2,
     y: H * 0.22,
-
-    width: 45,
-    height: 82,
-
-    phase: 0
+    width: 54,
+    height: 102,
+    phase: 0,
+    image: "suspect"
   };
 
   traffic = [];
-
   particles = [];
 
   distanceGap = 240;
-
   nitro = 0;
-
   nitroActive = 0;
-
   catchTimer = 0;
-
   elapsed = 0;
-
   score = 0;
-
-  spawnTimer = 0.4;
-
+  spawnTimer = 0.5;
   roadScroll = 0;
-
   shake = 0;
+
+  distanceValue.textContent = "240 m";
+  speedValue.textContent = "0 km/h";
+  nitroFill.style.width = "0%";
 }
 
 /* =====================================================
@@ -201,23 +152,16 @@ function resetGame() {
 function startGame() {
   resetGame();
 
-  overlay.style.display =
-    "none";
+  overlay.style.display = "none";
 
   running = true;
 
-  lastTime =
-    performance.now();
+  lastTime = performance.now();
 
-  requestAnimationFrame(
-    gameLoop
-  );
+  requestAnimationFrame(gameLoop);
 }
 
-startBtn.addEventListener(
-  "click",
-  startGame
-);
+startBtn.addEventListener("click", startGame);
 
 /* =====================================================
    STEERING
@@ -226,154 +170,108 @@ startBtn.addEventListener(
 let pointerDown = false;
 
 function steer(clientX) {
-  if (!running) {
-    return;
-  }
+  if (!running) return;
 
-  const road =
-    roadInfo();
+  const road = roadInfo();
 
-  player.targetX =
-    Math.max(
-      road.left +
-        player.width / 2 +
-        8,
-
-      Math.min(
-        road.right -
-          player.width / 2 -
-          8,
-
-        clientX
-      )
-    );
+  player.targetX = Math.max(
+    road.left + player.width / 2 + 10,
+    Math.min(
+      road.right - player.width / 2 - 10,
+      clientX
+    )
+  );
 }
 
-canvas.addEventListener(
-  "pointerdown",
-  event => {
-    pointerDown = true;
+canvas.addEventListener("pointerdown", event => {
+  pointerDown = true;
+  steer(event.clientX);
+});
+
+canvas.addEventListener("pointermove", event => {
+  if (pointerDown) {
     steer(event.clientX);
   }
-);
+});
 
-canvas.addEventListener(
-  "pointermove",
-  event => {
-    if (pointerDown) {
-      steer(event.clientX);
-    }
-  }
-);
-
-window.addEventListener(
-  "pointerup",
-  () => {
-    pointerDown = false;
-  }
-);
+window.addEventListener("pointerup", () => {
+  pointerDown = false;
+});
 
 /* =====================================================
    NITRO
 ===================================================== */
 
-nitroUI.addEventListener(
-  "pointerdown",
-  event => {
-    event.preventDefault();
+nitroUI.addEventListener("pointerdown", event => {
+  event.preventDefault();
 
-    if (
-      running &&
-      nitro >= 100
-    ) {
-      nitro = 0;
+  if (running && nitro >= 100) {
+    nitro = 0;
+    nitroActive = 2.4;
 
-      nitroActive =
-        2.4;
+    showStatus("NITRO BOOST!");
 
-      showStatus(
-        "NITRO BOOST!"
-      );
-
-      if (navigator.vibrate) {
-        navigator.vibrate(30);
-      }
+    if (navigator.vibrate) {
+      navigator.vibrate(30);
     }
   }
-);
+});
 
 /* =====================================================
    TRAFFIC
 ===================================================== */
 
 function spawnTraffic() {
-  const road =
-    roadInfo();
+  const road = roadInfo();
 
   const lanes = 4;
+  const laneWidth = road.width / lanes;
+  const lane = Math.floor(Math.random() * lanes);
 
-  const laneWidth =
-    road.width / lanes;
+  const roll = Math.random();
 
-  const lane =
-    Math.floor(
-      Math.random() *
-      lanes
-    );
+  let image;
+  let width;
+  let height;
+  let ownSpeed;
 
-  const type =
-    Math.random() < 0.18
-      ? "truck"
-      : "car";
+  if (roll < 0.16) {
+    image = "truck";
+    width = 70;
+    height = 150;
+    ownSpeed = 22 + Math.random() * 22;
+  } else {
+    const trafficChoices = [
+      "traffic1",
+      "traffic2",
+      "traffic3"
+    ];
 
-  const width =
-    type === "truck"
-      ? 52
-      : 42;
+    image =
+      trafficChoices[
+        Math.floor(
+          Math.random() * trafficChoices.length
+        )
+      ];
 
-  const height =
-    type === "truck"
-      ? 105
-      : 78;
-
-  const colors = [
-    "#dcdfe4",
-    "#d09b32",
-    "#447a9c",
-    "#739460",
-    "#9b617d",
-    "#404852",
-    "#bc3f47"
-  ];
+    width = 50;
+    height = 95;
+    ownSpeed = 28 + Math.random() * 35;
+  }
 
   traffic.push({
     x:
       road.left +
-      laneWidth *
-        (lane + 0.5),
+      laneWidth * (lane + 0.5),
 
     y:
       -height - 30,
 
     width,
     height,
-
-    ownSpeed:
-      25 +
-      Math.random() *
-      35,
-
+    ownSpeed,
     passed: false,
-
-    color:
-      colors[
-        Math.floor(
-          Math.random() *
-          colors.length
-        )
-      ],
-
-    type
+    image
   });
 }
 
@@ -381,31 +279,12 @@ function spawnTraffic() {
    COLLISION
 ===================================================== */
 
-function overlap(
-  a,
-  b,
-  padding = 0
-) {
+function overlap(a, b, padding = 0) {
   return (
-    Math.abs(
-      a.x - b.x
-    ) <
-      (
-        a.width +
-        b.width
-      ) /
-        2 -
-        padding &&
-
-    Math.abs(
-      a.y - b.y
-    ) <
-      (
-        a.height +
-        b.height
-      ) /
-        2 -
-        padding
+    Math.abs(a.x - b.x) <
+      (a.width + b.width) / 2 - padding &&
+    Math.abs(a.y - b.y) <
+      (a.height + b.height) / 2 - padding
   );
 }
 
@@ -414,77 +293,43 @@ function overlap(
 ===================================================== */
 
 function showStatus(text) {
-  chaseStatus.textContent =
-    text;
-
-  chaseStatus.style.opacity =
-    "1";
-
-  statusTimer =
-    0.8;
+  chaseStatus.textContent = text;
+  chaseStatus.style.opacity = "1";
+  statusTimer = 0.8;
 }
 
 /* =====================================================
    PARTICLES
 ===================================================== */
 
-function createSparks(
-  x,
-  y
-) {
-  for (
-    let i = 0;
-    i < 16;
-    i++
-  ) {
+function createSparks(x, y) {
+  for (let i = 0; i < 20; i++) {
     particles.push({
       x,
       y,
 
       vx:
-        (Math.random() - 0.5) *
-        160,
+        (Math.random() - 0.5) * 170,
 
       vy:
-        Math.random() *
-        150,
+        Math.random() * 170,
 
       life:
-        0.5 +
-        Math.random() *
-        0.4
+        0.45 + Math.random() * 0.45
     });
   }
 }
 
 function updateParticles(dt) {
-  for (
-    let i =
-      particles.length - 1;
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
 
-    i >= 0;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.life -= dt;
 
-    i--
-  ) {
-    const p =
-      particles[i];
-
-    p.x +=
-      p.vx * dt;
-
-    p.y +=
-      p.vy * dt;
-
-    p.life -=
-      dt;
-
-    if (
-      p.life <= 0
-    ) {
-      particles.splice(
-        i,
-        1
-      );
+    if (p.life <= 0) {
+      particles.splice(i, 1);
     }
   }
 }
@@ -496,18 +341,13 @@ function updateParticles(dt) {
 function finish(win) {
   running = false;
 
-  overlay.style.display =
-    "flex";
+  overlay.style.display = "flex";
 
   title.className =
-    win
-      ? "win"
-      : "lose";
+    win ? "win" : "lose";
 
   title.textContent =
-    win
-      ? "CAPTURED!"
-      : "ESCAPED";
+    win ? "CAPTURED!" : "ESCAPED";
 
   subtitle.textContent =
     win
@@ -515,8 +355,7 @@ function finish(win) {
       : "CHASE FAILED";
 
   if (win) {
-    message.innerHTML =
-      `
+    message.innerHTML = `
       Suspect captured.
       <br><br>
       <strong>Score:</strong>
@@ -524,22 +363,19 @@ function finish(win) {
       <br>
       <strong>Time:</strong>
       ${elapsed.toFixed(1)} seconds
-      `;
+    `;
   } else {
-    message.innerHTML =
-      `
+    message.innerHTML = `
       The suspect got away.
       <br><br>
       Avoid collisions,
       build nitro with near misses,
       and keep closing the gap.
-      `;
+    `;
   }
 
   startBtn.textContent =
-    win
-      ? "CHASE AGAIN"
-      : "TRY AGAIN";
+    win ? "CHASE AGAIN" : "TRY AGAIN";
 }
 
 /* =====================================================
@@ -549,118 +385,65 @@ function finish(win) {
 function update(dt) {
   elapsed += dt;
 
-  /* automatic acceleration */
+  player.speed = Math.min(
+    190,
+    player.speed + 7.5 * dt
+  );
 
-  player.speed =
-    Math.min(
-      190,
+  if (nitroActive > 0) {
+    nitroActive -= dt;
 
-      player.speed +
-        7.5 * dt
+    player.speed = Math.min(
+      230,
+      player.speed + 45 * dt
     );
-
-  /* nitro */
-
-  if (
-    nitroActive > 0
-  ) {
-    nitroActive -=
-      dt;
-
-    player.speed =
-      Math.min(
-        230,
-        player.speed +
-          45 * dt
-      );
   }
 
-  /* steering smoothing */
-
   player.x +=
-    (
-      player.targetX -
-      player.x
-    ) *
-    Math.min(
-      1,
-      dt * 10
-    );
+    (player.targetX - player.x) *
+    Math.min(1, dt * 10);
 
-  if (
-    player.invincible > 0
-  ) {
-    player.invincible -=
-      dt;
+  if (player.invincible > 0) {
+    player.invincible -= dt;
   }
 
   roadScroll +=
-    player.speed *
-    dt *
-    2.3;
-
-  /* robber movement */
+    player.speed * dt * 2.3;
 
   robber.phase +=
     dt *
-    (
-      1.2 +
-      player.speed /
-        220
-    );
+    (1.2 + player.speed / 220);
 
-  const road =
-    roadInfo();
+  const road = roadInfo();
 
-  let movement =
-    Math.min(
-      road.width * 0.27,
-      125
-    );
+  const movement = Math.min(
+    road.width * 0.27,
+    125
+  );
 
   let target =
     W / 2 +
-    Math.sin(
-      robber.phase
-    ) *
-      movement;
+    Math.sin(robber.phase) *
+    movement;
 
-  /* robber panics when cop gets close */
-
-  if (
-    distanceGap < 90
-  ) {
+  if (distanceGap < 90) {
     target +=
-      Math.sin(
-        robber.phase *
-          3.2
-      ) *
+      Math.sin(robber.phase * 3.2) *
       25;
   }
 
   robber.x +=
-    (
-      target -
-      robber.x
-    ) *
+    (target - robber.x) *
     dt *
-    (
-      distanceGap < 60
-        ? 2.4
-        : 1.25
-    );
+    (distanceGap < 60 ? 2.4 : 1.25);
 
-  robber.x =
-    Math.max(
-      road.left + 30,
-
-      Math.min(
-        road.right - 30,
-        robber.x
-      )
-    );
-
-  /* police catches robber slowly */
+  robber.x = Math.max(
+    road.left + robber.width / 2 + 10,
+    Math.min(
+      road.right - robber.width / 2 - 10,
+      robber.x
+    )
+  );
 
   let closingRate =
     4.3 +
@@ -668,124 +451,75 @@ function update(dt) {
       0,
       player.speed - 100
     ) *
-      0.038;
+    0.038;
 
-  if (
-    nitroActive > 0
-  ) {
-    closingRate +=
-      18;
+  if (nitroActive > 0) {
+    closingRate += 18;
   }
 
   distanceGap -=
-    closingRate *
-    dt;
+    closingRate * dt;
 
-  /* traffic spawning */
+  spawnTimer -= dt;
 
-  spawnTimer -=
-    dt;
+  const spawnRate = Math.max(
+    0.42,
+    1.08 -
+      player.speed / 290
+  );
 
-  const spawnRate =
-    Math.max(
-      0.42,
-      1.08 -
-        player.speed /
-          290
-    );
-
-  if (
-    spawnTimer <= 0
-  ) {
+  if (spawnTimer <= 0) {
     spawnTraffic();
 
     spawnTimer =
       spawnRate *
-      (
-        0.7 +
-        Math.random() *
-          0.7
-      );
+      (0.7 + Math.random() * 0.7);
   }
 
-  /* traffic movement */
-
-  for (
-    let i =
-      traffic.length - 1;
-
-    i >= 0;
-
-    i--
-  ) {
-    const car =
-      traffic[i];
+  for (let i = traffic.length - 1; i >= 0; i--) {
+    const car = traffic[i];
 
     car.y +=
       (
-        player.speed *
-          0.84 -
+        player.speed * 0.84 -
         car.ownSpeed
       ) *
       dt *
       2.2;
 
-    if (
-      car.y >
-      H + 150
-    ) {
-      traffic.splice(
-        i,
-        1
-      );
-
+    if (car.y > H + 180) {
+      traffic.splice(i, 1);
       continue;
     }
 
-    /* collision */
-
     if (
       player.invincible <= 0 &&
-      overlap(
-        player,
-        car,
-        7
-      )
+      overlap(player, car, 10)
     ) {
-      player.speed =
-        Math.max(
-          70,
-          player.speed -
-            55
-        );
+      player.speed = Math.max(
+        70,
+        player.speed - 55
+      );
 
-      distanceGap +=
-        30;
+      distanceGap += 30;
 
-      nitro =
-        Math.max(
-          0,
-          nitro - 15
-        );
+      nitro = Math.max(
+        0,
+        nitro - 15
+      );
 
-      player.invincible =
-        0.9;
+      player.invincible = 0.9;
 
-      shake =
-        18;
+      shake = 18;
 
       createSparks(
         player.x,
         player.y
       );
 
-      showStatus(
-        "CRASH! +30 m"
-      );
+      showStatus("CRASH! +30 m");
 
-      if (
-        navigator.vibrate
-      ) {
+      if (navigator.vibrate) {
         navigator.vibrate([
           40,
           30,
@@ -794,44 +528,32 @@ function update(dt) {
       }
     }
 
-    /* near miss */
-
     if (
       !car.passed &&
       car.y >
         player.y +
-          player.height *
-            0.60
+        player.height * 0.60
     ) {
       car.passed = true;
 
       const distance =
         Math.abs(
-          car.x -
-          player.x
+          car.x - player.x
         );
 
       const edge =
-        (
-          car.width +
-          player.width
-        ) /
-        2;
+        (car.width + player.width) / 2;
 
       if (
-        distance >
-          edge - 3 &&
-        distance <
-          edge + 28
+        distance > edge - 4 &&
+        distance < edge + 30
       ) {
-        nitro =
-          Math.min(
-            100,
-            nitro + 25
-          );
+        nitro = Math.min(
+          100,
+          nitro + 25
+        );
 
-        score +=
-          250;
+        score += 250;
 
         showStatus(
           "NEAR MISS +250"
@@ -840,53 +562,33 @@ function update(dt) {
     }
   }
 
-  distanceGap =
-    Math.max(
-      0,
-      Math.min(
-        420,
-        distanceGap
-      )
-    );
+  distanceGap = Math.max(
+    0,
+    Math.min(
+      420,
+      distanceGap
+    )
+  );
 
-  /* catching suspect */
-
-  if (
-    distanceGap <
-    16
-  ) {
-    catchTimer +=
-      dt;
+  if (distanceGap < 16) {
+    catchTimer += dt;
   } else {
-    catchTimer =
-      Math.max(
-        0,
-        catchTimer -
-          dt * 1.5
-      );
-  }
-
-  if (
-    distanceGap <
-    30
-  ) {
-    showStatus(
-      "STAY CLOSE!"
+    catchTimer = Math.max(
+      0,
+      catchTimer - dt * 1.5
     );
   }
 
-  if (
-    catchTimer >
-    1.3
-  ) {
+  if (distanceGap < 30) {
+    showStatus("STAY CLOSE!");
+  }
+
+  if (catchTimer > 1.3) {
     finish(true);
     return;
   }
 
-  if (
-    distanceGap >=
-    420
-  ) {
+  if (distanceGap >= 420) {
     finish(false);
     return;
   }
@@ -899,369 +601,60 @@ function update(dt) {
   updateParticles(dt);
 
   distanceValue.textContent =
-    Math.round(
-      distanceGap
-    ) +
-    " m";
+    Math.round(distanceGap) + " m";
 
   speedValue.textContent =
-    Math.round(
-      player.speed
-    ) +
-    " km/h";
+    Math.round(player.speed) + " km/h";
 
   nitroFill.style.width =
     nitro + "%";
 
-  if (
-    statusTimer > 0
-  ) {
-    statusTimer -=
-      dt;
+  if (statusTimer > 0) {
+    statusTimer -= dt;
 
-    if (
-      statusTimer <= 0
-    ) {
-      chaseStatus.style.opacity =
-        "0";
+    if (statusTimer <= 0) {
+      chaseStatus.style.opacity = "0";
     }
   }
 
-  shake *=
-    0.88;
+  shake *= 0.88;
 }
 
 /* =====================================================
-   DRAW HELPERS
+   IMAGE DRAWING
 ===================================================== */
 
-function roundedRect(
-  x,
-  y,
-  width,
-  height,
-  radius
-) {
-  radius =
-    Math.min(
-      radius,
-      width / 2,
-      height / 2
-    );
+function drawVehicle(car) {
+  const img =
+    vehicleImages[car.image];
 
-  ctx.beginPath();
+  if (!img || !img.complete) {
+    return;
+  }
 
-  ctx.moveTo(
-    x + radius,
-    y
-  );
-
-  ctx.arcTo(
-    x + width,
-    y,
-    x + width,
-    y + height,
-    radius
-  );
-
-  ctx.arcTo(
-    x + width,
-    y + height,
-    x,
-    y + height,
-    radius
-  );
-
-  ctx.arcTo(
-    x,
-    y + height,
-    x,
-    y,
-    radius
-  );
-
-  ctx.arcTo(
-    x,
-    y,
-    x + width,
-    y,
-    radius
-  );
-
-  ctx.closePath();
-}
-
-/* =====================================================
-   DRAW CAR
-===================================================== */
-
-function drawCar(
-  car,
-  color,
-  police = false,
-  suspect = false
-) {
   ctx.save();
 
-  ctx.translate(
-    car.x,
-    car.y
-  );
-
   if (
-    police &&
+    car.image === "police" &&
     player.invincible > 0 &&
-    Math.floor(
-      player.invincible *
-      12
-    ) %
-      2 ===
-      0
+    Math.floor(player.invincible * 12) % 2 === 0
   ) {
-    ctx.globalAlpha =
-      0.35;
+    ctx.globalAlpha = 0.35;
   }
 
-  /* shadow */
+  ctx.shadowColor =
+    "rgba(0,0,0,.55)";
 
-  ctx.fillStyle =
-    "rgba(0,0,0,.38)";
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 9;
 
-  roundedRect(
-    -car.width / 2 + 5,
-    -car.height / 2 + 9,
+  ctx.drawImage(
+    img,
+    car.x - car.width / 2,
+    car.y - car.height / 2,
     car.width,
-    car.height,
-    10
+    car.height
   );
-
-  ctx.fill();
-
-  /* body */
-
-  const bodyGradient =
-    ctx.createLinearGradient(
-      -car.width / 2,
-      0,
-      car.width / 2,
-      0
-    );
-
-  bodyGradient.addColorStop(
-    0,
-    "#111820"
-  );
-
-  bodyGradient.addColorStop(
-    0.20,
-    color
-  );
-
-  bodyGradient.addColorStop(
-    0.50,
-    color
-  );
-
-  bodyGradient.addColorStop(
-    0.80,
-    color
-  );
-
-  bodyGradient.addColorStop(
-    1,
-    "#0e151c"
-  );
-
-  ctx.fillStyle =
-    bodyGradient;
-
-  roundedRect(
-    -car.width / 2,
-    -car.height / 2,
-    car.width,
-    car.height,
-    11
-  );
-
-  ctx.fill();
-
-  /* windshield */
-
-  const glass =
-    ctx.createLinearGradient(
-      0,
-      -30,
-      0,
-      20
-    );
-
-  glass.addColorStop(
-    0,
-    "#86aebe"
-  );
-
-  glass.addColorStop(
-    1,
-    "#182c36"
-  );
-
-  ctx.fillStyle =
-    glass;
-
-  roundedRect(
-    -car.width * 0.31,
-    -car.height * 0.28,
-    car.width * 0.62,
-    car.height * 0.25,
-    5
-  );
-
-  ctx.fill();
-
-  /* rear glass */
-
-  ctx.fillStyle =
-    "#172a33";
-
-  roundedRect(
-    -car.width * 0.31,
-    car.height * 0.09,
-    car.width * 0.62,
-    car.height * 0.22,
-    5
-  );
-
-  ctx.fill();
-
-  /* headlights */
-
-  ctx.fillStyle =
-    "#fff7c6";
-
-  ctx.fillRect(
-    -car.width * 0.35,
-    -car.height * 0.45,
-    9,
-    5
-  );
-
-  ctx.fillRect(
-    car.width * 0.35 - 9,
-    -car.height * 0.45,
-    9,
-    5
-  );
-
-  /* taillights */
-
-  ctx.fillStyle =
-    "#ff3444";
-
-  ctx.fillRect(
-    -car.width * 0.35,
-    car.height * 0.41,
-    9,
-    6
-  );
-
-  ctx.fillRect(
-    car.width * 0.35 - 9,
-    car.height * 0.41,
-    9,
-    6
-  );
-
-  /* police */
-
-  if (
-    police
-  ) {
-    ctx.fillStyle =
-      "#f4f4f4";
-
-    ctx.fillRect(
-      -car.width * 0.43,
-      -8,
-      car.width * 0.86,
-      17
-    );
-
-    ctx.fillStyle =
-      "#17364c";
-
-    ctx.font =
-      "900 8px Arial";
-
-    ctx.textAlign =
-      "center";
-
-    ctx.fillText(
-      "POLICE",
-      0,
-      4
-    );
-
-    const flash =
-      Math.floor(
-        performance.now() /
-        160
-      ) %
-        2 ===
-      0;
-
-    ctx.shadowBlur =
-      20;
-
-    ctx.shadowColor =
-      flash
-        ? "#ff2343"
-        : "#287cff";
-
-    ctx.fillStyle =
-      flash
-        ? "#ff2343"
-        : "#287cff";
-
-    ctx.fillRect(
-      -14,
-      -16,
-      13,
-      6
-    );
-
-    ctx.shadowColor =
-      flash
-        ? "#287cff"
-        : "#ff2343";
-
-    ctx.fillStyle =
-      flash
-        ? "#287cff"
-        : "#ff2343";
-
-    ctx.fillRect(
-      1,
-      -16,
-      13,
-      6
-    );
-
-    ctx.shadowBlur = 0;
-  }
-
-  if (
-    suspect
-  ) {
-    ctx.fillStyle =
-      "#111";
-
-    ctx.fillRect(
-      -15,
-      -6,
-      30,
-      9
-    );
-  }
 
   ctx.restore();
 }
@@ -1273,35 +666,34 @@ function drawCar(
 function drawPoliceGlow() {
   const flash =
     Math.floor(
-      performance.now() /
-      160
+      performance.now() / 150
     ) %
       2 ===
     0;
 
   const redX =
     flash
-      ? player.x - 24
-      : player.x + 24;
+      ? player.x - 22
+      : player.x + 22;
 
   const blueX =
     flash
-      ? player.x + 24
-      : player.x - 24;
+      ? player.x + 22
+      : player.x - 22;
 
   const red =
     ctx.createRadialGradient(
       redX,
-      player.y,
+      player.y - 10,
       4,
       redX,
-      player.y,
-      110
+      player.y - 10,
+      125
     );
 
   red.addColorStop(
     0,
-    "rgba(255,20,50,.38)"
+    "rgba(255,20,50,.40)"
   );
 
   red.addColorStop(
@@ -1309,29 +701,28 @@ function drawPoliceGlow() {
     "rgba(255,20,50,0)"
   );
 
-  ctx.fillStyle =
-    red;
+  ctx.fillStyle = red;
 
   ctx.fillRect(
-    player.x - 145,
-    player.y - 130,
-    290,
-    260
+    player.x - 150,
+    player.y - 150,
+    300,
+    280
   );
 
   const blue =
     ctx.createRadialGradient(
       blueX,
-      player.y,
+      player.y - 10,
       4,
       blueX,
-      player.y,
-      110
+      player.y - 10,
+      125
     );
 
   blue.addColorStop(
     0,
-    "rgba(20,100,255,.42)"
+    "rgba(20,100,255,.44)"
   );
 
   blue.addColorStop(
@@ -1339,14 +730,13 @@ function drawPoliceGlow() {
     "rgba(20,100,255,0)"
   );
 
-  ctx.fillStyle =
-    blue;
+  ctx.fillStyle = blue;
 
   ctx.fillRect(
-    player.x - 145,
-    player.y - 130,
-    290,
-    260
+    player.x - 150,
+    player.y - 150,
+    300,
+    280
   );
 }
 
@@ -1355,9 +745,7 @@ function drawPoliceGlow() {
 ===================================================== */
 
 function drawParticles() {
-  for (
-    const p of particles
-  ) {
+  for (const p of particles) {
     ctx.globalAlpha =
       Math.min(
         1,
@@ -1371,12 +759,11 @@ function drawParticles() {
       p.x,
       p.y,
       3,
-      8
+      9
     );
   }
 
-  ctx.globalAlpha =
-    1;
+  ctx.globalAlpha = 1;
 }
 
 /* =====================================================
@@ -1394,7 +781,7 @@ function draw() {
   const road =
     roadInfo();
 
-  /* dark city background */
+  /* background */
 
   const sky =
     ctx.createLinearGradient(
@@ -1406,21 +793,20 @@ function draw() {
 
   sky.addColorStop(
     0,
-    "#081b2b"
+    "#071521"
   );
 
   sky.addColorStop(
-    0.50,
-    "#122534"
+    0.55,
+    "#142936"
   );
 
   sky.addColorStop(
     1,
-    "#17261f"
+    "#16281f"
   );
 
-  ctx.fillStyle =
-    sky;
+  ctx.fillStyle = sky;
 
   ctx.fillRect(
     0,
@@ -1429,10 +815,10 @@ function draw() {
     H
   );
 
-  /* buildings */
+  /* city silhouettes */
 
   ctx.fillStyle =
-    "#08121b";
+    "#07111a";
 
   for (
     let x = 0;
@@ -1440,34 +826,29 @@ function draw() {
     x += 34
   ) {
     if (
-      x >
-        road.left - 20 &&
-      x <
-        road.right + 20
+      x > road.left - 20 &&
+      x < road.right + 20
     ) {
       continue;
     }
 
     const height =
       40 +
-      (
-        (x * 17) %
-        110
-      );
+      ((x * 17) % 120);
 
     ctx.fillRect(
       x,
-      H * 0.26 - height,
+      H * 0.27 - height,
       27,
       height
     );
 
     ctx.fillStyle =
-      "rgba(255,210,90,.3)";
+      "rgba(255,210,90,.28)";
 
     ctx.fillRect(
       x + 7,
-      H * 0.26 -
+      H * 0.27 -
         height +
         12,
       4,
@@ -1475,7 +856,7 @@ function draw() {
     );
 
     ctx.fillStyle =
-      "#08121b";
+      "#07111a";
   }
 
   /* road */
@@ -1490,21 +871,20 @@ function draw() {
 
   roadGradient.addColorStop(
     0,
-    "#20252a"
+    "#1d2227"
   );
 
   roadGradient.addColorStop(
     0.5,
-    "#34383d"
+    "#34383c"
   );
 
   roadGradient.addColorStop(
     1,
-    "#20252a"
+    "#1d2227"
   );
 
-  ctx.fillStyle =
-    roadGradient;
+  ctx.fillStyle = roadGradient;
 
   ctx.fillRect(
     road.left,
@@ -1532,7 +912,7 @@ function draw() {
     H
   );
 
-  /* lane lines */
+  /* lane markings */
 
   const lanes = 4;
 
@@ -1546,7 +926,7 @@ function draw() {
     34;
 
   ctx.fillStyle =
-    "rgba(255,255,255,.7)";
+    "rgba(255,255,255,.72)";
 
   for (
     let lane = 1;
@@ -1555,18 +935,14 @@ function draw() {
   ) {
     const x =
       road.left +
-      lane *
-        laneWidth -
+      lane * laneWidth -
       2;
 
     for (
       let y =
         -(
           roadScroll %
-          (
-            dashHeight +
-            spacing
-          )
+          (dashHeight + spacing)
         );
 
       y < H;
@@ -1584,17 +960,13 @@ function draw() {
     }
   }
 
-  /* motion lines */
+  /* speed streaks */
 
-  if (
-    player.speed >
-    135
-  ) {
+  if (player.speed > 135) {
     ctx.strokeStyle =
       "rgba(255,255,255,.07)";
 
-    ctx.lineWidth =
-      2;
+    ctx.lineWidth = 2;
 
     for (
       let i = 0;
@@ -1604,7 +976,7 @@ function draw() {
       const x =
         road.left +
         Math.random() *
-          road.width;
+        road.width;
 
       const y =
         Math.random() *
@@ -1612,37 +984,30 @@ function draw() {
 
       ctx.beginPath();
 
-      ctx.moveTo(
-        x,
-        y
-      );
+      ctx.moveTo(x, y);
 
       ctx.lineTo(
         x,
         y +
           35 +
-          player.speed *
-            0.15
+          player.speed * 0.15
       );
 
       ctx.stroke();
     }
   }
 
-  /* robber marker */
+  /* suspect label */
 
   ctx.fillStyle =
-    "#ff253c";
+    "#fa1f34";
 
-  roundedRect(
+  ctx.fillRect(
     robber.x - 34,
-    robber.y - 60,
+    robber.y - 68,
     68,
-    24,
-    5
+    24
   );
-
-  ctx.fill();
 
   ctx.fillStyle =
     "white";
@@ -1656,100 +1021,72 @@ function draw() {
   ctx.fillText(
     "SUSPECT",
     robber.x,
-    robber.y - 44
+    robber.y - 52
   );
-
-  /* police light reflections */
 
   drawPoliceGlow();
 
-  /* cars */
+  drawVehicle(robber);
 
-  drawCar(
-    robber,
-    "#c52732",
-    false,
-    true
-  );
-
-  for (
-    const car of traffic
-  ) {
-    drawCar(
-      car,
-      car.color,
-      false,
-      false
-    );
+  for (const car of traffic) {
+    drawVehicle(car);
   }
 
-  drawCar(
-    player,
-    "#183f60",
-    true,
-    false
-  );
+  drawVehicle(player);
 
-  /* nitro flame */
+  /* nitro */
 
-  if (
-    nitroActive > 0
-  ) {
+  if (nitroActive > 0) {
     const gradient =
       ctx.createLinearGradient(
         player.x,
         player.y +
-          player.height /
-            2,
+          player.height / 2,
         player.x,
         player.y +
-          player.height /
-            2 +
-          45
+          player.height / 2 +
+          55
       );
 
     gradient.addColorStop(
       0,
-      "#43c8ff"
+      "#4de0ff"
     );
 
     gradient.addColorStop(
-      0.5,
-      "#4169ff"
+      0.35,
+      "#3478ff"
     );
 
     gradient.addColorStop(
       1,
-      "rgba(73,70,255,0)"
+      "rgba(70,40,255,0)"
     );
 
-    ctx.fillStyle =
-      gradient;
+    ctx.fillStyle = gradient;
 
     ctx.beginPath();
 
     ctx.moveTo(
-      player.x - 11,
+      player.x - 13,
       player.y +
-        player.height /
-          2
+        player.height / 2 -
+        5
     );
 
     ctx.lineTo(
       player.x,
       player.y +
-        player.height /
-          2 +
-        45 +
-        Math.random() *
-          16
+        player.height / 2 +
+        55 +
+        Math.random() * 18
     );
 
     ctx.lineTo(
-      player.x + 11,
+      player.x + 13,
       player.y +
-        player.height /
-          2
+        player.height / 2 -
+        5
     );
 
     ctx.closePath();
@@ -1765,47 +1102,29 @@ function draw() {
 ===================================================== */
 
 function gameLoop(time) {
-  if (
-    !running
-  ) {
-    return;
-  }
+  if (!running) return;
 
   let dt =
-    (
-      time -
-      lastTime
-    ) /
+    (time - lastTime) /
     1000;
 
-  dt =
-    Math.min(
-      0.033,
-      dt || 0.016
-    );
+  dt = Math.min(
+    0.033,
+    dt || 0.016
+  );
 
-  lastTime =
-    time;
+  lastTime = time;
 
   update(dt);
 
-  if (
-    !running
-  ) {
-    return;
-  }
+  if (!running) return;
 
   ctx.save();
 
-  if (
-    shake > 1
-  ) {
+  if (shake > 1) {
     ctx.translate(
-      (Math.random() - 0.5) *
-        shake,
-
-      (Math.random() - 0.5) *
-        shake
+      (Math.random() - 0.5) * shake,
+      (Math.random() - 0.5) * shake
     );
   }
 
@@ -1813,9 +1132,7 @@ function gameLoop(time) {
 
   ctx.restore();
 
-  requestAnimationFrame(
-    gameLoop
-  );
+  requestAnimationFrame(gameLoop);
 }
 
 /* =====================================================
