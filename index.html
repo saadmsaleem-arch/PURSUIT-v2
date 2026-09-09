@@ -6,184 +6,325 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-
   <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="black-translucent"
+    name="theme-color"
+    content="#061626"
   >
 
   <title>PURSUIT — Syntax Arcade</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="style.css?v=30"
+  >
 </head>
 
 <body>
 
+  <!-- =========================
+       GAME CANVAS
+  ========================== -->
+
   <canvas id="game"></canvas>
 
-  <!-- HUD -->
+
+  <!-- =========================
+       GAME HUD
+  ========================== -->
+
   <div id="hud">
 
-    <div class="topBar">
+    <div class="hudBox distanceBox">
+      <span class="hudLabel">
+        DISTANCE
+      </span>
 
-      <div class="hudBox">
-        <div class="hudLabel">
-          DISTANCE
-        </div>
-
-        <div
-          class="hudValue"
-          id="distanceValue"
-        >
-          245 m
-        </div>
-      </div>
-
-      <div class="hudBox">
-        <div class="hudLabel">
-          SPEED
-        </div>
-
-        <div
-          class="hudValue"
-          id="speedValue"
-        >
-          0 km/h
-        </div>
-      </div>
-
+      <span
+        id="distanceValue"
+        class="hudValue"
+      >
+        0 m
+      </span>
     </div>
 
-    <div id="environmentBadge">
+
+    <div class="hudBox speedBox">
+      <span class="hudLabel">
+        SPEED
+      </span>
+
+      <span
+        id="speedValue"
+        class="hudValue cyan"
+      >
+        0 km/h
+      </span>
+    </div>
+
+
+    <div
+      id="environmentBadge"
+      class="environmentBadge"
+    >
       CITY NIGHT
     </div>
 
-    <div id="chaseStatus">
-      NEAR MISS!
+
+    <div
+      id="chaseStatus"
+      class="chaseStatus"
+    >
+      STAY ON HIM!
     </div>
 
-    <!-- Nitro is display-only now -->
-    <div id="nitroUI">
 
-      <div class="nitroTop">
-        <span>NITRO</span>
-
-        <span id="nitroState">
-          BUILDING
-        </span>
-      </div>
-
-      <div id="nitroTrack">
-        <div id="nitroFill"></div>
-      </div>
-
-      <div id="nitroHelp">
-        DRAG TO STEER • SWIPE UP TO BOOST
-      </div>
-
+    <div
+      id="stageTimer"
+      class="stageTimer"
+    >
     </div>
 
   </div>
 
-  <!-- START / RESULTS OVERLAY -->
-  <div id="overlay">
 
-    <div class="menu">
+  <!-- =========================
+       NITRO
+  ========================== -->
 
-      <div class="menuTop">
+  <div
+    id="nitroUI"
+    class="nitroUI"
+  >
 
-        <button
-          id="soundToggle"
-          type="button"
-          aria-label="Toggle sound"
-        >
-          🔊
-        </button>
+    <div class="nitroHeader">
 
-      </div>
+      <span>
+        NITRO
+      </span>
 
-      <h1 id="title">
+      <span id="nitroState">
+        BUILDING
+      </span>
+
+    </div>
+
+    <div class="nitroTrack">
+
+      <div
+        id="nitroFill"
+        class="nitroFill"
+      ></div>
+
+    </div>
+
+    <div class="controlHint">
+      DRAG TO STEER • SWIPE UP ANYWHERE TO BOOST
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       MAIN MENU
+  ========================== -->
+
+  <div
+    id="overlay"
+    class="overlay"
+  >
+
+    <div class="menuCard">
+
+      <button
+        id="soundToggle"
+        class="soundToggle"
+        type="button"
+        aria-label="Toggle sound"
+      >
+        🔊
+      </button>
+
+
+      <h1
+        id="title"
+        class="logo"
+      >
         PURSUIT
       </h1>
 
-      <div id="subtitle">
+      <div
+        id="subtitle"
+        class="subtitle"
+      >
         CATCH THE CRIMINAL
       </div>
 
-      <div id="message">
-        Choose your environment.
-      </div>
 
-      <div id="environmentSelector">
+      <p class="menuPrompt">
+        Choose your environment.
+      </p>
+
+
+      <!-- ENVIRONMENT GRID -->
+
+      <div class="environmentGrid">
 
         <button
           class="envButton active"
           data-env="city"
           type="button"
         >
-          <span class="envEmoji">🌃</span>
-          <span class="envName">CITY NIGHT</span>
+          <span class="envIcon">
+            🌃
+          </span>
+
+          <span>
+            CITY NIGHT
+          </span>
         </button>
+
 
         <button
           class="envButton"
           data-env="highway"
           type="button"
         >
-          <span class="envEmoji">☀️</span>
-          <span class="envName">HIGHWAY</span>
+          <span class="envIcon">
+            ☀️
+          </span>
+
+          <span>
+            HIGHWAY
+          </span>
         </button>
+
 
         <button
           class="envButton"
           data-env="rain"
           type="button"
         >
-          <span class="envEmoji">🌧️</span>
-          <span class="envName">RAIN</span>
+          <span class="envIcon">
+            🌧️
+          </span>
+
+          <span>
+            RAIN
+          </span>
         </button>
+
 
         <button
           class="envButton"
           data-env="snow"
           type="button"
         >
-          <span class="envEmoji">❄️</span>
-          <span class="envName">SNOW</span>
+          <span class="envIcon">
+            ❄️
+          </span>
+
+          <span>
+            SNOW
+          </span>
         </button>
+
 
         <button
           class="envButton"
           data-env="desert"
           type="button"
         >
-          <span class="envEmoji">🏜️</span>
-          <span class="envName">DESERT</span>
+          <span class="envIcon">
+            🌵
+          </span>
+
+          <span>
+            DESERT
+          </span>
         </button>
+
 
         <button
           class="envButton"
           data-env="tunnel"
           type="button"
         >
-          <span class="envEmoji">🚇</span>
-          <span class="envName">TUNNEL</span>
+          <span class="envIcon">
+            🚇
+          </span>
+
+          <span>
+            TUNNEL
+          </span>
         </button>
 
       </div>
 
+
+      <!-- =========================
+           CHASE MODE
+      ========================== -->
+
+      <div class="modeHeading">
+        CHASE MODE
+      </div>
+
+
+      <div class="modeGrid">
+
+        <button
+          id="quickModeBtn"
+          class="modeButton active"
+          type="button"
+        >
+          <span class="modeTitle">
+            QUICK
+          </span>
+
+          <span class="modeDescription">
+            ONE LOCATION
+          </span>
+        </button>
+
+
+        <button
+          id="longModeBtn"
+          class="modeButton"
+          type="button"
+        >
+          <span class="modeTitle">
+            LONG
+          </span>
+
+          <span class="modeDescription">
+            ALL 6 LOCATIONS
+          </span>
+        </button>
+
+      </div>
+
+
+      <div
+        id="message"
+        class="modeInfo"
+      >
+        QUICK CHASE • ONE ENVIRONMENT
+      </div>
+
+
       <button
         id="startBtn"
+        class="startButton"
         type="button"
       >
         START CHASE
       </button>
 
-      <div id="brand">
+
+      <div class="brand">
         SYNTAX ARCADE
       </div>
 
@@ -191,7 +332,8 @@
 
   </div>
 
-  <script src="game.js"></script>
+
+  <script src="game.js?v=30"></script>
 
 </body>
 
