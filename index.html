@@ -13,7 +13,7 @@
 
   <title>PURSUIT — Syntax Arcade</title>
 
-  <link rel="stylesheet" href="style.css?v=41">
+  <link rel="stylesheet" href="style.css?v=50">
 </head>
 
 <body>
@@ -21,7 +21,9 @@
   <canvas id="game"></canvas>
 
 
-  <!-- HUD -->
+  <!-- =========================================
+       HUD
+  ========================================== -->
 
   <div id="hud">
 
@@ -84,21 +86,34 @@
   </div>
 
 
-  <!-- NITRO -->
+  <!-- =========================================
+       NITRO
+  ========================================== -->
 
   <div id="nitroUI" class="nitroUI">
 
     <div class="nitroHeader">
-      <span>NITRO</span>
-      <span id="nitroState">BUILDING</span>
+
+      <span>
+        NITRO
+      </span>
+
+      <span id="nitroState">
+        BUILDING
+      </span>
+
     </div>
 
+
     <div class="nitroTrack">
+
       <div
         id="nitroFill"
         class="nitroFill"
       ></div>
+
     </div>
+
 
     <div class="controlHint">
       DRAG TO STEER • SWIPE UP ANYWHERE TO BOOST
@@ -107,7 +122,9 @@
   </div>
 
 
-  <!-- MENU -->
+  <!-- =========================================
+       MAIN MENU
+  ========================================== -->
 
   <div id="overlay" class="overlay">
 
@@ -125,6 +142,7 @@
       <h1 id="title" class="logo">
         PURSUIT
       </h1>
+
 
       <div id="subtitle" class="subtitle">
         CATCH THE CRIMINAL
@@ -208,6 +226,7 @@
         CHASE MODE
       </div>
 
+
       <div class="twoOptionGrid">
 
         <button
@@ -215,7 +234,10 @@
           class="choiceButton active"
           type="button"
         >
-          <span class="choiceTitle">QUICK</span>
+          <span class="choiceTitle">
+            QUICK
+          </span>
+
           <span class="choiceDescription">
             ONE LOCATION
           </span>
@@ -227,7 +249,10 @@
           class="choiceButton purpleChoice"
           type="button"
         >
-          <span class="choiceTitle">LONG</span>
+          <span class="choiceTitle">
+            LONG
+          </span>
+
           <span class="choiceDescription">
             ALL 6 LOCATIONS
           </span>
@@ -242,6 +267,7 @@
         LEVEL LENGTH
       </div>
 
+
       <div class="twoOptionGrid">
 
         <button
@@ -249,7 +275,10 @@
           class="choiceButton"
           type="button"
         >
-          <span class="choiceTitle">30 SEC</span>
+          <span class="choiceTitle">
+            30 SEC
+          </span>
+
           <span class="choiceDescription">
             FAST
           </span>
@@ -261,7 +290,10 @@
           class="choiceButton active"
           type="button"
         >
-          <span class="choiceTitle">1 MIN</span>
+          <span class="choiceTitle">
+            1 MIN
+          </span>
+
           <span class="choiceDescription">
             FULL CHASE
           </span>
@@ -276,6 +308,7 @@
         DIFFICULTY
       </div>
 
+
       <div class="difficultyGrid">
 
         <button
@@ -283,7 +316,9 @@
           class="difficultyButton active"
           type="button"
         >
-          <span class="choiceTitle">EASY</span>
+          <span class="choiceTitle">
+            EASY
+          </span>
 
           <span class="choiceDescription">
             NORMAL TRAFFIC
@@ -300,7 +335,9 @@
           class="difficultyButton"
           type="button"
         >
-          <span class="choiceTitle">MEDIUM</span>
+          <span class="choiceTitle">
+            MEDIUM
+          </span>
 
           <span class="choiceDescription">
             STALLED CARS
@@ -317,7 +354,9 @@
           class="difficultyButton hardChoice"
           type="button"
         >
-          <span class="choiceTitle">HARD</span>
+          <span class="choiceTitle">
+            HARD
+          </span>
 
           <span class="choiceDescription">
             MORE HAZARDS
@@ -332,7 +371,7 @@
 
 
       <div id="message" class="modeInfo">
-        QUICK • 1 MIN • EASY • 5 LIVES
+        QUICK • 1 MIN • EASY • ×1 SCORE • 5 LIVES
       </div>
 
 
@@ -354,7 +393,7 @@
   </div>
 
 
-  <script src="game.js?v=41"></script>
+  <script src="game.js?v=50"></script>
 
 </body>
 
