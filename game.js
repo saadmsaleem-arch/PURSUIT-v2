@@ -1,5 +1,22 @@
 "use strict";
+/* ================================
+   VEHICLE ARTWORK
+================================ */
 
+const vehicleImages = {};
+
+function loadVehicle(name, file) {
+  const img = new Image();
+  img.src = file;
+  vehicleImages[name] = img;
+}
+
+loadVehicle("police", "police.png");
+loadVehicle("suspect", "suspect.png");
+loadVehicle("traffic1", "traffic1.png");
+loadVehicle("traffic2", "traffic2.png");
+loadVehicle("traffic3", "traffic3.png");
+loadVehicle("truck", "truck.png");
 /* =====================================================
    DOM
 ===================================================== */
