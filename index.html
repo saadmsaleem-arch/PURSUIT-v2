@@ -9,59 +9,55 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
-  <meta
-    name="theme-color"
-    content="#061626"
-  >
+  <meta name="theme-color" content="#061626">
 
   <title>PURSUIT — Syntax Arcade</title>
 
-  <link
-    rel="stylesheet"
-    href="style.css?v=30"
-  >
+  <link rel="stylesheet" href="style.css?v=31">
 </head>
 
 <body>
 
-  <!-- =========================
-       GAME CANVAS
-  ========================== -->
-
+  <!-- GAME -->
   <canvas id="game"></canvas>
 
 
   <!-- =========================
-       GAME HUD
+       HUD
   ========================== -->
 
   <div id="hud">
 
     <div class="hudBox distanceBox">
-      <span class="hudLabel">
-        DISTANCE
-      </span>
-
-      <span
-        id="distanceValue"
-        class="hudValue"
-      >
-        0 m
-      </span>
+      <span class="hudLabel">DISTANCE</span>
+      <span id="distanceValue" class="hudValue">0 m</span>
     </div>
 
 
     <div class="hudBox speedBox">
-      <span class="hudLabel">
-        SPEED
-      </span>
+      <span class="hudLabel">SPEED</span>
+      <span id="speedValue" class="hudValue cyan">0 km/h</span>
+    </div>
 
-      <span
-        id="speedValue"
-        class="hudValue cyan"
-      >
-        0 km/h
-      </span>
+
+    <div class="livesBox">
+      <span class="hudLabel">UNIT</span>
+      <div id="heartsValue" class="heartsValue">
+        ❤️ ❤️ ❤️ ❤️ ❤️
+      </div>
+    </div>
+
+
+    <div class="scoreBox">
+      <div>
+        <span class="hudLabel">SCORE</span>
+        <span id="scoreValue" class="scoreValue">0</span>
+      </div>
+
+      <div class="bestScoreRow">
+        BEST
+        <span id="bestScoreValue">0</span>
+      </div>
     </div>
 
 
@@ -74,17 +70,16 @@
 
 
     <div
+      id="stageTimer"
+      class="stageTimer"
+    ></div>
+
+
+    <div
       id="chaseStatus"
       class="chaseStatus"
     >
       STAY ON HIM!
-    </div>
-
-
-    <div
-      id="stageTimer"
-      class="stageTimer"
-    >
     </div>
 
   </div>
@@ -94,30 +89,18 @@
        NITRO
   ========================== -->
 
-  <div
-    id="nitroUI"
-    class="nitroUI"
-  >
+  <div id="nitroUI" class="nitroUI">
 
     <div class="nitroHeader">
-
-      <span>
-        NITRO
-      </span>
-
-      <span id="nitroState">
-        BUILDING
-      </span>
-
+      <span>NITRO</span>
+      <span id="nitroState">BUILDING</span>
     </div>
 
     <div class="nitroTrack">
-
       <div
         id="nitroFill"
         class="nitroFill"
       ></div>
-
     </div>
 
     <div class="controlHint">
@@ -128,13 +111,10 @@
 
 
   <!-- =========================
-       MAIN MENU
+       MAIN MENU / RESULTS
   ========================== -->
 
-  <div
-    id="overlay"
-    class="overlay"
-  >
+  <div id="overlay" class="overlay">
 
     <div class="menuCard">
 
@@ -142,23 +122,17 @@
         id="soundToggle"
         class="soundToggle"
         type="button"
-        aria-label="Toggle sound"
       >
         🔊
       </button>
 
 
-      <h1
-        id="title"
-        class="logo"
-      >
+      <h1 id="title" class="logo">
         PURSUIT
       </h1>
 
-      <div
-        id="subtitle"
-        class="subtitle"
-      >
+
+      <div id="subtitle" class="subtitle">
         CATCH THE CRIMINAL
       </div>
 
@@ -168,7 +142,7 @@
       </p>
 
 
-      <!-- ENVIRONMENT GRID -->
+      <!-- ENVIRONMENTS -->
 
       <div class="environmentGrid">
 
@@ -177,13 +151,8 @@
           data-env="city"
           type="button"
         >
-          <span class="envIcon">
-            🌃
-          </span>
-
-          <span>
-            CITY NIGHT
-          </span>
+          <span class="envIcon">🌃</span>
+          <span>CITY NIGHT</span>
         </button>
 
 
@@ -192,13 +161,8 @@
           data-env="highway"
           type="button"
         >
-          <span class="envIcon">
-            ☀️
-          </span>
-
-          <span>
-            HIGHWAY
-          </span>
+          <span class="envIcon">☀️</span>
+          <span>HIGHWAY</span>
         </button>
 
 
@@ -207,13 +171,8 @@
           data-env="rain"
           type="button"
         >
-          <span class="envIcon">
-            🌧️
-          </span>
-
-          <span>
-            RAIN
-          </span>
+          <span class="envIcon">🌧️</span>
+          <span>RAIN</span>
         </button>
 
 
@@ -222,13 +181,8 @@
           data-env="snow"
           type="button"
         >
-          <span class="envIcon">
-            ❄️
-          </span>
-
-          <span>
-            SNOW
-          </span>
+          <span class="envIcon">❄️</span>
+          <span>SNOW</span>
         </button>
 
 
@@ -237,13 +191,8 @@
           data-env="desert"
           type="button"
         >
-          <span class="envIcon">
-            🌵
-          </span>
-
-          <span>
-            DESERT
-          </span>
+          <span class="envIcon">🌵</span>
+          <span>DESERT</span>
         </button>
 
 
@@ -252,21 +201,14 @@
           data-env="tunnel"
           type="button"
         >
-          <span class="envIcon">
-            🚇
-          </span>
-
-          <span>
-            TUNNEL
-          </span>
+          <span class="envIcon">🚇</span>
+          <span>TUNNEL</span>
         </button>
 
       </div>
 
 
-      <!-- =========================
-           CHASE MODE
-      ========================== -->
+      <!-- MODE -->
 
       <div class="modeHeading">
         CHASE MODE
@@ -280,10 +222,7 @@
           class="modeButton active"
           type="button"
         >
-          <span class="modeTitle">
-            QUICK
-          </span>
-
+          <span class="modeTitle">QUICK</span>
           <span class="modeDescription">
             ONE LOCATION
           </span>
@@ -295,10 +234,7 @@
           class="modeButton"
           type="button"
         >
-          <span class="modeTitle">
-            LONG
-          </span>
-
+          <span class="modeTitle">LONG</span>
           <span class="modeDescription">
             ALL 6 LOCATIONS
           </span>
@@ -307,10 +243,7 @@
       </div>
 
 
-      <div
-        id="message"
-        class="modeInfo"
-      >
+      <div id="message" class="modeInfo">
         QUICK CHASE • ONE ENVIRONMENT
       </div>
 
@@ -333,7 +266,7 @@
   </div>
 
 
-  <script src="game.js?v=30"></script>
+  <script src="game.js?v=31"></script>
 
 </body>
 
