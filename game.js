@@ -310,9 +310,9 @@ let suspectWorldY = 650;
    TRAFFIC FEEL
 ===================================================== */
 
-const TRAFFIC_BASE_SCREEN_SPEED = 380;
+const TRAFFIC_BASE_SCREEN_SPEED = 340;
 const TRAFFIC_RELATIVE_MULTIPLIER = 4.2;
-const TRAFFIC_MAX_SCREEN_SPEED = 590;
+const TRAFFIC_MAX_SCREEN_SPEED = 540;
 
 /* =====================================================
    WEATHER
