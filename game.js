@@ -311,7 +311,7 @@ let suspectWorldY = 650;
 ===================================================== */
 
 const TRAFFIC_BASE_SCREEN_SPEED = 340;
-const TRAFFIC_RELATIVE_MULTIPLIER = 4.2;
+const TRAFFIC_RELATIVE_MULTIPLIER = 3.2;
 const TRAFFIC_MAX_SCREEN_SPEED = 540;
 
 /* =====================================================
