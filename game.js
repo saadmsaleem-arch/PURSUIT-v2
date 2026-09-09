@@ -244,7 +244,6 @@ let nitroActive = 0;
 
 let elapsed = 0;
 let score = 0;
-
 let nearMisses = 0;
 
 let shake = 0;
@@ -260,9 +259,23 @@ let suspectWorldY = 650;
    TRAFFIC FEEL
 ===================================================== */
 
+/*
+   These are the slightly slower settings
+   you just chose.
+*/
+
 const TRAFFIC_BASE_SCREEN_SPEED = 340;
 const TRAFFIC_RELATIVE_MULTIPLIER = 3.2;
 const TRAFFIC_MAX_SCREEN_SPEED = 540;
+
+/*
+   Safe lane is the gap through each band of traffic.
+
+   It can move left/right, but only one lane per band.
+   That creates a connected path through the traffic.
+*/
+
+let safeLane = 1;
 
 /* =====================================================
    WEATHER
@@ -307,7 +320,7 @@ function createWeatherParticles() {
 }
 
 /* =====================================================
-   BACKGROUND FRAME
+   BACKGROUND / ROAD
 ===================================================== */
 
 function backgroundFrameWidth() {
@@ -321,10 +334,6 @@ function backgroundFrameWidth() {
   return W;
 }
 
-/* =====================================================
-   PLAYABLE ROAD
-===================================================== */
-
 function roadInfo() {
   const frameWidth =
     backgroundFrameWidth();
@@ -336,30 +345,22 @@ function roadInfo() {
     );
 
   return {
-    left:
-      (W - width) / 2,
-
-    right:
-      (W + width) / 2,
-
+    left: (W - width) / 2,
+    right: (W + width) / 2,
     width,
-
     lanes: 4
   };
 }
 
 function laneCenter(lane) {
-  const road =
-    roadInfo();
+  const road = roadInfo();
 
   const laneWidth =
-    road.width /
-    road.lanes;
+    road.width / road.lanes;
 
   return (
     road.left +
-    laneWidth *
-    (lane + 0.5)
+    laneWidth * (lane + 0.5)
   );
 }
 
@@ -388,11 +389,8 @@ function resetGame() {
   };
 
   robber = {
-    x:
-      laneCenter(1),
-
-    screenY:
-      H * 0.27,
+    x: laneCenter(1),
+    screenY: H * 0.27,
 
     width: 58,
     height: 106,
@@ -400,7 +398,6 @@ function resetGame() {
     speed: 123,
 
     targetLane: 1,
-
     laneTimer: 1.0,
 
     image: "suspect"
@@ -414,14 +411,15 @@ function resetGame() {
 
   elapsed = 0;
   score = 0;
-
   nearMisses = 0;
 
   shake = 0;
   statusTimer = 0;
 
-  spawnTimer = 0.10;
+  spawnTimer = 0.20;
   roadScroll = 0;
+
+  safeLane = 1;
 
   distanceValue.textContent =
     getDistance() + " m";
@@ -430,9 +428,7 @@ function resetGame() {
     "132 km/h";
 
   environmentBadge.textContent =
-    environments[
-      selectedEnvironment
-    ].name;
+    environments[selectedEnvironment].name;
 
   nitroFill.style.width =
     "0%";
@@ -440,25 +436,27 @@ function resetGame() {
   nitroState.textContent =
     "BUILDING";
 
-  nitroUI.classList.remove(
-    "ready"
-  );
+  nitroUI.classList.remove("ready");
 
   createWeatherParticles();
 
   /*
-    Start with plenty of traffic already loaded.
+    Seed traffic in several bands so the road
+    starts busy, but every band has a passable gap.
   */
 
-  for (
-    let i = 0;
-    i < 15;
-    i++
-  ) {
-    spawnTraffic(
-      -20 -
-      i * 78
-    );
+  const seedYPositions = [
+    H * 0.08,
+    H * 0.25,
+    H * 0.42,
+    -80,
+    -240,
+    -400,
+    -560
+  ];
+
+  for (const y of seedYPositions) {
+    spawnTrafficBand(y);
   }
 }
 
@@ -469,13 +467,11 @@ function resetGame() {
 function getDistance() {
   return Math.max(
     0,
-
     Math.round(
       (
         policeWorldY -
         suspectWorldY
-      ) *
-      0.7
+      ) * 0.7
     )
   );
 }
@@ -487,14 +483,12 @@ function getDistance() {
 function startGame() {
   resetGame();
 
-  title.className =
-    "";
+  title.className = "";
 
   overlay.style.display =
     "none";
 
-  running =
-    true;
+  running = true;
 
   lastTime =
     performance.now();
@@ -524,19 +518,18 @@ let gestureStartTime = 0;
 function steer(clientX) {
   if (!running) return;
 
-  const road =
-    roadInfo();
+  const road = roadInfo();
 
   player.targetX =
     Math.max(
       road.left +
-      player.width / 2 +
-      8,
+        player.width / 2 +
+        8,
 
       Math.min(
         road.right -
-        player.width / 2 -
-        8,
+          player.width / 2 -
+          8,
 
         clientX
       )
@@ -548,8 +541,7 @@ canvas.addEventListener(
   event => {
     if (!running) return;
 
-    pointerDown =
-      true;
+    pointerDown = true;
 
     gestureStartX =
       event.clientX;
@@ -560,9 +552,7 @@ canvas.addEventListener(
     gestureStartTime =
       performance.now();
 
-    steer(
-      event.clientX
-    );
+    steer(event.clientX);
   }
 );
 
@@ -574,9 +564,7 @@ canvas.addEventListener(
       !running
     ) return;
 
-    steer(
-      event.clientX
-    );
+    steer(event.clientX);
   }
 );
 
@@ -585,8 +573,7 @@ window.addEventListener(
   event => {
     if (!pointerDown) return;
 
-    pointerDown =
-      false;
+    pointerDown = false;
 
     if (!running) return;
 
@@ -604,8 +591,7 @@ window.addEventListener(
 
     const vertical =
       Math.abs(dy) >
-      Math.abs(dx) *
-      1.1;
+      Math.abs(dx) * 1.1;
 
     const swipeUp =
       dy < -50 &&
@@ -634,9 +620,7 @@ function activateNitro() {
   }
 
   nitro = 0;
-
-  nitroActive =
-    2.35;
+  nitroActive = 2.35;
 
   nitroUI.classList.remove(
     "ready"
@@ -659,9 +643,7 @@ function activateNitro() {
       7
     );
 
-  if (
-    navigator.vibrate
-  ) {
+  if (navigator.vibrate) {
     navigator.vibrate(35);
   }
 }
@@ -682,14 +664,21 @@ function showStatus(text) {
 }
 
 /* =====================================================
-   TRAFFIC SPAWN
+   SAFE TRAFFIC SYSTEM
 ===================================================== */
 
-function spawnTraffic(
-  forcedY = null
+/*
+   Creates one vehicle at a specific lane and Y position.
+*/
+
+function createTrafficCar(
+  lane,
+  screenY
 ) {
-  const road =
-    roadInfo();
+  const road = roadInfo();
+
+  const laneWidth =
+    road.width / road.lanes;
 
   const roll =
     Math.random();
@@ -699,23 +688,15 @@ function spawnTraffic(
   let height;
   let speed;
 
-  if (
-    roll <
-    0.13
-  ) {
-    image =
-      "truck";
+  if (roll < 0.12) {
+    image = "truck";
 
-    width =
-      70;
-
-    height =
-      148;
+    width = 70;
+    height = 148;
 
     speed =
       92 +
-      Math.random() *
-      12;
+      Math.random() * 12;
 
   } else {
     const choices = [
@@ -732,259 +713,232 @@ function spawnTraffic(
         )
       ];
 
-    width =
-      52;
-
-    height =
-      96;
+    width = 52;
+    height = 96;
 
     speed =
       102 +
-      Math.random() *
-      18;
+      Math.random() * 18;
   }
 
-  const sidePadding =
-    width * 0.65;
+  /*
+    Slight lane jitter keeps traffic from looking
+    like four perfectly straight columns.
+  */
+
+  const jitter =
+    (
+      Math.random() -
+      0.5
+    ) *
+    laneWidth *
+    0.18;
+
+  let x =
+    laneCenter(lane) +
+    jitter;
 
   const minX =
     road.left +
-    sidePadding;
+    width * 0.55;
 
   const maxX =
     road.right -
-    sidePadding;
+    width * 0.55;
 
-  let trafficX =
-    minX +
-    Math.random() *
-    (
-      maxX -
-      minX
-    );
-
-  /*
-    Bias some traffic toward the middle.
-  */
-
-  if (
-    Math.random() <
-    0.50
-  ) {
-    const center =
-      W / 2;
-
-    trafficX =
-      center +
-      (
-        Math.random() -
-        0.5
-      ) *
-      road.width *
-      0.56;
-  }
-
-  trafficX =
+  x =
     Math.max(
       minX,
       Math.min(
         maxX,
-        trafficX
+        x
       )
     );
 
-  const startY =
-    forcedY !== null
-      ? forcedY
-      : -30 -
-        Math.random() *
-        260;
-
-  /*
-    Allow busy traffic but prevent literal overlap.
-  */
-
-  const overlapRisk =
-    traffic.some(car => {
-
-      const horizontal =
-        Math.abs(
-          car.x -
-          trafficX
-        );
-
-      const vertical =
-        Math.abs(
-          car.screenY -
-          startY
-        );
-
-      return (
-        horizontal <
-        (
-          car.width +
-          width
-        ) *
-        0.50
-
-        &&
-
-        vertical <
-        (
-          car.height +
-          height
-        ) *
-        0.54
-      );
-    });
-
-  if (
-    overlapRisk &&
-    forcedY !== null
-  ) {
-    for (
-      let attempt = 0;
-      attempt < 8;
-      attempt++
-    ) {
-      const alternativeX =
-        minX +
-        Math.random() *
-        (
-          maxX -
-          minX
-        );
-
-      const blocked =
-        traffic.some(car => {
-
-          const horizontal =
-            Math.abs(
-              car.x -
-              alternativeX
-            );
-
-          const vertical =
-            Math.abs(
-              car.screenY -
-              startY
-            );
-
-          return (
-            horizontal <
-            (
-              car.width +
-              width
-            ) *
-            0.50
-
-            &&
-
-            vertical <
-            (
-              car.height +
-              height
-            ) *
-            0.54
-          );
-        });
-
-      if (
-        !blocked
-      ) {
-        trafficX =
-          alternativeX;
-
-        traffic.push({
-          x:
-            trafficX,
-
-          screenY:
-            startY,
-
-          width,
-          height,
-
-          speed,
-
-          image,
-
-          passed:
-            false
-        });
-
-        return;
-      }
-    }
-
-    return;
-  }
-
-  if (
-    overlapRisk
-  ) {
-    return;
-  }
-
   traffic.push({
-    x:
-      trafficX,
-
-    screenY:
-      startY,
-
+    x,
+    lane,
+    screenY,
     width,
     height,
-
     speed,
-
     image,
-
-    passed:
-      false
+    passed: false
   });
+}
+
+/*
+   Move the safe lane gradually.
+
+   Example:
+   1 -> 2 -> 2 -> 3 -> 2 -> 1
+
+   Never:
+   0 -> 3
+
+   That prevents an impossible sudden jump.
+*/
+
+function chooseNextSafeLane() {
+  const movementChoices = [
+    -1,
+    0,
+    0,
+    1
+  ];
+
+  const move =
+    movementChoices[
+      Math.floor(
+        Math.random() *
+        movementChoices.length
+      )
+    ];
+
+  safeLane =
+    Math.max(
+      0,
+      Math.min(
+        3,
+        safeLane + move
+      )
+    );
+
+  return safeLane;
+}
+
+/*
+   Each band contains several vehicles across
+   the roadway, but leaves the safe lane empty.
+
+   Sometimes a second lane is also left open.
+*/
+
+function spawnTrafficBand(
+  forcedY = null
+) {
+  const road = roadInfo();
+
+  const bandY =
+    forcedY !== null
+      ? forcedY
+      : -100 -
+        Math.random() * 80;
+
+  const openLane =
+    chooseNextSafeLane();
+
+  /*
+    Usually 3 cars = busy.
+    Sometimes only 2 = breathing room.
+  */
+
+  const numberOfCars =
+    Math.random() < 0.70
+      ? 3
+      : 2;
+
+  const availableLanes = [];
+
+  for (
+    let lane = 0;
+    lane < road.lanes;
+    lane++
+  ) {
+    if (lane !== openLane) {
+      availableLanes.push(lane);
+    }
+  }
+
+  /*
+    Shuffle available lanes.
+  */
+
+  for (
+    let i =
+      availableLanes.length - 1;
+
+    i > 0;
+
+    i--
+  ) {
+    const j =
+      Math.floor(
+        Math.random() *
+        (i + 1)
+      );
+
+    const temp =
+      availableLanes[i];
+
+    availableLanes[i] =
+      availableLanes[j];
+
+    availableLanes[j] =
+      temp;
+  }
+
+  for (
+    let i = 0;
+    i < numberOfCars;
+    i++
+  ) {
+    const lane =
+      availableLanes[i];
+
+    /*
+      Small vertical stagger means cars don't form
+      a perfectly flat horizontal wall.
+  */
+
+    const yOffset =
+      (
+        Math.random() -
+        0.5
+      ) * 45;
+
+    createTrafficCar(
+      lane,
+      bandY + yOffset
+    );
+  }
 }
 
 /* =====================================================
    COLLISION
 
-   IMPORTANT CHANGE:
-   VISUAL SIZE stays the same.
-   COLLISION HITBOX is smaller.
+   Smaller than visible artwork for fair arcade play.
 ===================================================== */
 
 function overlapScreen(a, b) {
-
   const aHitWidth =
     a.image === "police"
       ? a.width * 0.62
-      : a.width * 0.78;
+      : a.width * 0.76;
 
   const bHitWidth =
     b.image === "police"
       ? b.width * 0.62
-      : b.width * 0.78;
+      : b.width * 0.76;
 
   const aHitHeight =
     a.image === "police"
-      ? a.height * 0.72
-      : a.height * 0.82;
+      ? a.height * 0.70
+      : a.height * 0.80;
 
   const bHitHeight =
     b.image === "police"
-      ? b.height * 0.72
-      : b.height * 0.82;
+      ? b.height * 0.70
+      : b.height * 0.80;
 
   return (
     Math.abs(
-      a.x -
-      b.x
+      a.x - b.x
     ) <
-    (
-      aHitWidth +
-      bHitWidth
-    ) /
-    2
+      (
+        aHitWidth +
+        bHitWidth
+      ) / 2
 
     &&
 
@@ -992,11 +946,10 @@ function overlapScreen(a, b) {
       a.screenY -
       b.screenY
     ) <
-    (
-      aHitHeight +
-      bHitHeight
-    ) /
-    2
+      (
+        aHitHeight +
+        bHitHeight
+      ) / 2
   );
 }
 
@@ -1004,10 +957,7 @@ function overlapScreen(a, b) {
    SPARKS
 ===================================================== */
 
-function createSparks(
-  x,
-  y
-) {
+function createSparks(x, y) {
   for (
     let i = 0;
     i < 20;
@@ -1021,8 +971,7 @@ function createSparks(
         (
           Math.random() -
           0.5
-        ) *
-        200,
+        ) * 200,
 
       vy:
         Math.random() *
@@ -1049,23 +998,15 @@ function updateParticles(dt) {
       particles[i];
 
     p.x +=
-      p.vx *
-      dt;
+      p.vx * dt;
 
     p.y +=
-      p.vy *
-      dt;
+      p.vy * dt;
 
-    p.life -=
-      dt;
+    p.life -= dt;
 
-    if (
-      p.life <= 0
-    ) {
-      particles.splice(
-        i,
-        1
-      );
+    if (p.life <= 0) {
+      particles.splice(i, 1);
     }
   }
 }
@@ -1074,25 +1015,19 @@ function updateParticles(dt) {
    CAMERA
 ===================================================== */
 
-function worldToScreenY(
-  worldY
-) {
+function worldToScreenY(worldY) {
   const midpoint =
     (
       policeWorldY +
       suspectWorldY
-    ) /
-    2;
+    ) / 2;
 
   return (
-    H *
-    0.50
-    +
+    H * 0.50 +
     (
       worldY -
       midpoint
-    ) *
-    0.78
+    ) * 0.78
   );
 }
 
@@ -1101,8 +1036,7 @@ function worldToScreenY(
 ===================================================== */
 
 function finish(win) {
-  running =
-    false;
+  running = false;
 
   stopDrivingSounds();
 
@@ -1116,9 +1050,7 @@ function finish(win) {
     "flex";
 
   title.className =
-    win
-      ? "win"
-      : "lose";
+    win ? "win" : "lose";
 
   title.textContent =
     win
@@ -1160,9 +1092,7 @@ function finish(win) {
   } else {
     message.innerHTML = `
       The suspect got away.
-
       <br><br>
-
       Select a location and try again.
     `;
   }
@@ -1178,8 +1108,7 @@ function finish(win) {
 ===================================================== */
 
 function update(dt) {
-  elapsed +=
-    dt;
+  elapsed += dt;
 
   const environment =
     environments[
@@ -1194,34 +1123,24 @@ function update(dt) {
 
   /* Nitro */
 
-  if (
-    nitroActive >
-    0
-  ) {
-    nitroActive -=
-      dt;
+  if (nitroActive > 0) {
+    nitroActive -= dt;
 
-    policeSpeed +=
-      48;
+    policeSpeed += 48;
 
-    if (
-      nitroActive <=
-      0
-    ) {
+    if (nitroActive <= 0) {
       nitroState.textContent =
         "BUILDING";
     }
   }
 
-  /* Chase movement */
+  /* Chase */
 
   suspectWorldY -=
-    suspectSpeed *
-    dt;
+    suspectSpeed * dt;
 
   policeWorldY -=
-    policeSpeed *
-    dt;
+    policeSpeed * dt;
 
   roadScroll +=
     policeSpeed *
@@ -1234,8 +1153,7 @@ function update(dt) {
 
       Math.min(
         1.35,
-        policeSpeed /
-        130
+        policeSpeed / 130
       )
     );
 
@@ -1257,46 +1175,35 @@ function update(dt) {
      SUSPECT AI
   =================================================== */
 
-  robber.laneTimer -=
-    dt;
+  robber.laneTimer -= dt;
 
-  if (
-    robber.laneTimer <=
-    0
-  ) {
+  if (robber.laneTimer <= 0) {
     const current =
       robber.targetLane;
 
-    const laneChoices =
-      [];
+    const choices = [];
 
     for (
       let lane = 0;
       lane < 4;
       lane++
     ) {
-      if (
-        lane !==
-        current
-      ) {
-        laneChoices.push(
-          lane
-        );
+      if (lane !== current) {
+        choices.push(lane);
       }
     }
 
     robber.targetLane =
-      laneChoices[
+      choices[
         Math.floor(
           Math.random() *
-          laneChoices.length
+          choices.length
         )
       ];
 
     robber.laneTimer =
       0.75 +
-      Math.random() *
-      1.15;
+      Math.random() * 1.15;
   }
 
   const robberTargetX =
@@ -1311,8 +1218,7 @@ function update(dt) {
     ) *
     Math.min(
       1,
-      dt *
-      2.8
+      dt * 2.8
     );
 
   /* Chase screen positions */
@@ -1329,65 +1235,47 @@ function update(dt) {
 
   player.screenY =
     Math.max(
-      H *
-      0.58,
+      H * 0.58,
 
       Math.min(
-        H *
-        0.78,
+        H * 0.78,
         player.screenY
       )
     );
 
   robber.screenY =
     Math.max(
-      H *
-      0.16,
+      H * 0.16,
 
       Math.min(
-        H *
-        0.39,
+        H * 0.39,
         robber.screenY
       )
     );
 
   /* ===================================================
-     BUSY TRAFFIC SPAWN
+     TRAFFIC SPAWN
+
+     Instead of random individual cars, spawn a band.
+     Keeps it busy AND guarantees a route.
   =================================================== */
 
-  spawnTimer -=
-    dt;
+  spawnTimer -= dt;
 
-  if (
-    spawnTimer <=
-    0
-  ) {
-    spawnTraffic();
-
-    if (
-      Math.random() <
-      0.28
-    ) {
-      spawnTraffic(
-        -80 -
-        Math.random() *
-        180
-      );
-    }
+  if (spawnTimer <= 0) {
+    spawnTrafficBand();
 
     const trafficIntensity =
       Math.min(
-        1.50,
+        1.35,
         1 +
-        elapsed /
-        75
+        elapsed / 100
       );
 
     spawnTimer =
       (
-        0.22 +
-        Math.random() *
-        0.24
+        0.40 +
+        Math.random() * 0.18
       )
       /
       (
@@ -1419,25 +1307,20 @@ function update(dt) {
       );
 
     let trafficScreenSpeed =
-      TRAFFIC_BASE_SCREEN_SPEED
-      +
+      TRAFFIC_BASE_SCREEN_SPEED +
       relativeSpeed *
       TRAFFIC_RELATIVE_MULTIPLIER;
 
     if (
-      car.image ===
-      "truck"
+      car.image === "truck"
     ) {
-      trafficScreenSpeed -=
-        40;
+      trafficScreenSpeed -= 40;
     }
 
     if (
-      nitroActive >
-      0
+      nitroActive > 0
     ) {
-      trafficScreenSpeed +=
-        75;
+      trafficScreenSpeed += 75;
     }
 
     trafficScreenSpeed =
@@ -1447,13 +1330,11 @@ function update(dt) {
       );
 
     car.screenY +=
-      trafficScreenSpeed *
-      dt;
+      trafficScreenSpeed * dt;
 
     if (
       car.screenY >
-      H +
-      180
+      H + 180
     ) {
       traffic.splice(
         i,
@@ -1466,9 +1347,7 @@ function update(dt) {
     /* Collision */
 
     if (
-      player.invincible <=
-      0
-      &&
+      player.invincible <= 0 &&
       overlapScreen(
         player,
         car
@@ -1477,24 +1356,20 @@ function update(dt) {
       player.speed =
         Math.max(
           105,
-          player.speed -
-          28
+          player.speed - 28
         );
 
-      policeWorldY +=
-        85;
+      policeWorldY += 85;
 
       player.invincible =
         0.9;
 
-      shake =
-        18;
+      shake = 18;
 
       nitro =
         Math.max(
           0,
-          nitro -
-          20
+          nitro - 20
         );
 
       createSparks(
@@ -1524,15 +1399,12 @@ function update(dt) {
     /* Near miss */
 
     if (
-      !car.passed
-      &&
+      !car.passed &&
       car.screenY >
-      player.screenY +
-      player.height *
-      0.50
+        player.screenY +
+        player.height * 0.50
     ) {
-      car.passed =
-        true;
+      car.passed = true;
 
       const horizontalGap =
         Math.abs(
@@ -1544,29 +1416,24 @@ function update(dt) {
         (
           car.width +
           player.width
-        ) /
-        2;
+        ) / 2;
 
       if (
         horizontalGap >
-        edge -
-        4
+          edge - 4
         &&
         horizontalGap <
-        edge +
-        34
+          edge + 34
       ) {
         nitro =
           Math.min(
             100,
-            nitro +
-            25
+            nitro + 25
           );
 
         nearMisses++;
 
-        score +=
-          250;
+        score += 250;
 
         playSound(
           sounds.nearMiss
@@ -1579,21 +1446,15 @@ function update(dt) {
     }
   }
 
-  if (
-    player.invincible >
-    0
-  ) {
-    player.invincible -=
-      dt;
+  if (player.invincible > 0) {
+    player.invincible -= dt;
   }
 
   player.speed =
     Math.min(
       154,
-
       player.speed +
-      2.5 *
-      dt
+        2.5 * dt
     );
 
   const distance =
@@ -1602,12 +1463,10 @@ function update(dt) {
   /* Nitro UI */
 
   nitroFill.style.width =
-    nitro +
-    "%";
+    nitro + "%";
 
   if (
-    nitro >= 100
-    &&
+    nitro >= 100 &&
     nitroActive <= 0
   ) {
     nitroState.textContent =
@@ -1618,8 +1477,7 @@ function update(dt) {
     );
 
   } else if (
-    nitroActive <=
-    0
+    nitroActive <= 0
   ) {
     nitroState.textContent =
       "BUILDING";
@@ -1629,35 +1487,23 @@ function update(dt) {
     );
   }
 
-  if (
-    distance <=
-    18
-  ) {
+  if (distance <= 18) {
     finish(true);
     return;
   }
 
-  if (
-    distance >=
-    520
-  ) {
+  if (distance >= 520) {
     finish(false);
     return;
   }
 
-  if (
-    distance <
-    90
-  ) {
+  if (distance < 90) {
     showStatus(
       "CLOSING IN!"
     );
   }
 
-  if (
-    distance <
-    45
-  ) {
+  if (distance < 45) {
     showStatus(
       "STAY ON HIM!"
     );
@@ -1668,17 +1514,11 @@ function update(dt) {
     dt *
     0.5;
 
-  updateParticles(
-    dt
-  );
-
-  updateWeather(
-    dt
-  );
+  updateParticles(dt);
+  updateWeather(dt);
 
   distanceValue.textContent =
-    distance +
-    " m";
+    distance + " m";
 
   speedValue.textContent =
     Math.round(
@@ -1686,24 +1526,16 @@ function update(dt) {
     ) +
     " km/h";
 
-  if (
-    statusTimer >
-    0
-  ) {
-    statusTimer -=
-      dt;
+  if (statusTimer > 0) {
+    statusTimer -= dt;
 
-    if (
-      statusTimer <=
-      0
-    ) {
+    if (statusTimer <= 0) {
       chaseStatus.style.opacity =
         "0";
     }
   }
 
-  shake *=
-    0.88;
+  shake *= 0.88;
 }
 
 /* =====================================================
@@ -1712,99 +1544,77 @@ function update(dt) {
 
 function updateWeather(dt) {
   if (
-    selectedEnvironment ===
-    "rain"
+    selectedEnvironment === "rain"
   ) {
     for (
-      const drop of
-      rainDrops
+      const drop of rainDrops
     ) {
       drop.y +=
-        drop.speed *
-        dt;
+        drop.speed * dt;
 
       drop.x -=
-        85 *
-        dt;
+        85 * dt;
 
       if (
         drop.y >
-        H +
-        30
+        H + 30
       ) {
-        drop.y =
-          -30;
+        drop.y = -30;
 
         drop.x =
-          Math.random() *
-          W;
+          Math.random() * W;
       }
 
       if (
-        drop.x <
-        -30
+        drop.x < -30
       ) {
         drop.x =
-          W +
-          30;
+          W + 30;
       }
     }
   }
 
   if (
-    selectedEnvironment ===
-    "snow"
+    selectedEnvironment === "snow"
   ) {
     for (
-      const flake of
-      snowFlakes
+      const flake of snowFlakes
     ) {
       flake.y +=
-        flake.speed *
-        dt;
+        flake.speed * dt;
 
       flake.x +=
-        flake.drift *
-        dt;
+        flake.drift * dt;
 
       if (
         flake.y >
-        H +
-        10
+        H + 10
       ) {
-        flake.y =
-          -10;
+        flake.y = -10;
 
         flake.x =
-          Math.random() *
-          W;
+          Math.random() * W;
       }
     }
   }
 
   if (
-    selectedEnvironment ===
-    "desert"
+    selectedEnvironment === "desert"
   ) {
     for (
-      const dust of
-      dustParticles
+      const dust of dustParticles
     ) {
       dust.x +=
-        dust.speed *
-        dt;
+        dust.speed * dt;
 
       if (
         dust.x >
-        W +
-        80
+        W + 80
       ) {
-        dust.x =
-          -80;
+        dust.x = -80;
 
         dust.y =
-          Math.random() *
-          H;
+          Math.random() * H;
       }
     }
   }
@@ -1843,8 +1653,7 @@ function drawBackground() {
     "#02070c"
   );
 
-  ctx.fillStyle =
-    outer;
+  ctx.fillStyle = outer;
 
   ctx.fillRect(
     0,
@@ -1856,8 +1665,7 @@ function drawBackground() {
   if (
     !img ||
     !img.complete ||
-    img.naturalWidth <=
-    0
+    img.naturalWidth <= 0
   ) {
     return;
   }
@@ -1865,8 +1673,7 @@ function drawBackground() {
   const frameWidth =
     backgroundFrameWidth();
 
-  const frameHeight =
-    H;
+  const frameHeight = H;
 
   const imageRatio =
     img.naturalWidth /
@@ -1889,7 +1696,6 @@ function drawBackground() {
     drawWidth =
       drawHeight *
       imageRatio;
-
   } else {
     drawWidth =
       frameWidth;
@@ -1900,26 +1706,20 @@ function drawBackground() {
   }
 
   const frameX =
-    (
-      W -
-      frameWidth
-    ) /
-    2;
+    (W - frameWidth) / 2;
 
   const drawX =
     frameX +
     (
       frameWidth -
       drawWidth
-    ) /
-    2;
+    ) / 2;
 
   const drawY =
     (
       H -
       drawHeight
-    ) /
-    2;
+    ) / 2;
 
   ctx.save();
 
@@ -1947,8 +1747,7 @@ function drawBackground() {
   ctx.strokeStyle =
     "rgba(255,255,255,.12)";
 
-  ctx.lineWidth =
-    2;
+  ctx.lineWidth = 2;
 
   ctx.strokeRect(
     frameX,
@@ -1976,26 +1775,21 @@ function drawVehicle(car) {
   const depth =
     Math.max(
       0,
-
       Math.min(
         1,
-        car.screenY /
-        H
+        car.screenY / H
       )
     );
 
   const scale =
     0.68 +
-    depth *
-    0.37;
+    depth * 0.37;
 
   const width =
-    car.width *
-    scale;
+    car.width * scale;
 
   const height =
-    car.height *
-    scale;
+    car.height * scale;
 
   ctx.save();
 
@@ -2004,23 +1798,14 @@ function drawVehicle(car) {
     car.screenY
   );
 
-  ctx.rotate(
-    Math.PI
-  );
+  ctx.rotate(Math.PI);
 
   if (
-    car.image ===
-    "police"
-    &&
-    player.invincible >
-    0
-    &&
+    car.image === "police" &&
+    player.invincible > 0 &&
     Math.floor(
-      player.invincible *
-      12
-    ) %
-    2 ===
-    0
+      player.invincible * 12
+    ) % 2 === 0
   ) {
     ctx.globalAlpha =
       0.35;
@@ -2029,21 +1814,13 @@ function drawVehicle(car) {
   ctx.shadowColor =
     "rgba(0,0,0,.6)";
 
-  ctx.shadowBlur =
-    14;
-
-  ctx.shadowOffsetY =
-    8;
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 8;
 
   ctx.drawImage(
     img,
-
-    -width /
-    2,
-
-    -height /
-    2,
-
+    -width / 2,
+    -height / 2,
     width,
     height
   );
@@ -2061,33 +1838,25 @@ function drawPoliceGlow() {
       performance.now() /
       150
     ) %
-    2 ===
-    0;
+      2 === 0;
 
   const redX =
     flash
-      ? player.x -
-        28
-      : player.x +
-        28;
+      ? player.x - 28
+      : player.x + 28;
 
   const blueX =
     flash
-      ? player.x +
-        28
-      : player.x -
-        28;
+      ? player.x + 28
+      : player.x - 28;
 
   const red =
     ctx.createRadialGradient(
       redX,
       player.screenY,
-
       5,
-
       redX,
       player.screenY,
-
       145
     );
 
@@ -2101,16 +1870,11 @@ function drawPoliceGlow() {
     "rgba(255,20,50,0)"
   );
 
-  ctx.fillStyle =
-    red;
+  ctx.fillStyle = red;
 
   ctx.fillRect(
-    player.x -
-    170,
-
-    player.screenY -
-    160,
-
+    player.x - 170,
+    player.screenY - 160,
     340,
     320
   );
@@ -2119,12 +1883,9 @@ function drawPoliceGlow() {
     ctx.createRadialGradient(
       blueX,
       player.screenY,
-
       5,
-
       blueX,
       player.screenY,
-
       145
     );
 
@@ -2138,16 +1899,11 @@ function drawPoliceGlow() {
     "rgba(20,100,255,0)"
   );
 
-  ctx.fillStyle =
-    blue;
+  ctx.fillStyle = blue;
 
   ctx.fillRect(
-    player.x -
-    170,
-
-    player.screenY -
-    160,
-
+    player.x - 170,
+    player.screenY - 160,
     340,
     320
   );
@@ -2159,24 +1915,19 @@ function drawPoliceGlow() {
 
 function drawNitro() {
   if (
-    nitroActive <=
-    0
+    nitroActive <= 0
   ) return;
 
   const gradient =
     ctx.createLinearGradient(
       player.x,
-
       player.screenY +
-      player.height /
-      2,
+        player.height / 2,
 
       player.x,
-
       player.screenY +
-      player.height /
-      2 +
-      70
+        player.height / 2 +
+        70
     );
 
   gradient.addColorStop(
@@ -2199,44 +1950,33 @@ function drawNitro() {
     "rgba(80,40,255,0)"
   );
 
-  ctx.fillStyle =
-    gradient;
+  ctx.fillStyle = gradient;
 
   ctx.beginPath();
 
   ctx.moveTo(
-    player.x -
-    14,
-
+    player.x - 14,
     player.screenY +
-    player.height /
-    2 -
-    5
+      player.height / 2 -
+      5
   );
 
   ctx.lineTo(
     player.x,
-
     player.screenY +
-    player.height /
-    2 +
-    68 +
-    Math.random() *
-    15
+      player.height / 2 +
+      68 +
+      Math.random() * 15
   );
 
   ctx.lineTo(
-    player.x +
-    14,
-
+    player.x + 14,
     player.screenY +
-    player.height /
-    2 -
-    5
+      player.height / 2 -
+      5
   );
 
   ctx.closePath();
-
   ctx.fill();
 }
 
@@ -2246,20 +1986,17 @@ function drawNitro() {
 
 function drawWeather() {
   if (
-    selectedEnvironment ===
-    "rain"
+    selectedEnvironment === "rain"
   ) {
     ctx.save();
 
     ctx.strokeStyle =
       "rgba(215,235,255,.54)";
 
-    ctx.lineWidth =
-      1.2;
+    ctx.lineWidth = 1.2;
 
     for (
-      const drop of
-      rainDrops
+      const drop of rainDrops
     ) {
       ctx.beginPath();
 
@@ -2269,11 +2006,9 @@ function drawWeather() {
       );
 
       ctx.lineTo(
-        drop.x -
-        8,
-
+        drop.x - 8,
         drop.y +
-        drop.length
+          drop.length
       );
 
       ctx.stroke();
@@ -2283,8 +2018,7 @@ function drawWeather() {
   }
 
   if (
-    selectedEnvironment ===
-    "snow"
+    selectedEnvironment === "snow"
   ) {
     ctx.save();
 
@@ -2292,8 +2026,7 @@ function drawWeather() {
       "rgba(255,255,255,.9)";
 
     for (
-      const flake of
-      snowFlakes
+      const flake of snowFlakes
     ) {
       ctx.beginPath();
 
@@ -2301,10 +2034,8 @@ function drawWeather() {
         flake.x,
         flake.y,
         flake.size,
-
         0,
-        Math.PI *
-        2
+        Math.PI * 2
       );
 
       ctx.fill();
@@ -2314,20 +2045,17 @@ function drawWeather() {
   }
 
   if (
-    selectedEnvironment ===
-    "desert"
+    selectedEnvironment === "desert"
   ) {
     ctx.save();
 
     ctx.strokeStyle =
       "rgba(240,190,120,.20)";
 
-    ctx.lineWidth =
-      2;
+    ctx.lineWidth = 2;
 
     for (
-      const dust of
-      dustParticles
+      const dust of dustParticles
     ) {
       ctx.beginPath();
 
@@ -2338,10 +2066,8 @@ function drawWeather() {
 
       ctx.lineTo(
         dust.x +
-        dust.length,
-
-        dust.y +
-        5
+          dust.length,
+        dust.y + 5
       );
 
       ctx.stroke();
@@ -2351,24 +2077,20 @@ function drawWeather() {
   }
 
   if (
-    selectedEnvironment ===
-    "tunnel"
+    selectedEnvironment === "tunnel"
   ) {
     const pulse =
       (
         Math.sin(
-          roadScroll *
-          0.045
+          roadScroll * 0.045
         ) +
         1
-      ) /
-      2;
+      ) / 2;
 
     ctx.fillStyle =
       `rgba(255,205,120,${
         0.012 +
-        pulse *
-        0.026
+        pulse * 0.026
       })`;
 
     ctx.fillRect(
@@ -2386,14 +2108,12 @@ function drawWeather() {
 
 function drawParticles() {
   for (
-    const p of
-    particles
+    const p of particles
   ) {
     ctx.globalAlpha =
       Math.min(
         1,
-        p.life *
-        2
+        p.life * 2
       );
 
     ctx.fillStyle =
@@ -2407,8 +2127,7 @@ function drawParticles() {
     );
   }
 
-  ctx.globalAlpha =
-    1;
+  ctx.globalAlpha = 1;
 }
 
 /* =====================================================
@@ -2416,16 +2135,13 @@ function drawParticles() {
 ===================================================== */
 
 function drawSuspectMarker() {
-  const width =
-    80;
-
-  const height =
-    25;
+  const width = 80;
+  const height = 25;
 
   const y =
     robber.screenY -
     robber.height *
-    0.48 -
+      0.48 -
     35;
 
   ctx.fillStyle =
@@ -2433,11 +2149,8 @@ function drawSuspectMarker() {
 
   ctx.fillRect(
     robber.x -
-    width /
-    2,
-
+      width / 2,
     y,
-
     width,
     height
   );
@@ -2454,8 +2167,7 @@ function drawSuspectMarker() {
   ctx.fillText(
     "SUSPECT",
     robber.x,
-    y +
-    17
+    y + 17
   );
 }
 
@@ -2466,29 +2178,21 @@ function drawSuspectMarker() {
 function drawVignette() {
   const gradient =
     ctx.createRadialGradient(
-      W /
-      2,
-
-      H /
-      2,
+      W / 2,
+      H / 2,
 
       Math.min(
         W,
         H
-      ) *
-      0.18,
+      ) * 0.18,
 
-      W /
-      2,
-
-      H /
-      2,
+      W / 2,
+      H / 2,
 
       Math.max(
         W,
         H
-      ) *
-      0.7
+      ) * 0.7
     );
 
   gradient.addColorStop(
@@ -2527,12 +2231,9 @@ function draw() {
   drawBackground();
 
   for (
-    const car of
-    traffic
+    const car of traffic
   ) {
-    drawVehicle(
-      car
-    );
+    drawVehicle(car);
   }
 
   drawSuspectMarker();
@@ -2561,53 +2262,40 @@ function draw() {
 ===================================================== */
 
 function gameLoop(time) {
-  if (
-    !running
-  ) return;
+  if (!running) return;
 
   let dt =
     (
       time -
       lastTime
-    ) /
-    1000;
+    ) / 1000;
 
   dt =
     Math.min(
       0.033,
-      dt ||
-      0.016
+      dt || 0.016
     );
 
   lastTime =
     time;
 
-  update(
-    dt
-  );
+  update(dt);
 
-  if (
-    !running
-  ) return;
+  if (!running) return;
 
   ctx.save();
 
-  if (
-    shake >
-    1
-  ) {
+  if (shake > 1) {
     ctx.translate(
       (
         Math.random() -
         0.5
-      ) *
-      shake,
+      ) * shake,
 
       (
         Math.random() -
         0.5
-      ) *
-      shake
+      ) * shake
     );
   }
 
