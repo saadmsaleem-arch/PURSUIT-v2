@@ -120,9 +120,9 @@ function resetGame() {
 
   robber = {
     x: W / 2,
-    y: H * 0.16,
-    width: 48,
-    height: 92,
+    y: H * 0.15,
+    width: 52,
+    height: 98,
     phase: 0,
     image: "suspect"
   };
@@ -330,7 +330,6 @@ function updateParticles(dt) {
 
 function finish(win) {
   running = false;
-
   overlay.style.display = "flex";
 
   title.className = win ? "win" : "lose";
@@ -374,14 +373,14 @@ function finish(win) {
 function update(dt) {
   elapsed += dt;
 
-  /* automatic acceleration */
+  /* Automatic acceleration */
 
   player.speed = Math.min(
     190,
     player.speed + 7.5 * dt
   );
 
-  /* nitro */
+  /* Nitro */
 
   if (nitroActive > 0) {
     nitroActive -= dt;
@@ -392,7 +391,7 @@ function update(dt) {
     );
   }
 
-  /* steering */
+  /* Steering */
 
   player.x +=
     (player.targetX - player.x) *
@@ -402,11 +401,12 @@ function update(dt) {
     player.invincible -= dt;
   }
 
-  roadScroll += player.speed * dt * 2.3;
+  roadScroll +=
+    player.speed * dt * 2.3;
 
   const road = roadInfo();
 
-  /* suspect movement */
+  /* Suspect weaving */
 
   robber.phase +=
     dt *
@@ -441,11 +441,11 @@ function update(dt) {
     )
   );
 
-  /* suspect stays ahead */
+  /* Suspect stays ahead */
 
-  robber.y = H * 0.16;
+  robber.y = H * 0.15;
 
-  /* close the distance */
+  /* Police closes distance */
 
   let closingRate =
     4.3 +
@@ -461,10 +461,7 @@ function update(dt) {
 
   distanceGap -= closingRate * dt;
 
-  /* =========================================
-     VISUAL CHASE POSITION
-     Police moves toward suspect as gap closes
-  ========================================= */
+  /* Police visually moves upward as gap closes */
 
   const gapRatio = Math.max(
     0,
@@ -475,14 +472,14 @@ function update(dt) {
   );
 
   const policeFarY = H * 0.84;
-  const policeCloseY = H * 0.34;
+  const policeCloseY = H * 0.31;
 
   player.y =
     policeCloseY +
     gapRatio *
     (policeFarY - policeCloseY);
 
-  /* traffic */
+  /* Traffic */
 
   spawnTimer -= dt;
 
@@ -515,7 +512,7 @@ function update(dt) {
       continue;
     }
 
-    /* collision */
+    /* Collision */
 
     if (
       player.invincible <= 0 &&
@@ -554,7 +551,7 @@ function update(dt) {
       }
     }
 
-    /* near miss */
+    /* Near miss */
 
     if (
       !car.passed &&
@@ -598,7 +595,7 @@ function update(dt) {
     )
   );
 
-  /* capture */
+  /* Capture */
 
   if (distanceGap < 18) {
     catchTimer += dt;
@@ -656,16 +653,28 @@ function update(dt) {
 
 /* =====================================================
    DRAW VEHICLE
+   IMPORTANT FIX:
+   artwork faces downward, so rotate 180 degrees
 ===================================================== */
 
 function drawVehicle(car) {
-  const img = vehicleImages[car.image];
+  const img =
+    vehicleImages[car.image];
 
   if (!img || !img.complete) {
     return;
   }
 
   ctx.save();
+
+  /* Move origin to vehicle center */
+  ctx.translate(
+    car.x,
+    car.y
+  );
+
+  /* Rotate artwork so cars face UP the road */
+  ctx.rotate(Math.PI);
 
   if (
     car.image === "police" &&
@@ -675,14 +684,16 @@ function drawVehicle(car) {
     ctx.globalAlpha = 0.35;
   }
 
-  ctx.shadowColor = "rgba(0,0,0,.55)";
+  ctx.shadowColor =
+    "rgba(0,0,0,.55)";
+
   ctx.shadowBlur = 14;
   ctx.shadowOffsetY = 9;
 
   ctx.drawImage(
     img,
-    car.x - car.width / 2,
-    car.y - car.height / 2,
+    -car.width / 2,
+    -car.height / 2,
     car.width,
     car.height
   );
@@ -783,7 +794,8 @@ function drawParticles() {
         p.life * 2
       );
 
-    ctx.fillStyle = "#ffc04b";
+    ctx.fillStyle =
+      "#ffc04b";
 
     ctx.fillRect(
       p.x,
@@ -810,7 +822,7 @@ function draw() {
 
   const road = roadInfo();
 
-  /* background */
+  /* Background */
 
   const sky =
     ctx.createLinearGradient(
@@ -844,7 +856,7 @@ function draw() {
     H
   );
 
-  /* city silhouettes */
+  /* City silhouettes */
 
   ctx.fillStyle = "#07111a";
 
@@ -882,7 +894,7 @@ function draw() {
     ctx.fillStyle = "#07111a";
   }
 
-  /* road */
+  /* Road */
 
   const roadGradient =
     ctx.createLinearGradient(
@@ -916,9 +928,10 @@ function draw() {
     H
   );
 
-  /* shoulders */
+  /* Shoulders */
 
-  ctx.fillStyle = "#bec2c5";
+  ctx.fillStyle =
+    "#bec2c5";
 
   ctx.fillRect(
     road.left,
@@ -934,17 +947,23 @@ function draw() {
     H
   );
 
-  /* lane markings */
+  /* Lane markings */
 
   const lanes = 4;
-  const laneWidth = road.width / lanes;
+  const laneWidth =
+    road.width / lanes;
+
   const dashHeight = 42;
   const spacing = 34;
 
   ctx.fillStyle =
     "rgba(255,255,255,.72)";
 
-  for (let lane = 1; lane < lanes; lane++) {
+  for (
+    let lane = 1;
+    lane < lanes;
+    lane++
+  ) {
     const x =
       road.left +
       lane * laneWidth -
@@ -972,7 +991,7 @@ function draw() {
     }
   }
 
-  /* speed streaks */
+  /* Speed streaks */
 
   if (player.speed > 135) {
     ctx.strokeStyle =
@@ -1005,26 +1024,34 @@ function draw() {
     }
   }
 
-  /* suspect marker */
+  /* Suspect marker */
 
-  ctx.fillStyle = "#fa1f34";
+  ctx.fillStyle =
+    "#fa1f34";
 
   ctx.fillRect(
     robber.x - 34,
-    robber.y - robber.height / 2 - 34,
+    robber.y -
+      robber.height / 2 -
+      34,
     68,
     24
   );
 
   ctx.fillStyle = "white";
 
-  ctx.font = "900 11px Arial";
-  ctx.textAlign = "center";
+  ctx.font =
+    "900 11px Arial";
+
+  ctx.textAlign =
+    "center";
 
   ctx.fillText(
     "SUSPECT",
     robber.x,
-    robber.y - robber.height / 2 - 18
+    robber.y -
+      robber.height / 2 -
+      18
   );
 
   drawPoliceGlow();
@@ -1037,7 +1064,7 @@ function draw() {
 
   drawVehicle(player);
 
-  /* nitro flame */
+  /* Nitro flame */
 
   if (nitroActive > 0) {
     const gradient =
@@ -1066,7 +1093,8 @@ function draw() {
       "rgba(70,40,255,0)"
     );
 
-    ctx.fillStyle = gradient;
+    ctx.fillStyle =
+      gradient;
 
     ctx.beginPath();
 
@@ -1093,7 +1121,6 @@ function draw() {
     );
 
     ctx.closePath();
-
     ctx.fill();
   }
 
