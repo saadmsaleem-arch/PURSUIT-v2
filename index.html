@@ -13,18 +13,15 @@
 
   <title>PURSUIT — Syntax Arcade</title>
 
-  <link rel="stylesheet" href="style.css?v=31">
+  <link rel="stylesheet" href="style.css?v=40">
 </head>
 
 <body>
 
-  <!-- GAME -->
   <canvas id="game"></canvas>
 
 
-  <!-- =========================
-       HUD
-  ========================== -->
+  <!-- HUD -->
 
   <div id="hud">
 
@@ -42,6 +39,7 @@
 
     <div class="livesBox">
       <span class="hudLabel">UNIT</span>
+
       <div id="heartsValue" class="heartsValue">
         ❤️ ❤️ ❤️ ❤️ ❤️
       </div>
@@ -49,15 +47,18 @@
 
 
     <div class="scoreBox">
-      <div>
-        <span class="hudLabel">SCORE</span>
-        <span id="scoreValue" class="scoreValue">0</span>
-      </div>
+
+      <span class="hudLabel">SCORE</span>
+
+      <span id="scoreValue" class="scoreValue">
+        0
+      </span>
 
       <div class="bestScoreRow">
         BEST
         <span id="bestScoreValue">0</span>
       </div>
+
     </div>
 
 
@@ -78,16 +79,12 @@
     <div
       id="chaseStatus"
       class="chaseStatus"
-    >
-      STAY ON HIM!
-    </div>
+    ></div>
 
   </div>
 
 
-  <!-- =========================
-       NITRO
-  ========================== -->
+  <!-- NITRO -->
 
   <div id="nitroUI" class="nitroUI">
 
@@ -110,9 +107,7 @@
   </div>
 
 
-  <!-- =========================
-       MAIN MENU / RESULTS
-  ========================== -->
+  <!-- MENU -->
 
   <div id="overlay" class="overlay">
 
@@ -130,7 +125,6 @@
       <h1 id="title" class="logo">
         PURSUIT
       </h1>
-
 
       <div id="subtitle" class="subtitle">
         CATCH THE CRIMINAL
@@ -208,22 +202,21 @@
       </div>
 
 
-      <!-- MODE -->
+      <!-- CHASE MODE -->
 
-      <div class="modeHeading">
+      <div class="optionHeading">
         CHASE MODE
       </div>
 
-
-      <div class="modeGrid">
+      <div class="twoOptionGrid">
 
         <button
           id="quickModeBtn"
-          class="modeButton active"
+          class="choiceButton active"
           type="button"
         >
-          <span class="modeTitle">QUICK</span>
-          <span class="modeDescription">
+          <span class="choiceTitle">QUICK</span>
+          <span class="choiceDescription">
             ONE LOCATION
           </span>
         </button>
@@ -231,11 +224,11 @@
 
         <button
           id="longModeBtn"
-          class="modeButton"
+          class="choiceButton purpleChoice"
           type="button"
         >
-          <span class="modeTitle">LONG</span>
-          <span class="modeDescription">
+          <span class="choiceTitle">LONG</span>
+          <span class="choiceDescription">
             ALL 6 LOCATIONS
           </span>
         </button>
@@ -243,8 +236,103 @@
       </div>
 
 
+      <!-- LEVEL LENGTH -->
+
+      <div class="optionHeading">
+        LEVEL LENGTH
+      </div>
+
+      <div class="twoOptionGrid">
+
+        <button
+          id="duration30Btn"
+          class="choiceButton"
+          type="button"
+        >
+          <span class="choiceTitle">30 SEC</span>
+          <span class="choiceDescription">
+            FAST
+          </span>
+        </button>
+
+
+        <button
+          id="duration60Btn"
+          class="choiceButton active"
+          type="button"
+        >
+          <span class="choiceTitle">1 MIN</span>
+          <span class="choiceDescription">
+            FULL CHASE
+          </span>
+        </button>
+
+      </div>
+
+
+      <!-- DIFFICULTY -->
+
+      <div class="optionHeading">
+        DIFFICULTY
+      </div>
+
+      <div class="difficultyGrid">
+
+        <button
+          id="easyBtn"
+          class="difficultyButton active"
+          type="button"
+        >
+          <span class="choiceTitle">EASY</span>
+
+          <span class="choiceDescription">
+            NORMAL TRAFFIC
+          </span>
+
+          <span class="multiplier">
+            ×1 SCORE
+          </span>
+        </button>
+
+
+        <button
+          id="mediumBtn"
+          class="difficultyButton"
+          type="button"
+        >
+          <span class="choiceTitle">MEDIUM</span>
+
+          <span class="choiceDescription">
+            STALLED CARS
+          </span>
+
+          <span class="multiplier">
+            ×1.5 SCORE
+          </span>
+        </button>
+
+
+        <button
+          id="hardBtn"
+          class="difficultyButton hardChoice"
+          type="button"
+        >
+          <span class="choiceTitle">HARD</span>
+
+          <span class="choiceDescription">
+            MORE HAZARDS
+          </span>
+
+          <span class="multiplier">
+            ×2 SCORE
+          </span>
+        </button>
+
+      </div>
+
+
       <div id="message" class="modeInfo">
-        QUICK CHASE • ONE ENVIRONMENT
+        QUICK • 1 MIN • EASY • 5 LIVES
       </div>
 
 
@@ -266,7 +354,7 @@
   </div>
 
 
-  <script src="game.js?v=31"></script>
+  <script src="game.js?v=40"></script>
 
 </body>
 
